@@ -2,14 +2,14 @@
 
 ## Project Initialization
 
-- [ ]  Create Unity project
-- [ ]  Configure Git repository
-- [ ]  Set up project folder structure
-- [ ]  Configure Input System
-- [ ]  Configure URP (Universal Render Pipeline)
-- [ ]  Configure Addressables
-- [ ]  Configure ScriptableObject architecture
-- [ ]  Create Event Bus system
+- [x]  Create Unity project
+- [x]  Configure Git repository
+- [x]  Set up project folder structure
+- [ ]  Configure Input System        <!-- pkg added to manifest; needs Editor: input actions asset + Active Input Handling -->
+- [ ]  Configure URP (Universal Render Pipeline)   <!-- pkg added; needs Editor: URP asset + Graphics settings -->
+- [ ]  Configure Addressables        <!-- pkg added; needs Editor: init Addressables settings -->
+- [x]  Configure ScriptableObject architecture
+- [x]  Create Event Bus system
 - [ ]  Configure Dependency Injection (optional)
 - [ ]  Configure Firebase
 - [ ]  Configure Cloud Save
