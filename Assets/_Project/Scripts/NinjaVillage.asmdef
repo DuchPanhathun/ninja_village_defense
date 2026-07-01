@@ -1,0 +1,21 @@
+{
+    "name": "NinjaVillage",
+    "rootNamespace": "NinjaVillage",
+    "references": [
+        "Unity.InputSystem",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.Cinemachine",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

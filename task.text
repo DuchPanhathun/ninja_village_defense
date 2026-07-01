@@ -1,0 +1,496 @@
+# 🎮 EPIC 0 - Project Setup
+
+## Project Initialization
+
+- [ ]  Create Unity project
+- [ ]  Configure Git repository
+- [ ]  Set up project folder structure
+- [ ]  Configure Input System
+- [ ]  Configure URP (Universal Render Pipeline)
+- [ ]  Configure Addressables
+- [ ]  Configure ScriptableObject architecture
+- [ ]  Create Event Bus system
+- [ ]  Configure Dependency Injection (optional)
+- [ ]  Configure Firebase
+- [ ]  Configure Cloud Save
+- [ ]  Configure Analytics
+- [ ]  Configure Mobile Build (Android/iOS)
+
+---
+
+# 🎮 EPIC 1 - Core Gameplay
+
+## Player Controller
+
+- [ ]  Implement joystick movement
+- [ ]  Implement movement animation
+- [ ]  Add dash movement support (future)
+- [ ]  Add movement speed modifier
+- [ ]  Add player health
+- [ ]  Add player death
+- [ ]  Add invulnerability frames
+
+---
+
+## Auto Attack System
+
+- [ ]  Find nearest enemy
+- [ ]  Auto target enemy
+- [ ]  Attack cooldown
+- [ ]  Spawn projectile
+- [ ]  Projectile collision
+- [ ]  Projectile damage
+- [ ]  Critical hit system
+- [ ]  Knockback system
+
+---
+
+## Camera
+
+- [ ]  Camera follow
+- [ ]  Camera shake
+- [ ]  Boss zoom effect
+
+---
+
+# 🎮 EPIC 2 - Weapon System
+
+## Base Weapon Framework
+
+- [ ]  Weapon interface
+- [ ]  Weapon stats
+- [ ]  Weapon rarity
+- [ ]  Weapon level
+
+---
+
+## Implement Weapons
+
+### Kunai
+
+- [ ]  Throw single kunai
+- [ ]  Upgrade damage
+- [ ]  Upgrade attack speed
+
+### Shuriken
+
+- [ ]  Circular throw
+- [ ]  Piercing projectile
+
+### Katana
+
+- [ ]  Melee attack
+- [ ]  Arc attack
+- [ ]  Slash animation
+
+### Bow
+
+- [ ]  Long range attack
+- [ ]  Charge attack
+
+### Chain Sickle
+
+- [ ]  Swing mechanic
+- [ ]  Pull enemy
+
+---
+
+# 🎮 EPIC 3 - Enemy System
+
+## Enemy Framework
+
+- [ ]  Enemy base class
+- [ ]  Enemy movement
+- [ ]  Enemy attack
+- [ ]  Enemy health
+- [ ]  Enemy death
+- [ ]  Enemy animation
+
+---
+
+## Early Enemies
+
+- [ ]  Bandit
+- [ ]  Slime
+- [ ]  Wolf
+
+---
+
+## Mid Enemies
+
+- [ ]  Oni
+- [ ]  Ghost
+- [ ]  Skeleton Ninja
+- [ ]  Spider
+
+---
+
+## Late Enemies
+
+- [ ]  Dragon
+- [ ]  Giant
+- [ ]  Demon King
+- [ ]  Cursed Samurai
+
+---
+
+# 🎮 EPIC 4 - Wave System
+
+- [ ]  Wave manager
+- [ ]  Spawn manager
+- [ ]  Spawn zones
+- [ ]  Difficulty scaling
+- [ ]  Elite enemies
+- [ ]  Boss wave
+- [ ]  Endless mode
+
+---
+
+# 🎮 EPIC 5 - Experience System
+
+- [ ]  XP orb
+- [ ]  XP collection
+- [ ]  XP bar
+- [ ]  Level up
+- [ ]  Level animation
+
+---
+
+# 🎮 EPIC 6 - Skill System
+
+## Skill Framework
+
+- [ ]  Skill data
+- [ ]  Skill rarity
+- [ ]  Random selection
+- [ ]  Skill upgrade
+- [ ]  Max level
+
+---
+
+## Offensive Skills
+
+- [ ]  Giant Shuriken
+- [ ]  Triple Throw
+- [ ]  Fire Blade
+- [ ]  Poison Kunai
+- [ ]  Lightning Strike
+- [ ]  Explosive Bomb
+
+---
+
+## Defensive Skills
+
+- [ ]  Smoke Bomb
+- [ ]  Shield
+- [ ]  Dodge Chance
+- [ ]  Auto Heal
+
+---
+
+## Utility Skills
+
+- [ ]  Movement Speed
+- [ ]  XP Magnet
+- [ ]  Gold Bonus
+- [ ]  Lucky Drop
+
+---
+
+# 🎮 EPIC 7 - Element Combination System
+
+## Element Framework
+
+- [ ]  Fire
+- [ ]  Wind
+- [ ]  Lightning
+- [ ]  Water
+- [ ]  Earth
+- [ ]  Shadow
+
+---
+
+## Evolution Recipes
+
+- [ ]  Fire + Wind = Firestorm
+- [ ]  Lightning + Kunai = Thunder Kunai
+- [ ]  Clone + Katana = Shadow Army
+- [ ]  Smoke + Teleport = Invisible Assassin
+
+---
+
+## Hidden Discovery System
+
+- [ ]  Evolution journal
+- [ ]  Unlock animation
+- [ ]  Collection UI
+
+---
+
+# 🎮 EPIC 8 - Ultimate Skills
+
+- [ ]  Ultimate charge
+- [ ]  Ultimate button
+- [ ]  Cooldown
+
+---
+
+## Ultimates
+
+- [ ]  Shadow Clone Army
+- [ ]  Dragon Slash
+- [ ]  Heavenly Storm
+
+---
+
+# 🎮 EPIC 9 - Boss System
+
+## Boss Framework
+
+- [ ]  Boss health bar
+- [ ]  Boss AI
+- [ ]  Multiple attack phases
+
+---
+
+## Giant Oni
+
+- [ ]  Charge attack
+- [ ]  Ground smash
+- [ ]  Shockwave
+
+---
+
+## Spider Queen
+
+- [ ]  Web attack
+- [ ]  Spider spawn
+
+---
+
+## Shadow Ninja
+
+- [ ]  Mirror player
+- [ ]  Clone player attacks
+
+---
+
+## Nine-Tailed Fox
+
+- [ ]  Teleport
+- [ ]  Illusion clone
+- [ ]  Explosion attack
+
+---
+
+# 🎮 EPIC 10 - Loot System
+
+- [ ]  Coin drop
+- [ ]  XP drop
+- [ ]  Equipment drop
+- [ ]  Loot rarity
+- [ ]  Chest rewards
+
+---
+
+# 🎮 EPIC 11 - Village System
+
+## Village Scene
+
+- [ ]  Village map
+- [ ]  Camera navigation
+- [ ]  NPC system
+
+---
+
+## Buildings
+
+### Dojo
+
+- [ ]  Hero upgrade
+- [ ]  Attack bonus
+
+### Forge
+
+- [ ]  Weapon crafting
+- [ ]  Weapon upgrading
+
+### Shrine
+
+- [ ]  Passive blessing
+
+### Pet House
+
+- [ ]  Pet management
+
+### Market
+
+- [ ]  Daily shop
+
+### Castle
+
+- [ ]  Main progression
+
+---
+
+# 🎮 EPIC 12 - Pet System
+
+## Pet Framework
+
+- [ ]  Pet follow AI
+- [ ]  Pet leveling
+- [ ]  Pet equipment
+
+---
+
+## Pets
+
+- [ ]  Fox
+- [ ]  Wolf
+- [ ]  Hawk
+- [ ]  Monkey
+- [ ]  Dragon
+
+---
+
+# 🎮 EPIC 13 - Hero System
+
+## Hero Framework
+
+- [ ]  Hero unlock
+- [ ]  Hero stats
+- [ ]  Hero progression
+
+---
+
+## Heroes
+
+- [ ]  Assassin
+- [ ]  Samurai
+- [ ]  Monk
+- [ ]  Mage Ninja
+- [ ]  Beast Ninja
+
+---
+
+# 🎮 EPIC 14 - Talent Tree
+
+- [ ]  Talent categories
+- [ ]  Talent unlock
+- [ ]  Talent reset
+
+---
+
+# 🎮 EPIC 15 - Economy
+
+- [ ]  Coins
+- [ ]  Gems
+- [ ]  Upgrade costs
+- [ ]  Reward balancing
+
+---
+
+# 🎮 EPIC 16 - Save System
+
+- [ ]  Local save
+- [ ]  Cloud save
+- [ ]  Player profile
+- [ ]  Inventory save
+
+---
+
+# 🎮 EPIC 17 - UI
+
+## Main Menu
+
+- [ ]  Home
+- [ ]  Settings
+- [ ]  Inventory
+- [ ]  Village
+
+---
+
+## Battle UI
+
+- [ ]  HP bar
+- [ ]  XP bar
+- [ ]  Skill selection
+- [ ]  Ultimate button
+- [ ]  Boss health
+- [ ]  Pause menu
+
+---
+
+## Village UI
+
+- [ ]  Building menu
+- [ ]  Hero screen
+- [ ]  Weapon inventory
+- [ ]  Pet inventory
+
+---
+
+# 🎮 EPIC 18 - Audio
+
+- [ ]  Background music
+- [ ]  Battle music
+- [ ]  Boss music
+- [ ]  Attack SFX
+- [ ]  Skill SFX
+- [ ]  UI SFX
+
+---
+
+# 🎮 EPIC 19 - Daily Content
+
+- [ ]  Daily login
+- [ ]  Daily quest
+- [ ]  Weekly quest
+- [ ]  Achievement system
+
+---
+
+# 🎮 EPIC 20 - Live Ops
+
+- [ ]  Battle Pass
+- [ ]  Seasonal events
+- [ ]  Limited-time shop
+- [ ]  Event missions
+
+---
+
+# 🎮 EPIC 21 - Monetization
+
+- [ ]  Cosmetic skins
+- [ ]  Premium heroes
+- [ ]  Remove Ads purchase
+- [ ]  Revival ads
+- [ ]  Reward ads
+- [ ]  Starter packs
+- [ ]  Gem purchases
+
+---
+
+# 🎮 EPIC 22 - Backend (Firebase)
+
+- [ ]  Authentication
+- [ ]  Cloud Save
+- [ ]  Remote Config
+- [ ]  Analytics
+- [ ]  Crashlytics
+- [ ]  Daily rewards sync
+- [ ]  Leaderboard
+- [ ]  Player profile
+
+---
+
+# 🎮 EPIC 23 - Polish
+
+- [ ]  Visual effects
+- [ ]  Screen shake
+- [ ]  Hit flash
+- [ ]  Damage numbers
+- [ ]  Performance optimization
+- [ ]  Mobile optimization
+- [ ]  Battery optimization
+- [ ]  Asset compression

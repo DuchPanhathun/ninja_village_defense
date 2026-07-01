@@ -1,0 +1,638 @@
+# Vision
+
+> **Ninja Village Defense**
+> 
+> 
+> Become the last ninja protecting your hidden village against endless demon invasions. Every battle makes your village stronger, unlocks new ninjas, and reveals ancient forbidden techniques.
+> 
+
+Core gameplay loop:
+
+```
+Prepare
+↓
+Enter Battle
+↓
+Fight Waves
+↓
+Choose Skill
+↓
+Defeat Boss
+↓
+Collect Loot
+↓
+Upgrade Village
+↓
+Unlock New Content
+↓
+Repeat
+```
+
+---
+
+# Core Gameplay
+
+Instead of controlling attacks manually,
+
+The player only controls movement.
+
+The ninja automatically attacks the nearest enemy.
+
+This keeps gameplay simple enough for one-handed mobile play.
+
+Example:
+
+```
+            Goblin
+
+      Goblin      Goblin
+
+            YOU
+
+         ↓ Move
+
+Auto throws shuriken
+```
+
+Every 30 seconds:
+
+```
+LEVEL UP!
+
+Choose ONE
+
+🌀 Clone Jutsu
+🔥 Fire Shuriken
+⚡ Attack Speed +20%
+```
+
+Exactly like a roguelike.
+
+---
+
+# Combat System
+
+### Basic Weapon
+
+Every ninja starts with:
+
+- Kunai
+- Shuriken
+- Katana
+- Bow
+- Chain Sickle
+
+Each weapon feels different.
+
+Example
+
+### Katana
+
+```
+Damage: High
+
+Range:
+  ███
+
+Attack Speed:
+ █
+
+Critical:
+ ████
+```
+
+### Shuriken
+
+```
+Damage:
+ ██
+
+Range:
+ █████
+
+Attack Speed:
+ █████
+```
+
+---
+
+# Skill System
+
+Every level gives 3 random upgrades.
+
+Example pool:
+
+### Offensive
+
+- Giant Shuriken
+- Triple Throw
+- Fire Blade
+- Poison Kunai
+- Lightning Strike
+- Explosive Bomb
+
+### Defensive
+
+- Smoke Bomb
+- Dodge Chance
+- Shield
+- Heal every 10 seconds
+
+### Utility
+
+- Movement Speed
+- XP Magnet
+- Gold Bonus
+- Lucky Drop
+
+---
+
+# Evolution System
+
+The fun begins when skills combine.
+
+Example
+
+```
+Fire
++
+Wind
+
+↓
+
+Firestorm
+```
+
+```
+Lightning
++
+Kunai
+
+↓
+
+Thunder Kunai
+```
+
+```
+Clone
++
+Katana
+
+↓
+
+Shadow Army
+```
+
+```
+Smoke
++
+Teleport
+
+↓
+
+Invisible Assassin
+```
+
+Players discover combinations over time instead of being told everything immediately.
+
+---
+
+# Ultimate Skills
+
+Every ninja has one ultimate.
+
+Example:
+
+## Shadow Clone Army
+
+```
+Creates
+
+8 clones
+
+for
+
+15 seconds
+```
+
+Cooldown:
+
+90 seconds.
+
+---
+
+## Dragon Slash
+
+Huge dragon crosses the map.
+
+Kills everything.
+
+---
+
+## Heavenly Storm
+
+Rain of 500 shurikens.
+
+---
+
+# Village System
+
+Instead of only upgrading stats...
+
+The village itself grows.
+
+Beginning:
+
+```
+    Tree
+
+ Hut
+
+You
+```
+
+Late game:
+
+```
+Temple
+
+Forge
+
+Training Hall
+
+Pet House
+
+Market
+
+Castle
+
+Walls
+
+Cherry Trees
+
+Dojo
+```
+
+Village becomes a visual indicator of progress.
+
+---
+
+# Buildings
+
+## Dojo
+
+Increase hero levels.
+
+```
+Lv1
+
++2% Attack
+
+Lv20
+
++80% Attack
+```
+
+---
+
+## Forge
+
+Craft weapons.
+
+```
+Iron Kunai
+
+↓
+
+Steel Kunai
+
+↓
+
+Golden Kunai
+
+↓
+
+Legendary Kunai
+```
+
+---
+
+## Shrine
+
+Unlock passive blessings.
+
+```
++Health
+
++Critical
+
++Luck
+
++Coins
+```
+
+---
+
+## Pet House
+
+Unlock companions.
+
+---
+
+# Pets
+
+Instead of cosmetic pets...
+
+They actively help.
+
+Fox
+
+```
+Collects XP
+```
+
+Wolf
+
+```
+Bites enemies
+```
+
+Hawk
+
+```
+Reveals treasure
+```
+
+Monkey
+
+```
+Throws bananas
+
+(stuns enemies)
+```
+
+Dragon
+
+```
+Breathes fire
+```
+
+---
+
+# Ninja Classes
+
+Instead of skins...
+
+Every ninja changes gameplay.
+
+## Assassin
+
+Fast attacks.
+
+Low HP.
+
+---
+
+## Samurai
+
+Tank.
+
+Huge sword.
+
+---
+
+## Monk
+
+Healing.
+
+Buffs.
+
+---
+
+## Mage Ninja
+
+Elemental attacks.
+
+---
+
+## Beast Ninja
+
+Uses wolves.
+
+---
+
+# Enemy Design
+
+Early
+
+```
+Bandits
+
+Slimes
+
+Wolves
+```
+
+Mid
+
+```
+Oni
+
+Ghosts
+
+Skeleton Ninjas
+
+Spiders
+```
+
+Late
+
+```
+Dragons
+
+Demon Kings
+
+Giants
+
+Cursed Samurai
+```
+
+---
+
+# Boss Design
+
+Every boss should introduce a memorable mechanic.
+
+### Giant Oni
+
+- Charges across the map.
+- Smashes the ground to create shockwaves.
+
+### Spider Queen
+
+- Fills the arena with webs that slow movement.
+- Spawns spiderlings continuously.
+
+### Shadow Ninja
+
+- Mirrors the player's movements.
+- Uses the same weapon and abilities as the player.
+
+### Nine-Tailed Fox
+
+- Teleports between positions.
+- Creates illusion clones that explode.
+
+---
+
+# Meta Progression
+
+This is what keeps players coming back.
+
+```
+Battle
+↓
+
+Earn Coins
+
+↓
+
+Upgrade
+
+↓
+
+Become Stronger
+
+↓
+
+Reach Further
+
+↓
+
+Unlock New Content
+```
+
+Permanent progression includes:
+
+- Hero levels
+- Weapons
+- Pets
+- Village buildings
+- Talent tree
+- New maps
+- Cosmetics
+- Achievements
+
+---
+
+# Monetization (Player-Friendly)
+
+A sustainable free-to-play model can include:
+
+- Cosmetic ninja skins
+- Seasonal battle pass
+- Optional ad to revive once per run or double rewards
+- Starter bundles
+- Premium pets or cosmetics
+- Daily and weekly events
+
+Avoid making purchases mandatory to progress.
+
+---
+
+# Development Roadmap
+
+## Phase 1 (1–2 months): Prototype
+
+Focus on proving the gameplay is fun.
+
+- One playable map
+- One ninja
+- Auto-attack
+- Movement controls
+- One enemy type
+- One boss
+- Ten upgrade choices
+- Basic leveling
+- One weapon
+- Health and damage systems
+
+**Goal:** Players should enjoy a 10-minute run.
+
+---
+
+## Phase 2 (2–3 months): Vertical Slice
+
+Build a polished demo.
+
+- Three maps
+- Five enemy types
+- Three bosses
+- Twenty skills
+- Five skill evolutions
+- Basic village screen
+- Weapon upgrades
+- Save/load system
+- Sound effects and UI polish
+
+**Goal:** A polished build suitable for playtesting.
+
+---
+
+## Phase 3 (2–4 months): Soft Launch
+
+Add long-term progression.
+
+- Hero roster
+- Pets
+- Talent tree
+- Village buildings
+- Daily missions
+- Achievements
+- Basic analytics
+- Cloud save
+- Ads and in-app purchases
+
+**Goal:** Release in one region to gather player feedback.
+
+---
+
+## Phase 4: Global Launch
+
+Expand content and retention.
+
+- Seasonal events
+- New maps and bosses
+- Guilds or clans (optional)
+- Leaderboards
+- Additional heroes and pets
+- New elemental combinations
+- Continuous balance updates
+
+---
+
+## Suggested Unity Architecture
+
+Since you're a software engineer, I'd recommend designing the project with modular systems from the beginning:
+
+```
+Game
+├── Player System
+├── Enemy System
+├── Weapon System
+├── Skill System
+├── Element Combination System
+├── AI System
+├── Wave Manager
+├── Boss System
+├── Loot System
+├── Village System
+├── Economy System
+├── Save System
+├── Quest System
+├── Audio Manager
+├── UI Manager
+└── Analytics Manager
+```
+
+Each system should communicate through events rather than direct dependencies where possible. This makes it much easier to add new heroes, skills, enemies, or game modes later.
