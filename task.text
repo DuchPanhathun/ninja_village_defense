@@ -22,33 +22,33 @@
 
 ## Player Controller
 
-- [ ]  Implement joystick movement
-- [ ]  Implement movement animation
+- [x]  Implement joystick movement    <!-- VirtualJoystick.cs (mobile) + KeyboardMoveInputProvider.cs (editor testing) -->
+- [ ]  Implement movement animation   <!-- Animator hooks wired (Speed/Die params); needs Editor: Animator Controller + sprite clips -->
 - [ ]  Add dash movement support (future)
-- [ ]  Add movement speed modifier
-- [ ]  Add player health
-- [ ]  Add player death
-- [ ]  Add invulnerability frames
+- [x]  Add movement speed modifier    <!-- PlayerStats.MoveSpeedMultiplier -->
+- [x]  Add player health              <!-- Core/Combat/Health.cs, shared with enemies -->
+- [x]  Add player death               <!-- PlayerController.HandleDeath -> PlayerDiedEvent -->
+- [x]  Add invulnerability frames     <!-- Health.invulnerabilityDuration + GrantInvulnerability -->
 
 ---
 
 ## Auto Attack System
 
-- [ ]  Find nearest enemy
-- [ ]  Auto target enemy
-- [ ]  Attack cooldown
-- [ ]  Spawn projectile
-- [ ]  Projectile collision
-- [ ]  Projectile damage
-- [ ]  Critical hit system
-- [ ]  Knockback system
+- [x]  Find nearest enemy      <!-- Core/Combat/TargetFinder.cs -->
+- [x]  Auto target enemy       <!-- AutoAttackController -->
+- [x]  Attack cooldown
+- [x]  Spawn projectile
+- [x]  Projectile collision
+- [x]  Projectile damage
+- [x]  Critical hit system
+- [x]  Knockback system
 
 ---
 
 ## Camera
 
-- [ ]  Camera follow
-- [ ]  Camera shake
+- [x]  Camera follow
+- [x]  Camera shake     <!-- auto-shakes on PlayerDamagedEvent, plus public Shake() for scripted moments -->
 - [ ]  Boss zoom effect
 
 ---
@@ -57,10 +57,10 @@
 
 ## Base Weapon Framework
 
-- [ ]  Weapon interface
-- [ ]  Weapon stats
-- [ ]  Weapon rarity
-- [ ]  Weapon level
+- [ ]  Weapon interface   <!-- covered by WeaponDefinition SO + generic AutoAttackController/Projectile instead of a formal IWeapon; revisit if melee weapons need a different code path -->
+- [x]  Weapon stats       <!-- WeaponDefinition.cs -->
+- [x]  Weapon rarity      <!-- Core/Rarity.cs, shared with skills -->
+- [x]  Weapon level       <!-- RuntimeWeapon.cs -->
 
 ---
 
@@ -68,9 +68,9 @@
 
 ### Kunai
 
-- [ ]  Throw single kunai
-- [ ]  Upgrade damage
-- [ ]  Upgrade attack speed
+- [x]  Throw single kunai     <!-- generic Projectile+AutoAttackController; needs Editor: create a WeaponDefinition asset "Kunai" + projectile prefab -->
+- [x]  Upgrade damage         <!-- WeaponDefinition.GetDamage(level) -->
+- [x]  Upgrade attack speed   <!-- WeaponDefinition.GetAttacksPerSecond(level) -->
 
 ### Shuriken
 
@@ -99,18 +99,18 @@
 
 ## Enemy Framework
 
-- [ ]  Enemy base class
-- [ ]  Enemy movement
-- [ ]  Enemy attack
-- [ ]  Enemy health
-- [ ]  Enemy death
-- [ ]  Enemy animation
+- [x]  Enemy base class   <!-- EnemyController.cs -->
+- [x]  Enemy movement
+- [x]  Enemy attack
+- [x]  Enemy health       <!-- shared Health component -->
+- [x]  Enemy death
+- [ ]  Enemy animation    <!-- Animator hooks wired; needs Editor: Animator Controller + sprite clips -->
 
 ---
 
 ## Early Enemies
 
-- [ ]  Bandit
+- [x]  Bandit   <!-- data-only: generic EnemyController + an EnemyDefinition asset; needs Editor: create the asset + prefab -->
 - [ ]  Slime
 - [ ]  Wolf
 
@@ -136,22 +136,22 @@
 
 # 🎮 EPIC 4 - Wave System
 
-- [ ]  Wave manager
-- [ ]  Spawn manager
-- [ ]  Spawn zones
-- [ ]  Difficulty scaling
-- [ ]  Elite enemies
-- [ ]  Boss wave
-- [ ]  Endless mode
+- [x]  Wave manager
+- [x]  Spawn manager
+- [x]  Spawn zones          <!-- ring spawn around player, off-screen -->
+- [x]  Difficulty scaling   <!-- per-wave multiplier -->
+- [x]  Elite enemies        <!-- stat-multiplier variant -->
+- [x]  Boss wave            <!-- wave sequencing done; actual unique boss mechanics are EPIC 9 -->
+- [x]  Endless mode         <!-- loops final wave with rising difficulty -->
 
 ---
 
 # 🎮 EPIC 5 - Experience System
 
-- [ ]  XP orb
-- [ ]  XP collection
-- [ ]  XP bar
-- [ ]  Level up
+- [x]  XP orb
+- [x]  XP collection
+- [ ]  XP bar          <!-- needs Editor: Canvas + Slider/Image, then a small UI script -->
+- [x]  Level up
 - [ ]  Level animation
 
 ---
@@ -160,40 +160,40 @@
 
 ## Skill Framework
 
-- [ ]  Skill data
-- [ ]  Skill rarity
-- [ ]  Random selection
-- [ ]  Skill upgrade
-- [ ]  Max level
+- [x]  Skill data          <!-- SkillDefinition.cs -->
+- [x]  Skill rarity
+- [x]  Random selection    <!-- SkillManager.RollChoices, 3 eligible picks -->
+- [x]  Skill upgrade
+- [x]  Max level
 
 ---
 
 ## Offensive Skills
 
-- [ ]  Giant Shuriken
-- [ ]  Triple Throw
-- [ ]  Fire Blade
-- [ ]  Poison Kunai
-- [ ]  Lightning Strike
-- [ ]  Explosive Bomb
+- [ ]  Giant Shuriken     <!-- needs Element/Status system (EPIC 7) -->
+- [x]  Triple Throw       <!-- TripleThrowSkill -> PlayerStats.ExtraProjectiles -->
+- [ ]  Fire Blade         <!-- needs Element/Status system (EPIC 7) -->
+- [ ]  Poison Kunai       <!-- needs DoT/status system -->
+- [ ]  Lightning Strike   <!-- needs Element/Status system (EPIC 7) -->
+- [ ]  Explosive Bomb     <!-- needs AoE system -->
 
 ---
 
 ## Defensive Skills
 
-- [ ]  Smoke Bomb
-- [ ]  Shield
-- [ ]  Dodge Chance
-- [ ]  Auto Heal
+- [ ]  Smoke Bomb   <!-- needs invisibility/status system -->
+- [ ]  Shield       <!-- needs damage-absorb mechanic on Health -->
+- [x]  Dodge Chance   <!-- DodgeChanceSkill; Health.DodgeRoll hook -->
+- [x]  Auto Heal      <!-- AutoHealSkill; PlayerController.TickAutoHeal -->
 
 ---
 
 ## Utility Skills
 
-- [ ]  Movement Speed
-- [ ]  XP Magnet
-- [ ]  Gold Bonus
-- [ ]  Lucky Drop
+- [x]  Movement Speed
+- [x]  XP Magnet
+- [x]  Gold Bonus
+- [x]  Lucky Drop   <!-- stat modeled (PlayerStats.LuckyDropChanceBonus); no consumer yet since Loot System (EPIC 10) isn't built -->
 
 ---
 
@@ -383,8 +383,8 @@
 
 # 🎮 EPIC 15 - Economy
 
-- [ ]  Coins
-- [ ]  Gems
+- [x]  Coins   <!-- CurrencyWallet + EconomyManager; auto-credits on EnemyKilledEvent w/ Gold Bonus skill -->
+- [x]  Gems    <!-- wallet supports both currencies uniformly; no gem-earning source hooked up yet -->
 - [ ]  Upgrade costs
 - [ ]  Reward balancing
 
@@ -392,8 +392,8 @@
 
 # 🎮 EPIC 16 - Save System
 
-- [ ]  Local save
-- [ ]  Cloud save
+- [x]  Local save   <!-- SaveSystem.cs, JSON to Application.persistentDataPath -->
+- [ ]  Cloud save   <!-- needs Firebase Firestore, see EDITOR_SETUP.md -->
 - [ ]  Player profile
 - [ ]  Inventory save
 
