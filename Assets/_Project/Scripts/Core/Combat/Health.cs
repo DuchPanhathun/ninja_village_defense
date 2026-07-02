@@ -1,4 +1,5 @@
 using System;
+using NinjaVillage.Core.Events;
 using UnityEngine;
 
 namespace NinjaVillage.Core.Combat
@@ -19,6 +20,8 @@ namespace NinjaVillage.Core.Combat
 
         public float MaxHealth => maxHealth;
         public float CurrentHealth { get; private set; }
+        /// <summary>Absorbs damage before health. Granted by the Shield skill and similar effects.</summary>
+        public float CurrentShield { get; private set; }
         public bool IsAlive => CurrentHealth > 0f;
         public Transform Transform => transform;
 
@@ -48,6 +51,7 @@ namespace NinjaVillage.Core.Combat
             if (newMaxHealth.HasValue)
                 maxHealth = newMaxHealth.Value;
             CurrentHealth = maxHealth;
+            CurrentShield = 0f;
             _invulnerableUntil = 0f;
         }
 
@@ -57,7 +61,16 @@ namespace NinjaVillage.Core.Combat
             if (Time.time < _invulnerableUntil) return;
             if (DodgeRoll != null && DodgeRoll()) return;
 
-            CurrentHealth = Mathf.Max(0f, CurrentHealth - damage.Amount);
+            // Shield absorbs first; only the remainder reaches health.
+            float remaining = damage.Amount;
+            if (CurrentShield > 0f)
+            {
+                float absorbed = Mathf.Min(CurrentShield, remaining);
+                CurrentShield -= absorbed;
+                remaining -= absorbed;
+            }
+
+            CurrentHealth = Mathf.Max(0f, CurrentHealth - remaining);
 
             if (invulnerabilityDuration > 0f)
                 _invulnerableUntil = Time.time + invulnerabilityDuration;
@@ -66,9 +79,32 @@ namespace NinjaVillage.Core.Combat
                 optionalRigidbody.AddForce(damage.KnockbackDirection * damage.KnockbackForce, ForceMode2D.Impulse);
 
             OnDamaged?.Invoke(damage.Amount, CurrentHealth, maxHealth);
+            EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(transform.position, damage.Amount, damage.IsCritical));
 
             if (!IsAlive)
                 OnDeath?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Damage-over-time entry point used by <see cref="StatusEffectReceiver"/>.
+        /// Bypasses i-frames, dodge and shields (a burn keeps burning) and does not
+        /// spam the global damage-number event with per-frame slivers.
+        /// </summary>
+        public void TakeDamageOverTime(float amount)
+        {
+            if (!IsAlive || amount <= 0f) return;
+
+            CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
+            OnDamaged?.Invoke(amount, CurrentHealth, maxHealth);
+
+            if (!IsAlive)
+                OnDeath?.Invoke(this);
+        }
+
+        /// <summary>Adds shield points up to <paramref name="cap"/> (skills pass their own cap so stacking stays bounded).</summary>
+        public void GainShield(float amount, float cap)
+        {
+            CurrentShield = Mathf.Min(cap, CurrentShield + amount);
         }
 
         /// <summary>Grants temporary invulnerability (e.g. dash i-frames, skill effects).</summary>

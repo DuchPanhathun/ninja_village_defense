@@ -19,6 +19,7 @@ namespace NinjaVillage.Gameplay.Enemies
 
         protected Rigidbody2D Body;
         protected Health HealthComponent;
+        protected StatusEffectReceiver Status; // optional
         protected Transform PlayerTransform;
 
         private float _currentDamage;
@@ -34,6 +35,7 @@ namespace NinjaVillage.Gameplay.Enemies
         {
             Body = GetComponent<Rigidbody2D>();
             HealthComponent = GetComponent<Health>();
+            Status = GetComponent<StatusEffectReceiver>();
         }
 
         protected virtual void OnEnable()
@@ -70,6 +72,12 @@ namespace NinjaVillage.Gameplay.Enemies
         /// <summary>Default chase-and-melee behavior. Override for bosses with unique mechanics.</summary>
         protected virtual void TickBehavior()
         {
+            if (Status != null && Status.IsStunned)
+            {
+                Body.linearVelocity = Vector2.zero;
+                return;
+            }
+
             float distance = Vector2.Distance(transform.position, PlayerTransform.position);
 
             if (distance > definition.AttackRange)
@@ -90,7 +98,8 @@ namespace NinjaVillage.Gameplay.Enemies
         protected void MoveToward(Vector2 worldPosition)
         {
             Vector2 direction = (worldPosition - (Vector2)transform.position).normalized;
-            Body.linearVelocity = direction * definition.MoveSpeed;
+            float speedMultiplier = Status != null ? Status.MoveSpeedMultiplier : 1f;
+            Body.linearVelocity = direction * (definition.MoveSpeed * speedMultiplier);
 
             if (direction.x != 0f)
             {

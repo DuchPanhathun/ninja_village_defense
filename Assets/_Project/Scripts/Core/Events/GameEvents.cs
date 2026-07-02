@@ -50,4 +50,30 @@ namespace NinjaVillage.Core.Events
         public readonly int NewLevel;
         public LevelUpEvent(int newLevel) => NewLevel = newLevel;
     }
+
+    /// <summary>Asks the camera to shake — raised by heavy impacts like boss ground smashes.</summary>
+    public readonly struct CameraShakeRequestEvent : IGameEvent
+    {
+        public readonly float Duration;
+        public readonly float Magnitude;
+        public CameraShakeRequestEvent(float duration, float magnitude)
+        {
+            Duration = duration;
+            Magnitude = magnitude;
+        }
+    }
+
+    /// <summary>Raised whenever any entity takes a direct hit — drives damage numbers and hit feedback.</summary>
+    public readonly struct EntityDamagedEvent : IGameEvent
+    {
+        public readonly Vector2 Position;
+        public readonly float Amount;
+        public readonly bool IsCritical;
+        public EntityDamagedEvent(Vector2 position, float amount, bool isCritical)
+        {
+            Position = position;
+            Amount = amount;
+            IsCritical = isCritical;
+        }
+    }
 }

@@ -26,6 +26,12 @@ namespace NinjaVillage.Gameplay.Player
         public float DodgeChance { get; private set; } = 0f;
         public float HealPerSecond { get; private set; } = 0f;
 
+        [Header("On-Hit Status Effects")]
+        public float BurnOnHitDps { get; private set; } = 0f;
+        public float BurnOnHitDuration { get; private set; } = 0f;
+        public float PoisonOnHitDps { get; private set; } = 0f;
+        public float PoisonOnHitDuration { get; private set; } = 0f;
+
         [Header("Utility")]
         public float XpMagnetRadiusMultiplier { get; private set; } = 1f;
         public float GoldBonusMultiplier { get; private set; } = 1f;
@@ -39,6 +45,16 @@ namespace NinjaVillage.Gameplay.Player
         public void AddExtraProjectiles(int delta) => ExtraProjectiles += delta;
         public void AddDodgeChance(float delta) => DodgeChance = Mathf.Clamp01(DodgeChance + delta);
         public void AddHealPerSecond(float delta) => HealPerSecond += delta;
+        public void AddBurnOnHit(float dps, float duration)
+        {
+            BurnOnHitDps += dps;
+            BurnOnHitDuration = Mathf.Max(BurnOnHitDuration, duration);
+        }
+        public void AddPoisonOnHit(float dps, float duration)
+        {
+            PoisonOnHitDps += dps;
+            PoisonOnHitDuration = Mathf.Max(PoisonOnHitDuration, duration);
+        }
         public void AddXpMagnetRadiusMultiplier(float delta) => XpMagnetRadiusMultiplier += delta;
         public void AddGoldBonusMultiplier(float delta) => GoldBonusMultiplier += delta;
         public void AddLuckyDropChanceBonus(float delta) => LuckyDropChanceBonus += delta;

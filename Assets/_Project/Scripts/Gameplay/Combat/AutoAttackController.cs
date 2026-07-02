@@ -22,6 +22,8 @@ namespace NinjaVillage.Gameplay.Combat
         private float _cooldownRemaining;
 
         public RuntimeWeapon Weapon => _weapon;
+        /// <summary>Shared by behavior skills (Lightning Strike, Explosive Bomb) and ultimates so the enemy layer is configured once.</summary>
+        public LayerMask EnemyMask => enemyMask;
 
         private void Awake()
         {
@@ -82,6 +84,17 @@ namespace NinjaVillage.Gameplay.Combat
             var instance = Instantiate(_weapon.Definition.ProjectilePrefab, origin, Quaternion.identity);
             var projectile = instance.GetComponent<Projectile>();
             projectile.Launch(direction, _weapon.Definition.ProjectileSpeed, damage, isCritical, _weapon.Definition.KnockbackForce, enemyMask, gameObject);
+
+            if (_stats.BurnOnHitDps > 0f || _stats.PoisonOnHitDps > 0f)
+            {
+                projectile.SetStatusPayload(new StatusPayload
+                {
+                    BurnDps = _stats.BurnOnHitDps,
+                    BurnDuration = _stats.BurnOnHitDuration,
+                    PoisonDps = _stats.PoisonOnHitDps,
+                    PoisonDuration = _stats.PoisonOnHitDuration
+                });
+            }
         }
     }
 }

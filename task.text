@@ -150,7 +150,7 @@
 
 - [x]  XP orb
 - [x]  XP collection
-- [ ]  XP bar          <!-- needs Editor: Canvas + Slider/Image, then a small UI script -->
+- [x]  XP bar          <!-- XpBarUI script; needs Editor: canvas wiring (SCENE_WIRING.md §7) -->
 - [x]  Level up
 - [ ]  Level animation
 
@@ -170,19 +170,19 @@
 
 ## Offensive Skills
 
-- [ ]  Giant Shuriken     <!-- needs Element/Status system (EPIC 7) -->
+- [ ]  Giant Shuriken     <!-- needs projectile size scaling; low-hanging, next code pass -->
 - [x]  Triple Throw       <!-- TripleThrowSkill -> PlayerStats.ExtraProjectiles -->
-- [ ]  Fire Blade         <!-- needs Element/Status system (EPIC 7) -->
-- [ ]  Poison Kunai       <!-- needs DoT/status system -->
-- [ ]  Lightning Strike   <!-- needs Element/Status system (EPIC 7) -->
-- [ ]  Explosive Bomb     <!-- needs AoE system -->
+- [x]  Fire Blade         <!-- burn-on-hit via StatusEffectReceiver -->
+- [x]  Poison Kunai       <!-- poison DoT on hit -->
+- [x]  Lightning Strike   <!-- LightningStrikeBehavior, auto-added to player -->
+- [x]  Explosive Bomb     <!-- ExplosiveBombBehavior + AreaDamage -->
 
 ---
 
 ## Defensive Skills
 
-- [ ]  Smoke Bomb   <!-- needs invisibility/status system -->
-- [ ]  Shield       <!-- needs damage-absorb mechanic on Health -->
+- [ ]  Smoke Bomb   <!-- needs invisibility system -->
+- [x]  Shield       <!-- Health.CurrentShield absorbs first; ShieldRegenBehavior -->
 - [x]  Dodge Chance   <!-- DodgeChanceSkill; Health.DodgeRoll hook -->
 - [x]  Auto Heal      <!-- AutoHealSkill; PlayerController.TickAutoHeal -->
 
@@ -229,17 +229,17 @@
 
 # 🎮 EPIC 8 - Ultimate Skills
 
-- [ ]  Ultimate charge
-- [ ]  Ultimate button
-- [ ]  Cooldown
+- [x]  Ultimate charge    <!-- UltimateController: kills build charge -->
+- [x]  Ultimate button    <!-- UltimateButtonUI; needs Editor: canvas Button wiring (SCENE_WIRING.md §7) -->
+- [x]  Cooldown
 
 ---
 
 ## Ultimates
 
-- [ ]  Shadow Clone Army
-- [ ]  Dragon Slash
-- [ ]  Heavenly Storm
+- [ ]  Shadow Clone Army   <!-- needs clone prefab + clone AI -->
+- [x]  Dragon Slash        <!-- map-wide AreaDamage + shake; VFX later -->
+- [x]  Heavenly Storm      <!-- 50 damage bursts over 5s around player; VFX later -->
 
 ---
 
@@ -247,17 +247,17 @@
 
 ## Boss Framework
 
-- [ ]  Boss health bar
-- [ ]  Boss AI
-- [ ]  Multiple attack phases
+- [x]  Boss health bar    <!-- BossHealthBarUI; needs Editor: canvas wiring -->
+- [x]  Boss AI            <!-- BossController : EnemyController -->
+- [x]  Multiple attack phases   <!-- health-threshold phases + OnPhaseStarted hook -->
 
 ---
 
 ## Giant Oni
 
-- [ ]  Charge attack
-- [ ]  Ground smash
-- [ ]  Shockwave
+- [x]  Charge attack   <!-- telegraphed dash w/ contact damage -->
+- [x]  Ground smash    <!-- windup + AoE at impact -->
+- [x]  Shockwave       <!-- expanding ring that hits the player once as it passes -->
 
 ---
 
@@ -285,8 +285,8 @@
 
 # 🎮 EPIC 10 - Loot System
 
-- [ ]  Coin drop
-- [ ]  XP drop
+- [x]  Coin drop   <!-- CoinPickup + LootSpawner (Gold Bonus + Lucky Drop applied) -->
+- [x]  XP drop     <!-- XpOrb + XpOrbSpawner -->
 - [ ]  Equipment drop
 - [ ]  Loot rarity
 - [ ]  Chest rewards
@@ -411,13 +411,13 @@
 ---
 
 ## Battle UI
-
-- [ ]  HP bar
-- [ ]  XP bar
-- [ ]  Skill selection
-- [ ]  Ultimate button
-- [ ]  Boss health
-- [ ]  Pause menu
+<!-- all scripts done; each needs Editor canvas wiring per SCENE_WIRING.md §7 -->
+- [x]  HP bar          <!-- PlayerHealthBarUI (health + shield fill) -->
+- [x]  XP bar          <!-- XpBarUI -->
+- [x]  Skill selection <!-- SkillChoicePanel: pauses, queues multi-level-ups -->
+- [x]  Ultimate button <!-- UltimateButtonUI -->
+- [x]  Boss health     <!-- BossHealthBarUI -->
+- [x]  Pause menu      <!-- PauseMenu -->
 
 ---
 
@@ -487,9 +487,9 @@
 # 🎮 EPIC 23 - Polish
 
 - [ ]  Visual effects
-- [ ]  Screen shake
-- [ ]  Hit flash
-- [ ]  Damage numbers
+- [x]  Screen shake     <!-- CameraShake: auto on player damage + CameraShakeRequestEvent for big impacts -->
+- [x]  Hit flash        <!-- HitFlash component for any Health owner -->
+- [x]  Damage numbers   <!-- DamageNumber + spawner; needs Editor: world-space TMP prefab -->
 - [ ]  Performance optimization
 - [ ]  Mobile optimization
 - [ ]  Battery optimization

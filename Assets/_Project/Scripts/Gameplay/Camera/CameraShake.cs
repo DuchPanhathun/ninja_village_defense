@@ -25,16 +25,23 @@ namespace NinjaVillage.Gameplay.Camera
         private void OnEnable()
         {
             EventBus<PlayerDamagedEvent>.Subscribe(OnPlayerDamaged);
+            EventBus<CameraShakeRequestEvent>.Subscribe(OnShakeRequested);
         }
 
         private void OnDisable()
         {
             EventBus<PlayerDamagedEvent>.Unsubscribe(OnPlayerDamaged);
+            EventBus<CameraShakeRequestEvent>.Unsubscribe(OnShakeRequested);
         }
 
         private void OnPlayerDamaged(PlayerDamagedEvent evt)
         {
             Shake(damageShakeDuration, damageShakeMagnitude);
+        }
+
+        private void OnShakeRequested(CameraShakeRequestEvent evt)
+        {
+            Shake(evt.Duration, evt.Magnitude);
         }
 
         public void Shake(float duration, float magnitude)

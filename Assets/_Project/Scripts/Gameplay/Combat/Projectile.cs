@@ -23,6 +23,7 @@ namespace NinjaVillage.Gameplay.Combat
         private GameObject _source;
         private int _remainingPierces;
         private float _spawnTime;
+        private StatusPayload _statusPayload;
 
         private void Awake()
         {
@@ -43,7 +44,11 @@ namespace NinjaVillage.Gameplay.Combat
 
             transform.right = direction;
             _rigidbody.linearVelocity = _velocity;
+            _statusPayload = default;
         }
+
+        /// <summary>Optional on-hit status effects (burn/poison). Call after <see cref="Launch"/>.</summary>
+        public void SetStatusPayload(in StatusPayload payload) => _statusPayload = payload;
 
         private void Update()
         {
@@ -58,6 +63,9 @@ namespace NinjaVillage.Gameplay.Combat
 
             var damage = new DamageInfo(_damage, _isCritical, _velocity, _knockbackForce, _source);
             damageable.TakeDamage(damage);
+
+            if (_statusPayload.HasAny && other.TryGetComponent<StatusEffectReceiver>(out var status))
+                status.Apply(_statusPayload);
 
             if (_remainingPierces <= 0)
             {
