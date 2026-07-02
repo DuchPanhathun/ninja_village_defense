@@ -5,16 +5,16 @@
 - [x]  Create Unity project
 - [x]  Configure Git repository
 - [x]  Set up project folder structure
-- [ ]  Configure Input System        <!-- pkg added to manifest; needs Editor: input actions asset + Active Input Handling -->
-- [ ]  Configure URP (Universal Render Pipeline)   <!-- pkg added; needs Editor: URP asset + Graphics settings -->
-- [ ]  Configure Addressables        <!-- pkg added; needs Editor: init Addressables settings -->
+- [x]  Configure Input System        <!-- Active Input Handling set + PlayerControls.inputactions with Move composite -->
+- [x]  Configure URP (Universal Render Pipeline)   <!-- NinjaVillage_URP assigned in Graphics + Quality settings -->
+- [x]  Configure Addressables        <!-- Addressables settings initialized -->
 - [x]  Configure ScriptableObject architecture
 - [x]  Create Event Bus system
 - [ ]  Configure Dependency Injection (optional)
-- [ ]  Configure Firebase
-- [ ]  Configure Cloud Save
-- [ ]  Configure Analytics
-- [ ]  Configure Mobile Build (Android/iOS)
+- [x]  Configure Firebase            <!-- Android+iOS apps registered, google-services.json/GoogleService-Info.plist placed, SDK imported, Android Resolver succeeded -->
+- [ ]  Configure Cloud Save          <!-- Firestore package imported; actual save/load code against it not written yet (local JSON save works today, see SaveSystem.cs) -->
+- [ ]  Configure Analytics           <!-- Analytics package imported; no events instrumented yet -->
+- [x]  Configure Mobile Build (Android/iOS)   <!-- Android: switched platform, IL2CPP, ARM64-only, min API 26+. iOS platform switch deferred until closer to an iOS build, per Android-first plan -->
 
 ---
 

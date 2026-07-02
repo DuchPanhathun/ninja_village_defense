@@ -81,7 +81,7 @@ Your committed `firebase_cred.tsx` is a **web** config for project `bookknhom` �
    - **Android tab → Other Settings → Package Name** = your chosen id.
    - **iOS tab → Other Settings → Bundle Identifier** = the same id.
 
-- [ ]  Done
+- [x]  Done
 
 ---
 
@@ -95,7 +95,7 @@ Your committed `firebase_cred.tsx` is a **web** config for project `bookknhom` �
    - **Target Architectures**: ARM64 only (uncheck ARMv7 — Play Store requires 64-bit, ARMv7-only submissions are rejected).
 3. iOS platform switch can wait until we're closer to an iOS build — Android first per your brief.
 
-- [ ]  Done
+- [x]  Done
 
 ---
 
