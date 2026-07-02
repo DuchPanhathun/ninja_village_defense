@@ -24,7 +24,7 @@ Open the project first: **Unity Hub → Add → select this folder** → open wi
    skip this step entirely if it's giving you trouble.
 4. Check the box **☑ Configure Input System** in `task.text` — I'll do this automatically once you tell me it's done.
 
-- [ ]  Done
+- [x]  Done
 
 ---
 
@@ -36,7 +36,7 @@ Open the project first: **Unity Hub → Add → select this folder** → open wi
 3. **Edit → Project Settings → Quality** → for each quality level (or at least the default), set the **Render Pipeline Asset** to `NinjaVillage_URP` as well.
 4. Since this is 2D: in the URP asset inspector, you can leave defaults — 2D Renderer is auto-selected when you create a 2D project template, but if colors look washed out later, check the Renderer's **2D Renderer Data** is assigned.
 
-- [ ]  Done
+- [x]  Done
 
 ---
 
@@ -47,7 +47,7 @@ Open the project first: **Unity Hub → Add → select this folder** → open wi
    - This generates `Assets/AddressableAssetsData/` with a `Default Local Group` and settings asset.
 3. Leave defaults for now — we'll addressable-tag prefabs (enemies, weapons, skill data) as we build them in later EPICs.
 
-- [ ]  Done
+- [x]  Done
 
 ---
 
@@ -74,7 +74,7 @@ Your committed `firebase_cred.tsx` is a **web** config for project `bookknhom` �
    - `FirebaseAnalytics.unitypackage`
    - `FirebaseCrashlytics.unitypackage`
 3. When prompted about **Android Resolver / External Dependency Manager**, let it run — it patches Gradle dependencies automatically. This can take a few minutes and needs internet.
-4. Once resolved, **File → Build Settings → Android → Player Settings**: set the **Package Name** to match `google-services.json` exactly.
+4. Once resolved, **File → Build Profiles → Player Settings** (or directly: **Edit → Project Settings → Player**) → Android section: set the **Package Name** to match `google-services.json` exactly.
 
 ### 4d. Set your bundle id in Unity
 1. **Edit → Project Settings → Player**:
@@ -87,7 +87,7 @@ Your committed `firebase_cred.tsx` is a **web** config for project `bookknhom` �
 
 ## 5. Mobile Build target (~2 min)
 
-1. **File → Build Settings → Android** → **Switch Platform**.
+1. **File → Build Profiles → Android** → **Switch Platform** (Unity 6 renamed "Build Settings" to "Build Profiles").
 2. **Player Settings → Android**:
    - **Minimum API Level**: Android 8.0 (API 26) or higher.
    - **Target API Level**: Automatic (highest installed).
