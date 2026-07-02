@@ -14,8 +14,14 @@ Open the project first: **Unity Hub → Add → select this folder** → open wi
 3. Double-click it to open the Input Actions editor:
    - Add an **Action Map** named `Gameplay`.
    - Add an action `Move` of type **Value**, Control Type **Vector2**.
-   - Add a binding: **Composite → 2D Vector** with WASD, *and* a separate binding using the **Touch/On-Screen Stick** binding (or just leave WASD for now — we'll wire the mobile joystick via a UI package later in EPIC 1).
+   - Add a **2D Vector composite** binding under it, bound to WASD.
    - Click **Save Asset**.
+
+   Note: this is optional polish for future gamepad support. The actual mobile
+   joystick (`UI/VirtualJoystick.cs`) is a plain Canvas drag-handler, not an Input
+   Actions binding — and `Gameplay/Player/KeyboardMoveInputProvider.cs` reads
+   `Keyboard.current` directly for Editor testing. Neither touches this asset, so
+   skip this step entirely if it's giving you trouble.
 4. Check the box **☑ Configure Input System** in `task.text` — I'll do this automatically once you tell me it's done.
 
 - [ ]  Done
