@@ -12,6 +12,7 @@ namespace NinjaVillage.Gameplay.Skills.Behaviors
     public class LightningStrikeBehavior : MonoBehaviour
     {
         private static readonly Collider2D[] Buffer = new Collider2D[32];
+        private static readonly ContactFilter2D Filter = new() { useTriggers = true };
 
         private float _damage;
         private float _interval;
@@ -41,7 +42,8 @@ namespace NinjaVillage.Gameplay.Skills.Behaviors
         {
             if (!_maskResolved || Time.time < _nextStrikeAt) return;
 
-            int count = Physics2D.OverlapCircleNonAlloc(transform.position, _radius, Buffer, _enemyMask);
+            Filter.SetLayerMask(_enemyMask);
+            int count = Physics2D.OverlapCircle(transform.position, _radius, Filter, Buffer);
             if (count == 0) return;
 
             var target = Buffer[Random.Range(0, count)];

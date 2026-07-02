@@ -6,10 +6,12 @@ namespace NinjaVillage.Core.Combat
     public static class TargetFinder
     {
         private static readonly Collider2D[] Buffer = new Collider2D[64];
+        private static readonly ContactFilter2D Filter = new() { useTriggers = true };
 
         public static Transform FindNearest(Vector2 origin, float range, LayerMask mask)
         {
-            int count = Physics2D.OverlapCircleNonAlloc(origin, range, Buffer, mask);
+            Filter.SetLayerMask(mask);
+            int count = Physics2D.OverlapCircle(origin, range, Filter, Buffer);
             if (count == 0) return null;
 
             Transform nearest = null;

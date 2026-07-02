@@ -6,11 +6,13 @@ namespace NinjaVillage.Core.Combat
     public static class AreaDamage
     {
         private static readonly Collider2D[] Buffer = new Collider2D[64];
+        private static readonly ContactFilter2D Filter = new() { useTriggers = true };
 
         /// <returns>Number of targets hit.</returns>
         public static int DamageCircle(Vector2 origin, float radius, LayerMask mask, float damage, float knockbackForce, GameObject source, bool isCritical = false)
         {
-            int count = Physics2D.OverlapCircleNonAlloc(origin, radius, Buffer, mask);
+            Filter.SetLayerMask(mask);
+            int count = Physics2D.OverlapCircle(origin, radius, Filter, Buffer);
             int hits = 0;
 
             for (int i = 0; i < count; i++)
