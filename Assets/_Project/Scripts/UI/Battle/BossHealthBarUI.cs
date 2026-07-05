@@ -18,12 +18,15 @@ namespace NinjaVillage.UI.Battle
 
         private void Awake()
         {
+            // Subscribe before disabling barRoot below — if this script lives on
+            // barRoot itself, OnEnable would never fire once it's inactive.
+            EventBus<BossSpawnedEvent>.Subscribe(OnBossSpawned);
+
             if (barRoot != null)
                 barRoot.SetActive(false);
         }
 
-        private void OnEnable() => EventBus<BossSpawnedEvent>.Subscribe(OnBossSpawned);
-        private void OnDisable() => EventBus<BossSpawnedEvent>.Unsubscribe(OnBossSpawned);
+        private void OnDestroy() => EventBus<BossSpawnedEvent>.Unsubscribe(OnBossSpawned);
 
         private void OnBossSpawned(BossSpawnedEvent evt)
         {

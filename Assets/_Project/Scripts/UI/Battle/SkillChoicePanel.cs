@@ -27,6 +27,10 @@ namespace NinjaVillage.UI.Battle
 
         private void Awake()
         {
+            // Subscribe before disabling panelRoot below — if this script lives on
+            // panelRoot itself, OnEnable would never fire once it's inactive.
+            EventBus<SkillChoicesReadyEvent>.Subscribe(OnChoicesReady);
+
             if (panelRoot != null)
                 panelRoot.SetActive(false);
 
@@ -37,8 +41,7 @@ namespace NinjaVillage.UI.Battle
             }
         }
 
-        private void OnEnable() => EventBus<SkillChoicesReadyEvent>.Subscribe(OnChoicesReady);
-        private void OnDisable() => EventBus<SkillChoicesReadyEvent>.Unsubscribe(OnChoicesReady);
+        private void OnDestroy() => EventBus<SkillChoicesReadyEvent>.Unsubscribe(OnChoicesReady);
 
         private void OnChoicesReady(SkillChoicesReadyEvent evt)
         {

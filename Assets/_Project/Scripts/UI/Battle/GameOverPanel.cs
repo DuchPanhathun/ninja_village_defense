@@ -14,12 +14,15 @@ namespace NinjaVillage.UI.Battle
 
         private void Awake()
         {
+            // Subscribe before disabling panelRoot below — if this script lives on
+            // panelRoot itself, OnEnable would never fire once it's inactive.
+            EventBus<RunEndedEvent>.Subscribe(OnRunEnded);
+
             if (panelRoot != null)
                 panelRoot.SetActive(false);
         }
 
-        private void OnEnable() => EventBus<RunEndedEvent>.Subscribe(OnRunEnded);
-        private void OnDisable() => EventBus<RunEndedEvent>.Unsubscribe(OnRunEnded);
+        private void OnDestroy() => EventBus<RunEndedEvent>.Unsubscribe(OnRunEnded);
 
         private void OnRunEnded(RunEndedEvent evt)
         {
