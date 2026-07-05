@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989056664463",
+    "project_id": "bookknhom",
+    "storage_bucket": "bookknhom.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989056664463:android:884eda916b53b5a85f01fa",
+        "android_client_info": {
+          "package_name": "com.thun.ninjavillagedefense"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDx9DwtdMwO9F7YML28uF8OUWpKMC5n8Xc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

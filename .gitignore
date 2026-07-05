@@ -40,6 +40,12 @@ Thumbs.db
 # Crashlytics
 crashlytics-build.properties
 
+# Firebase desktop Editor-testing native binaries (~220MB, exceeds GitHub's file
+# size limits) — only needed for Play Mode testing on desktop, not for Android/iOS
+# builds. Re-import the Firebase Unity SDK if you ever need these locally.
+/Assets/Firebase/Plugins/x86_64/
+/Assets/Firebase/Plugins/x86_64.meta
+
 # ---- Firebase secrets: DO NOT COMMIT ----
 google-services.json
 GoogleService-Info.plist

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3917dd796c774343b9e186e6563e413, type: 3}
+  m_Name: Kunai
+  m_EditorClassIdentifier: 
+  id: Kunai
+  displayName: 
+  description: 
+  icon: {fileID: 0}
+  rarity: 0
+  baseDamage: 10
+  baseAttacksPerSecond: 2
+  range: 6
+  baseCritChance: 0.05
+  baseCritMultiplier: 1.5
+  knockbackForce: 2
+  damagePerLevel: 2
+  attacksPerSecondPerLevel: 0.05
+  projectilePrefab: {fileID: 8179992011265535766, guid: 781cb998c88da481d83f8556aa338b71, type: 3}
+  projectileSpeed: 12
