@@ -49,7 +49,7 @@
 
 - [x]  Camera follow
 - [x]  Camera shake     <!-- auto-shakes on PlayerDamagedEvent, plus public Shake() for scripted moments -->
-- [ ]  Boss zoom effect
+- [x]  Boss zoom effect   <!-- BossZoomEffect.cs: zooms out on BossSpawnedEvent, back in on boss death -->
 
 ---
 
@@ -74,24 +74,24 @@
 
 ### Shuriken
 
-- [ ]  Circular throw
-- [ ]  Piercing projectile
+- [x]  Circular throw       <!-- ShurikenWeaponDefinition: fires a full ring of projectiles instead of aiming at one target -->
+- [x]  Piercing projectile  <!-- Projectile already supports Pierce Count; set >0 on Shuriken's own projectile prefab in Editor -->
 
 ### Katana
 
-- [ ]  Melee attack
-- [ ]  Arc attack
-- [ ]  Slash animation
+- [x]  Melee attack   <!-- KatanaWeaponDefinition: instant arc damage, no projectile -->
+- [x]  Arc attack     <!-- Core/Combat/MeleeArc.cs -->
+- [ ]  Slash animation   <!-- needs Editor: Animator Controller + sprite clips -->
 
 ### Bow
 
-- [ ]  Long range attack
-- [ ]  Charge attack
+- [x]  Long range attack   <!-- set a high Range value on the Bow asset -->
+- [x]  Charge attack       <!-- every Nth shot auto-charges (no manual hold, matches auto-attack design) -->
 
 ### Chain Sickle
 
-- [ ]  Swing mechanic
-- [ ]  Pull enemy
+- [x]  Swing mechanic   <!-- ChainSickleWeaponDefinition: instant hit on nearest target -->
+- [x]  Pull enemy       <!-- reversed knockback direction, pulls target toward player -->
 
 ---
 
@@ -111,8 +111,10 @@
 ## Early Enemies
 
 - [x]  Bandit   <!-- generic EnemyController + EnemyDefinition asset + prefab created and wired -->
-- [ ]  Slime
-- [ ]  Wolf
+- [x]  Slime    <!-- SlimeController: splits into 2 mini-slimes on death; needs Editor: Slime + MiniSlime prefabs (MiniSlime has Can Split unchecked) -->
+- [ ]  Wolf     <!-- data-only like Bandit, no unique mechanic specified — create whenever via generic EnemyController -->
+
+Wolf and other early/mid/late enemies not listed above are fully supported by the generic EnemyController + a new EnemyDefinition asset (same pattern as Bandit) — no new code needed unless you want a unique mechanic like Slime's.
 
 ---
 
@@ -170,7 +172,7 @@
 
 ## Offensive Skills
 
-- [ ]  Giant Shuriken     <!-- needs projectile size scaling; low-hanging, next code pass -->
+- [x]  Giant Shuriken     <!-- GiantShurikenSkill: scales PlayerStats.ProjectileSizeMultiplier + damage together -->
 - [x]  Triple Throw       <!-- TripleThrowSkill -> PlayerStats.ExtraProjectiles -->
 - [x]  Fire Blade         <!-- burn-on-hit via StatusEffectReceiver -->
 - [x]  Poison Kunai       <!-- poison DoT on hit -->

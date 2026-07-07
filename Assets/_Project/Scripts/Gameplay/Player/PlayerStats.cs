@@ -21,6 +21,7 @@ namespace NinjaVillage.Gameplay.Player
         public float CritChanceBonus { get; private set; } = 0f;
         public float CritMultiplierBonus { get; private set; } = 0f;
         public int ExtraProjectiles { get; private set; } = 0;
+        public float ProjectileSizeMultiplier { get; private set; } = 1f;
 
         [Header("Survival")]
         public float DodgeChance { get; private set; } = 0f;
@@ -43,6 +44,7 @@ namespace NinjaVillage.Gameplay.Player
         public void AddCritChanceBonus(float delta) => CritChanceBonus += delta;
         public void AddCritMultiplierBonus(float delta) => CritMultiplierBonus += delta;
         public void AddExtraProjectiles(int delta) => ExtraProjectiles += delta;
+        public void AddProjectileSizeMultiplier(float delta) => ProjectileSizeMultiplier += delta;
         public void AddDodgeChance(float delta) => DodgeChance = Mathf.Clamp01(DodgeChance + delta);
         public void AddHealPerSecond(float delta) => HealPerSecond += delta;
         public void AddBurnOnHit(float dps, float duration)

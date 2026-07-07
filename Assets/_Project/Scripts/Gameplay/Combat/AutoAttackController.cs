@@ -37,6 +37,10 @@ namespace NinjaVillage.Gameplay.Combat
             _weapon = new RuntimeWeapon(definition, level);
         }
 
+        /// <summary>Degrees between shots when firing more than one projectile at once (multi-shot skills or an innately multi-projectile weapon).</summary>
+        public float MultiShotSpreadDegrees => multiShotSpreadDegrees;
+        public PlayerStats Stats => _stats;
+
         private void Update()
         {
             if (_weapon == null) return;
@@ -47,33 +51,23 @@ namespace NinjaVillage.Gameplay.Combat
             var target = TargetFinder.FindNearest(transform.position, _weapon.Definition.Range, enemyMask);
             if (target == null) return;
 
-            Fire(target);
+            _weapon.Definition.Fire(this, transform, target, _stats);
 
             float attacksPerSecond = _weapon.CurrentAttacksPerSecond * _stats.AttackSpeedMultiplier;
             _cooldownRemaining = 1f / Mathf.Max(0.01f, attacksPerSecond);
         }
 
-        private void Fire(Transform target)
+        /// <summary>Rolls a crit and returns the final damage for this weapon's current level — shared by every weapon's Fire() override.</summary>
+        public (float damage, bool isCritical) RollDamage()
         {
-            Vector2 origin = transform.position;
-            Vector2 baseDirection = ((Vector2)target.position - origin).normalized;
-
             bool isCritical = Random.value < (_weapon.Definition.BaseCritChance + _stats.CritChanceBonus);
             float critMultiplier = isCritical ? _weapon.Definition.BaseCritMultiplier + _stats.CritMultiplierBonus : 1f;
             float damage = _weapon.CurrentDamage * _stats.AttackDamageMultiplier * critMultiplier;
-
-            int totalProjectiles = 1 + Mathf.Max(0, _stats.ExtraProjectiles);
-            float startAngleOffset = -(totalProjectiles - 1) * multiShotSpreadDegrees * 0.5f;
-
-            for (int i = 0; i < totalProjectiles; i++)
-            {
-                float angle = startAngleOffset + i * multiShotSpreadDegrees;
-                Vector2 direction = Quaternion.Euler(0, 0, angle) * baseDirection;
-                SpawnProjectile(origin, direction, damage, isCritical);
-            }
+            return (damage, isCritical);
         }
 
-        private void SpawnProjectile(Vector2 origin, Vector2 direction, float damage, bool isCritical)
+        /// <summary>Spawns and launches one projectile from the equipped weapon's prefab — reusable by any WeaponDefinition.Fire() override.</summary>
+        public void SpawnProjectile(Vector2 origin, Vector2 direction, float damage, bool isCritical, float knockbackForce, float speedOverride = -1f)
         {
             if (_weapon.Definition.ProjectilePrefab == null)
             {
@@ -81,9 +75,13 @@ namespace NinjaVillage.Gameplay.Combat
                 return;
             }
 
+            float speed = speedOverride > 0f ? speedOverride : _weapon.Definition.ProjectileSpeed;
             var instance = Instantiate(_weapon.Definition.ProjectilePrefab, origin, Quaternion.identity);
+            if (!Mathf.Approximately(_stats.ProjectileSizeMultiplier, 1f))
+                instance.transform.localScale *= _stats.ProjectileSizeMultiplier;
+
             var projectile = instance.GetComponent<Projectile>();
-            projectile.Launch(direction, _weapon.Definition.ProjectileSpeed, damage, isCritical, _weapon.Definition.KnockbackForce, enemyMask, gameObject);
+            projectile.Launch(direction, speed, damage, isCritical, knockbackForce, enemyMask, gameObject);
 
             if (_stats.BurnOnHitDps > 0f || _stats.PoisonOnHitDps > 0f)
             {
@@ -94,6 +92,18 @@ namespace NinjaVillage.Gameplay.Combat
                     PoisonDps = _stats.PoisonOnHitDps,
                     PoisonDuration = _stats.PoisonOnHitDuration
                 });
+            }
+        }
+
+        /// <summary>Fires <paramref name="totalProjectiles"/> copies spread evenly around <paramref name="baseDirection"/> — the standard multi-shot fan used by ranged weapons.</summary>
+        public void SpawnProjectileFan(Vector2 origin, Vector2 baseDirection, int totalProjectiles, float damage, bool isCritical, float knockbackForce)
+        {
+            float startAngleOffset = -(totalProjectiles - 1) * multiShotSpreadDegrees * 0.5f;
+            for (int i = 0; i < totalProjectiles; i++)
+            {
+                float angle = startAngleOffset + i * multiShotSpreadDegrees;
+                Vector2 direction = Quaternion.Euler(0, 0, angle) * baseDirection;
+                SpawnProjectile(origin, direction, damage, isCritical, knockbackForce);
             }
         }
     }

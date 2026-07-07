@@ -13,6 +13,9 @@ namespace NinjaVillage.Gameplay.Weapons
         public WeaponDefinition Definition { get; }
         public int Level { get; private set; }
 
+        /// <summary>Scratch counter for weapons with "every Nth shot" patterns (e.g. Bow's charge shot). Lives here, not on the shared WeaponDefinition asset, since this is per-equip runtime state.</summary>
+        public int FireCount { get; set; }
+
         public const int MaxLevel = 10;
 
         public RuntimeWeapon(WeaponDefinition definition, int level = 1)

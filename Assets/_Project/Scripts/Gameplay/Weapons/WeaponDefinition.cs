@@ -1,15 +1,17 @@
 using NinjaVillage.Core;
 using NinjaVillage.Core.ScriptableObjects;
+using NinjaVillage.Gameplay.Combat;
+using NinjaVillage.Gameplay.Player;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Weapons
 {
     /// <summary>
     /// Data definition for a weapon. Every weapon (Kunai, Shuriken, Katana, Bow,
-    /// Chain Sickle, ...) is an instance of this asset — behavior differences
-    /// beyond "throw a projectile at the nearest enemy" live in a dedicated
-    /// controller (see <see cref="Combat.AutoAttackController"/> for the shared
-    /// projectile path).
+    /// Chain Sickle, ...) is an instance of this asset. <see cref="Fire"/> is the
+    /// extension point for weapon-specific attack patterns — the default here is
+    /// the basic "throw N projectiles at the nearest enemy" behavior (Kunai);
+    /// other weapons subclass this and override it.
     /// </summary>
     [CreateAssetMenu(fileName = "NewWeapon", menuName = "Ninja Village/Weapon Definition")]
     public class WeaponDefinition : DescriptiveScriptableObject
@@ -43,5 +45,22 @@ namespace NinjaVillage.Gameplay.Weapons
 
         public float GetDamage(int level) => baseDamage + damagePerLevel * (level - 1);
         public float GetAttacksPerSecond(int level) => baseAttacksPerSecond + attacksPerSecondPerLevel * (level - 1);
+
+        /// <summary>
+        /// Fires this weapon once. Default behavior: throw a fan of projectiles
+        /// (1 + PlayerStats.ExtraProjectiles) straight at <paramref name="target"/>.
+        /// Override for weapons with a different attack pattern (melee arcs,
+        /// circular bursts, pull effects, ...).
+        /// </summary>
+        public virtual void Fire(AutoAttackController controller, Transform origin, Transform target, PlayerStats stats)
+        {
+            Vector2 originPos = origin.position;
+            Vector2 baseDirection = ((Vector2)target.position - originPos).normalized;
+
+            var (damage, isCritical) = controller.RollDamage();
+            int totalProjectiles = 1 + Mathf.Max(0, stats.ExtraProjectiles);
+
+            controller.SpawnProjectileFan(originPos, baseDirection, totalProjectiles, damage, isCritical, KnockbackForce);
+        }
     }
 }
