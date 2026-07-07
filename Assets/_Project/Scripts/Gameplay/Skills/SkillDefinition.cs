@@ -17,10 +17,12 @@ namespace NinjaVillage.Gameplay.Skills
         [SerializeField] private SkillCategory category = SkillCategory.Offensive;
         [SerializeField] private Rarity rarity = Rarity.Common;
         [SerializeField] private int maxLevel = 5;
+        [SerializeField] private Element element = Element.None;
 
         public SkillCategory Category => category;
         public Rarity Rarity => rarity;
         public int MaxLevel => maxLevel;
+        public Element Element => element;
 
         /// <summary>Applies this skill's effect for having just reached <paramref name="newLevel"/>.</summary>
         public abstract void ApplyLevel(PlayerStats stats, int newLevel);

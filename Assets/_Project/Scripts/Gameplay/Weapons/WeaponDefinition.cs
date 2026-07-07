@@ -18,6 +18,7 @@ namespace NinjaVillage.Gameplay.Weapons
     {
         [Header("Rarity")]
         [SerializeField] private Rarity rarity = Rarity.Common;
+        [SerializeField] private Element element = Element.None;
 
         [Header("Base Stats (level 1)")]
         [SerializeField] private float baseDamage = 10f;
@@ -36,6 +37,7 @@ namespace NinjaVillage.Gameplay.Weapons
         [SerializeField] private float projectileSpeed = 12f;
 
         public Rarity Rarity => rarity;
+        public Element Element => element;
         public float Range => range;
         public float BaseCritChance => baseCritChance;
         public float BaseCritMultiplier => baseCritMultiplier;

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e7a8c562cf764c27bfdc5ae5f178895, type: 3}
+  m_Name: CursedSamurai
+  m_EditorClassIdentifier: 
+  id: CursedSamurai
+  displayName: 
+  description: 
+  icon: {fileID: 0}
+  maxHealth: 250
+  moveSpeed: 2.2
+  damage: 30
+  attackRange: 1.3
+  attackCooldown: 0.8
+  xpReward: 45
+  coinReward: 12
+  isBoss: 1
+  isElite: 0
+  enemyPrefab: {fileID: 2512614446188148790, guid: 7774cbfac8cf4943a8b289cf3c735eb1, type: 3}

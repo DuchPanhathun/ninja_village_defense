@@ -1,3 +1,4 @@
+using NinjaVillage.Gameplay.Skills.Behaviors;
 using UnityEngine;
 
 namespace NinjaVillage.Core.Combat
@@ -21,6 +22,9 @@ namespace NinjaVillage.Core.Combat
             {
                 var col = Buffer[i];
                 if (col == null) continue;
+
+                // Skip targets that are invisible (Smoke Bomb skill).
+                if (col.TryGetComponent<InvisibilityBehavior>(out var inv) && inv.IsInvisible) continue;
 
                 float sqrDist = ((Vector2)col.transform.position - origin).sqrMagnitude;
                 if (sqrDist < nearestSqrDist)

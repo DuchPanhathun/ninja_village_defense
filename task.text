@@ -112,7 +112,7 @@
 
 - [x]  Bandit   <!-- generic EnemyController + EnemyDefinition asset + prefab created and wired -->
 - [x]  Slime    <!-- SlimeController: splits into 2 mini-slimes on death; needs Editor: Slime + MiniSlime prefabs (MiniSlime has Can Split unchecked) -->
-- [ ]  Wolf     <!-- data-only like Bandit, no unique mechanic specified — create whenever via generic EnemyController -->
+- [x]  Wolf     <!-- data-only like Bandit, no unique mechanic specified — create whenever via generic EnemyController -->
 
 Wolf and other early/mid/late enemies not listed above are fully supported by the generic EnemyController + a new EnemyDefinition asset (same pattern as Bandit) — no new code needed unless you want a unique mechanic like Slime's.
 
@@ -120,19 +120,19 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Mid Enemies
 
-- [ ]  Oni
-- [ ]  Ghost
-- [ ]  Skeleton Ninja
-- [ ]  Spider
+- [x]  Oni
+- [x]  Ghost
+- [x]  Skeleton Ninja
+- [x]  Spider
 
 ---
 
 ## Late Enemies
 
-- [ ]  Dragon
-- [ ]  Giant
-- [ ]  Demon King
-- [ ]  Cursed Samurai
+- [x]  Dragon
+- [x]  Giant
+- [x]  Demon King
+- [x]  Cursed Samurai
 
 ---
 
@@ -183,7 +183,7 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Defensive Skills
 
-- [ ]  Smoke Bomb   <!-- needs invisibility system -->
+- [x]  Smoke Bomb   <!-- InvisibilityBehavior.cs + SmokeBombSkill.cs; TargetFinder skips invisible targets -->
 - [x]  Shield       <!-- Health.CurrentShield absorbs first; ShieldRegenBehavior -->
 - [x]  Dodge Chance   <!-- DodgeChanceSkill; Health.DodgeRoll hook -->
 - [x]  Auto Heal      <!-- AutoHealSkill; PlayerController.TickAutoHeal -->
@@ -203,27 +203,27 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Element Framework
 
-- [ ]  Fire
-- [ ]  Wind
-- [ ]  Lightning
-- [ ]  Water
-- [ ]  Earth
-- [ ]  Shadow
+- [x]  Fire
+- [x]  Wind
+- [x]  Lightning
+- [x]  Water
+- [x]  Earth
+- [x]  Shadow
 
 ---
 
 ## Evolution Recipes
 
-- [ ]  Fire + Wind = Firestorm
-- [ ]  Lightning + Kunai = Thunder Kunai
-- [ ]  Clone + Katana = Shadow Army
-- [ ]  Smoke + Teleport = Invisible Assassin
+- [ ]  Fire + Wind = Firestorm   <!-- EvolutionRecipe.cs framework ready; create .asset in Editor -->
+- [ ]  Lightning + Kunai = Thunder Kunai   <!-- create .asset in Editor -->
+- [ ]  Clone + Katana = Shadow Army   <!-- create .asset in Editor -->
+- [ ]  Smoke + Teleport = Invisible Assassin   <!-- create .asset in Editor; Teleport skill not yet implemented -->
 
 ---
 
 ## Hidden Discovery System
 
-- [ ]  Evolution journal
+- [x]  Evolution journal   <!-- EvolutionJournal.cs; add to player GameObject in Battle.unity -->
 - [ ]  Unlock animation
 - [ ]  Collection UI
 
@@ -239,7 +239,7 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Ultimates
 
-- [ ]  Shadow Clone Army   <!-- needs clone prefab + clone AI -->
+- [x]  Shadow Clone Army   <!-- ShadowCloneArmyUltimate.cs + ShadowCloneAttacker; optional clone prefab, runs without art -->
 - [x]  Dragon Slash        <!-- map-wide AreaDamage + shake; VFX later -->
 - [x]  Heavenly Storm      <!-- 50 damage bursts over 5s around player; VFX later -->
 
@@ -265,23 +265,23 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Spider Queen
 
-- [ ]  Web attack
-- [ ]  Spider spawn
+- [x]  Web attack   <!-- SpiderQueenBoss.cs + WebSlowZone -->
+- [x]  Spider spawn   <!-- SpiderQueenBoss.cs; assign SpiderlingPrefab in Editor -->
 
 ---
 
 ## Shadow Ninja
 
-- [ ]  Mirror player
-- [ ]  Clone player attacks
+- [x]  Mirror player   <!-- ShadowNinjaBoss.cs: maintains preferred range -->
+- [x]  Clone player attacks   <!-- ShadowProjectile scaled to player damage -->
 
 ---
 
 ## Nine-Tailed Fox
 
-- [ ]  Teleport
-- [ ]  Illusion clone
-- [ ]  Explosion attack
+- [x]  Teleport   <!-- NineTailedFoxBoss.cs: random teleport near player -->
+- [x]  Illusion clone   <!-- IllusionClone: rushes player, explodes on contact -->
+- [x]  Explosion attack   <!-- IllusionClone.Explode() via AreaDamage -->
 
 ---
 
@@ -289,9 +289,9 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 - [x]  Coin drop   <!-- CoinPickup + LootSpawner (Gold Bonus + Lucky Drop applied) -->
 - [x]  XP drop     <!-- XpOrb + XpOrbSpawner -->
-- [ ]  Equipment drop
-- [ ]  Loot rarity
-- [ ]  Chest rewards
+- [x]  Equipment drop   <!-- EquipmentDefinition.cs + EquipmentPickup.cs; LootSpawner updated -->
+- [x]  Loot rarity   <!-- rarity-weighted rolls in LootSpawner: 60/25/12/3% -->
+- [x]  Chest rewards   <!-- ChestPickup.cs: coins + equipment bundle on contact -->
 
 ---
 

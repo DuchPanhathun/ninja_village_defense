@@ -1,0 +1,179 @@
+using System.Collections;
+using NinjaVillage.Core.Combat;
+using NinjaVillage.Gameplay.Player;
+using UnityEngine;
+
+namespace NinjaVillage.Gameplay.Ultimates
+{
+    /// <summary>
+    /// "Creates 8 clones for 15 seconds." Each clone mirrors the player's auto-attack:
+    /// finds the nearest enemy, fires a projectile at it on a shared cooldown.
+    /// </summary>
+    [CreateAssetMenu(fileName = "Ultimate_ShadowCloneArmy", menuName = "Ninja Village/Ultimates/Shadow Clone Army")]
+    public class ShadowCloneArmyUltimate : UltimateDefinition
+    {
+        [SerializeField] private int cloneCount = 8;
+        [SerializeField] private float cloneDuration = 15f;
+        [SerializeField] private float cloneOrbitRadius = 2f;
+        [Tooltip("Damage fraction relative to the player's current weapon damage.")]
+        [SerializeField] private float damageFraction = 0.5f;
+        [SerializeField] private GameObject clonePrefab;
+
+        public override void Activate(in UltimateContext context)
+        {
+            context.Runner.StartCoroutine(SpawnClonesRoutine(context));
+        }
+
+        private IEnumerator SpawnClonesRoutine(UltimateContext context)
+        {
+            var spawnedClones = new GameObject[cloneCount];
+
+            for (int i = 0; i < cloneCount; i++)
+            {
+                float angle = i * (360f / cloneCount) * Mathf.Deg2Rad;
+                Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * cloneOrbitRadius;
+                Vector3 spawnPos = context.PlayerTransform.position + (Vector3)offset;
+
+                GameObject cloneGo;
+                if (clonePrefab != null)
+                {
+                    cloneGo = Object.Instantiate(clonePrefab, spawnPos, Quaternion.identity);
+                }
+                else
+                {
+                    cloneGo = new GameObject($"ShadowClone_{i}");
+                    cloneGo.transform.position = spawnPos;
+                }
+
+                var cloneAttacker = cloneGo.GetComponent<ShadowCloneAttacker>();
+                if (cloneAttacker == null)
+                    cloneAttacker = cloneGo.AddComponent<ShadowCloneAttacker>();
+
+                cloneAttacker.Initialize(context.PlayerTransform, context.Stats, damageFraction, context.EnemyMask);
+                spawnedClones[i] = cloneGo;
+            }
+
+            // Orbit + despawn
+            float elapsed = 0f;
+            while (elapsed < cloneDuration)
+            {
+                elapsed += Time.deltaTime;
+
+                if (context.PlayerTransform == null) break;
+
+                for (int i = 0; i < cloneCount; i++)
+                {
+                    if (spawnedClones[i] == null) continue;
+
+                    float angle = (i * (360f / cloneCount) + elapsed * 30f) * Mathf.Deg2Rad;
+                    Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * cloneOrbitRadius;
+                    spawnedClones[i].transform.position = context.PlayerTransform.position + (Vector3)offset;
+                }
+
+                yield return null;
+            }
+
+            foreach (var clone in spawnedClones)
+            {
+                if (clone != null)
+                    Object.Destroy(clone);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Attached to each shadow clone: finds the nearest enemy and fires a simple
+    /// projectile at it on an independent cooldown.
+    /// </summary>
+    public class ShadowCloneAttacker : MonoBehaviour
+    {
+        private Transform _playerTransform;
+        private PlayerStats _playerStats;
+        private float _damageFraction;
+        private LayerMask _enemyMask;
+        private float _cooldownRemaining;
+
+        private const float AttacksPerSecond = 2f;
+        private const float ProjectileSpeed = 10f;
+        private const float Range = 6f;
+
+        public void Initialize(Transform playerTransform, PlayerStats stats, float damageFraction, LayerMask enemyMask)
+        {
+            _playerTransform = playerTransform;
+            _playerStats = stats;
+            _damageFraction = damageFraction;
+            _enemyMask = enemyMask;
+        }
+
+        private void Update()
+        {
+            _cooldownRemaining -= Time.deltaTime;
+            if (_cooldownRemaining > 0f) return;
+
+            var target = TargetFinder.FindNearest(transform.position, Range, _enemyMask);
+            if (target == null) return;
+
+            Fire(target);
+            _cooldownRemaining = 1f / AttacksPerSecond;
+        }
+
+        private void Fire(Transform target)
+        {
+            float baseDamage = _playerStats != null ? 10f * _playerStats.AttackDamageMultiplier * _damageFraction : 5f;
+            Vector2 dir = ((Vector2)target.position - (Vector2)transform.position).normalized;
+
+            var go = new GameObject("CloneProjectile");
+            go.transform.position = transform.position;
+            go.transform.right = dir;
+            go.layer = gameObject.layer;
+
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.linearVelocity = dir * ProjectileSpeed;
+
+            var col = go.AddComponent<CircleCollider2D>();
+            col.isTrigger = true;
+            col.radius = 0.15f;
+
+            var proj = go.AddComponent<ShadowCloneProjectile>();
+            proj.Initialize(baseDamage, _enemyMask, gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Projectile fired by shadow clones — simple hit-and-destroy on enemy layer.
+    /// </summary>
+    [RequireComponent(typeof(Rigidbody2D))]
+    public class ShadowCloneProjectile : MonoBehaviour
+    {
+        private float _damage;
+        private LayerMask _hitMask;
+        private GameObject _source;
+        private float _spawnTime;
+        private const float Lifetime = 3f;
+
+        public void Initialize(float damage, LayerMask hitMask, GameObject source)
+        {
+            _damage = damage;
+            _hitMask = hitMask;
+            _source = source;
+            _spawnTime = Time.time;
+        }
+
+        private void Update()
+        {
+            if (Time.time - _spawnTime >= Lifetime)
+                Destroy(gameObject);
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (((1 << other.gameObject.layer) & _hitMask) == 0) return;
+            if (!other.TryGetComponent<IDamageable>(out var target) || !target.IsAlive) return;
+
+            Vector2 dir = GetComponent<Rigidbody2D>().linearVelocity.normalized;
+            target.TakeDamage(new DamageInfo(_damage, false, dir, 2f, _source));
+            Destroy(gameObject);
+        }
+    }
+}

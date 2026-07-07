@@ -1,24 +1,43 @@
+using NinjaVillage.Core;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Player;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Loot
 {
     /// <summary>
-    /// Turns enemy deaths into physical coin drops — the "Collect Loot" step of the
-    /// core loop. Applies the Gold Bonus multiplier and the Lucky Drop skill
-    /// (chance to double the drop).
+    /// Turns enemy deaths into physical coin and equipment drops. Applies the Gold
+    /// Bonus and Lucky Drop skill modifiers. Equipment drops are rarity-weighted:
+    /// the base drop chance is rolled first, then a rarity is selected by weight,
+    /// then a random equipment of that rarity is chosen from the pool.
     /// </summary>
     public class LootSpawner : MonoBehaviour
     {
+        [Header("Coins")]
         [SerializeField] private GameObject coinPickupPrefab;
-        [Tooltip("Coins scatter this far from the death position.")]
         [SerializeField] private float scatterRadius = 0.5f;
+
+        [Header("Equipment")]
+        [SerializeField] private GameObject equipmentPickupPrefab;
+        [SerializeField] private EquipmentDefinition[] equipmentPool;
+        [Tooltip("Base chance per enemy kill that any equipment drops at all.")]
+        [SerializeField] private float equipmentBaseDropChance = 0.04f;
+        [Tooltip("Relative weights for Common / Rare / Epic / Legendary (in that order).")]
+        [SerializeField] private float[] rarityWeights = { 60f, 25f, 12f, 3f };
+
+        private static readonly Rarity[] RarityOrder = { Rarity.Common, Rarity.Rare, Rarity.Epic, Rarity.Legendary };
 
         private void OnEnable() => EventBus<EnemyKilledEvent>.Subscribe(OnEnemyKilled);
         private void OnDisable() => EventBus<EnemyKilledEvent>.Unsubscribe(OnEnemyKilled);
 
         private void OnEnemyKilled(EnemyKilledEvent evt)
+        {
+            SpawnCoins(evt);
+            TrySpawnEquipment(evt.Position);
+        }
+
+        private void SpawnCoins(EnemyKilledEvent evt)
         {
             if (coinPickupPrefab == null || evt.CoinReward <= 0) return;
 
@@ -37,6 +56,50 @@ namespace NinjaVillage.Gameplay.Loot
             Vector2 position = evt.Position + Random.insideUnitCircle * scatterRadius;
             var instance = Instantiate(coinPickupPrefab, position, Quaternion.identity);
             instance.GetComponent<CoinPickup>().Initialize(amount);
+        }
+
+        private void TrySpawnEquipment(Vector2 position)
+        {
+            if (equipmentPickupPrefab == null || equipmentPool == null || equipmentPool.Length == 0) return;
+            if (Random.value > equipmentBaseDropChance) return;
+
+            Rarity rarity = RollRarity();
+            var candidates = new List<EquipmentDefinition>();
+            foreach (var def in equipmentPool)
+            {
+                if (def != null && def.Rarity == rarity)
+                    candidates.Add(def);
+            }
+
+            // Fall back to any rarity if pool has nothing at the rolled tier.
+            if (candidates.Count == 0)
+            {
+                foreach (var def in equipmentPool)
+                    if (def != null) candidates.Add(def);
+            }
+
+            if (candidates.Count == 0) return;
+
+            var chosen = candidates[Random.Range(0, candidates.Count)];
+            var go = Instantiate(equipmentPickupPrefab, position + Random.insideUnitCircle * scatterRadius, Quaternion.identity);
+            if (go.TryGetComponent<EquipmentPickup>(out var pickup))
+                pickup.Initialize(chosen);
+        }
+
+        private Rarity RollRarity()
+        {
+            float total = 0f;
+            int len = Mathf.Min(rarityWeights.Length, RarityOrder.Length);
+            for (int i = 0; i < len; i++) total += rarityWeights[i];
+
+            float roll = Random.value * total;
+            float cumulative = 0f;
+            for (int i = 0; i < len; i++)
+            {
+                cumulative += rarityWeights[i];
+                if (roll <= cumulative) return RarityOrder[i];
+            }
+            return Rarity.Common;
         }
     }
 }
