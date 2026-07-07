@@ -68,7 +68,7 @@
 
 ### Kunai
 
-- [x]  Throw single kunai     <!-- generic Projectile+AutoAttackController; needs Editor: create a WeaponDefinition asset "Kunai" + projectile prefab -->
+- [x]  Throw single kunai     <!-- generic Projectile+AutoAttackController; Kunai asset + projectile prefab created and wired -->
 - [x]  Upgrade damage         <!-- WeaponDefinition.GetDamage(level) -->
 - [x]  Upgrade attack speed   <!-- WeaponDefinition.GetAttacksPerSecond(level) -->
 
@@ -110,7 +110,7 @@
 
 ## Early Enemies
 
-- [x]  Bandit   <!-- data-only: generic EnemyController + an EnemyDefinition asset; needs Editor: create the asset + prefab -->
+- [x]  Bandit   <!-- generic EnemyController + EnemyDefinition asset + prefab created and wired -->
 - [ ]  Slime
 - [ ]  Wolf
 
@@ -150,7 +150,7 @@
 
 - [x]  XP orb
 - [x]  XP collection
-- [x]  XP bar          <!-- XpBarUI script; needs Editor: canvas wiring (SCENE_WIRING.md §7) -->
+- [x]  XP bar          <!-- XpBarUI script; canvas wiring done -->
 - [x]  Level up
 - [ ]  Level animation
 
@@ -230,7 +230,7 @@
 # 🎮 EPIC 8 - Ultimate Skills
 
 - [x]  Ultimate charge    <!-- UltimateController: kills build charge -->
-- [x]  Ultimate button    <!-- UltimateButtonUI; needs Editor: canvas Button wiring (SCENE_WIRING.md §7) -->
+- [x]  Ultimate button    <!-- UltimateButtonUI; canvas wiring done, SCENE_WIRING.md §7 -->
 - [x]  Cooldown
 
 ---
@@ -247,7 +247,7 @@
 
 ## Boss Framework
 
-- [x]  Boss health bar    <!-- BossHealthBarUI; needs Editor: canvas wiring -->
+- [x]  Boss health bar    <!-- BossHealthBarUI; canvas wiring done -->
 - [x]  Boss AI            <!-- BossController : EnemyController -->
 - [x]  Multiple attack phases   <!-- health-threshold phases + OnPhaseStarted hook -->
 
@@ -411,7 +411,7 @@
 ---
 
 ## Battle UI
-<!-- all scripts done; each needs Editor canvas wiring per SCENE_WIRING.md §7 -->
+<!-- scripted + fully wired into Battle.unity via SCENE_WIRING.md §7 -->
 - [x]  HP bar          <!-- PlayerHealthBarUI (health + shield fill) -->
 - [x]  XP bar          <!-- XpBarUI -->
 - [x]  Skill selection <!-- SkillChoicePanel: pauses, queues multi-level-ups -->
