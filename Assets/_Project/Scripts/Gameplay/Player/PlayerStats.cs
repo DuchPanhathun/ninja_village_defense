@@ -26,6 +26,8 @@ namespace NinjaVillage.Gameplay.Player
         [Header("Survival")]
         public float DodgeChance { get; private set; } = 0f;
         public float HealPerSecond { get; private set; } = 0f;
+        /// <summary>Fraction of incoming hit damage ignored (0..0.8). Samurai hero, Shrine, talents.</summary>
+        public float DamageReduction { get; private set; } = 0f;
 
         [Header("On-Hit Status Effects")]
         public float BurnOnHitDps { get; private set; } = 0f;
@@ -37,6 +39,10 @@ namespace NinjaVillage.Gameplay.Player
         public float XpMagnetRadiusMultiplier { get; private set; } = 1f;
         public float GoldBonusMultiplier { get; private set; } = 1f;
         public float LuckyDropChanceBonus { get; private set; } = 0f;
+        public float XpGainMultiplier { get; private set; } = 1f;
+        public float UltimateChargeMultiplier { get; private set; } = 1f;
+
+        public const float MaxDamageReduction = 0.8f;
 
         public void AddMoveSpeedMultiplier(float delta) => MoveSpeedMultiplier += delta;
         public void AddAttackDamageMultiplier(float delta) => AttackDamageMultiplier += delta;
@@ -47,6 +53,7 @@ namespace NinjaVillage.Gameplay.Player
         public void AddProjectileSizeMultiplier(float delta) => ProjectileSizeMultiplier += delta;
         public void AddDodgeChance(float delta) => DodgeChance = Mathf.Clamp01(DodgeChance + delta);
         public void AddHealPerSecond(float delta) => HealPerSecond += delta;
+        public void AddDamageReduction(float delta) => DamageReduction = Mathf.Clamp(DamageReduction + delta, 0f, MaxDamageReduction);
         public void AddBurnOnHit(float dps, float duration)
         {
             BurnOnHitDps += dps;
@@ -60,5 +67,7 @@ namespace NinjaVillage.Gameplay.Player
         public void AddXpMagnetRadiusMultiplier(float delta) => XpMagnetRadiusMultiplier += delta;
         public void AddGoldBonusMultiplier(float delta) => GoldBonusMultiplier += delta;
         public void AddLuckyDropChanceBonus(float delta) => LuckyDropChanceBonus += delta;
+        public void AddXpGainMultiplier(float delta) => XpGainMultiplier += delta;
+        public void AddUltimateChargeMultiplier(float delta) => UltimateChargeMultiplier += delta;
     }
 }

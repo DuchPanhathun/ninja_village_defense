@@ -37,6 +37,7 @@ namespace NinjaVillage.Gameplay.Player
             _stats = GetComponent<PlayerStats>();
             _moveInput = moveInputSource as IMoveInputProvider;
             _health.DodgeRoll = () => Random.value < _stats.DodgeChance;
+            _health.IncomingDamageModifier = amount => amount * (1f - _stats.DamageReduction);
 
             if (_moveInput == null)
                 Debug.LogWarning($"{nameof(PlayerController)} on {name}: moveInputSource does not implement IMoveInputProvider.", this);

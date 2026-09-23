@@ -1,4 +1,5 @@
 using NinjaVillage.Core.Events;
+using NinjaVillage.Gameplay.Player;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Progression
@@ -27,7 +28,11 @@ namespace NinjaVillage.Gameplay.Progression
 
         private void OnXpGained(XpGainedEvent evt)
         {
-            CurrentXp += evt.Amount;
+            float multiplier = 1f;
+            if (PlayerReference.Instance != null && PlayerReference.Instance.TryGetComponent<PlayerStats>(out var stats))
+                multiplier = stats.XpGainMultiplier;
+            if (evt.Amount <= 0) return;
+            CurrentXp += Mathf.Max(1, Mathf.RoundToInt(evt.Amount * multiplier));
 
             while (CurrentXp >= XpToNextLevel)
             {

@@ -38,6 +38,12 @@ namespace NinjaVillage.Core.Combat
         /// </summary>
         public Func<bool> DodgeRoll;
 
+        /// <summary>
+        /// Optional hook that scales a direct hit before shields/health (e.g. the player's
+        /// DamageReduction stat). Not applied to damage-over-time.
+        /// </summary>
+        public Func<float, float> IncomingDamageModifier;
+
         private void Awake()
         {
             CurrentHealth = maxHealth;
@@ -62,7 +68,7 @@ namespace NinjaVillage.Core.Combat
             if (DodgeRoll != null && DodgeRoll()) return;
 
             // Shield absorbs first; only the remainder reaches health.
-            float remaining = damage.Amount;
+            float remaining = IncomingDamageModifier != null ? Mathf.Max(0f, IncomingDamageModifier(damage.Amount)) : damage.Amount;
             if (CurrentShield > 0f)
             {
                 float absorbed = Mathf.Min(CurrentShield, remaining);

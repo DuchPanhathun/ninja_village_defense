@@ -1,33 +1,28 @@
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Waves;
-using NinjaVillage.Systems.Economy;
+using NinjaVillage.Systems.Meta;
 using NinjaVillage.Systems.Save;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace NinjaVillage.Systems.GameFlow
 {
     /// <summary>
-    /// Battle-scene run orchestrator: loads the save on start, tracks the current
-    /// wave, ends the run on player death or full clear, persists progress, and
-    /// restarts cleanly.
+    /// Battle-scene run orchestrator: tracks the current wave, ends the run on player
+    /// death or full clear, records the run into the profile, persists progress, and
+    /// restarts / exits cleanly.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
-        private SaveData _saveData;
+        [Tooltip("Optional — supplies kills/coins/duration for the run record. Found on this GameObject if left empty.")]
+        [SerializeField] private RunStatsTracker runStats;
+
         private int _currentWave;
         private bool _runEnded;
 
         private void Awake()
         {
-            _saveData = SaveSystem.Load();
-        }
-
-        private void Start()
-        {
-            // EconomyManager may be created in the same frame; wallet sync in Start is safe.
-            if (EconomyManager.Instance != null)
-                EconomyManager.Instance.LoadFrom(_saveData.Wallet);
+            if (runStats == null) runStats = GetComponent<RunStatsTracker>();
+            if (runStats == null) runStats = gameObject.AddComponent<RunStatsTracker>();
         }
 
         private void OnEnable()
@@ -55,27 +50,25 @@ namespace NinjaVillage.Systems.GameFlow
             if (_runEnded) return;
             _runEnded = true;
 
-            _saveData.HighestWaveReached = Mathf.Max(_saveData.HighestWaveReached, _currentWave);
-            _saveData.TotalRunsCompleted++;
+            var save = SaveService.Data;
+            var record = runStats.BuildRecord(victory, _currentWave);
 
-            if (EconomyManager.Instance != null)
-            {
-                _saveData.Wallet.Coins = EconomyManager.Instance.Wallet.Coins;
-                _saveData.Wallet.Gems = EconomyManager.Instance.Wallet.Gems;
-            }
+            save.Profile.RecordRun(record);
+            // Legacy root fields, still read by older UI.
+            save.HighestWaveReached = Mathf.Max(save.HighestWaveReached, _currentWave);
+            save.TotalRunsCompleted++;
 
-            SaveSystem.Save(_saveData);
-            EventBus<RunEndedEvent>.Raise(new RunEndedEvent(victory, _currentWave));
+            SaveService.SaveNow();
+            EventBus<RunEndedEvent>.Raise(new RunEndedEvent(victory, _currentWave, record));
         }
 
         /// <summary>Hook the game-over panel's Retry button here.</summary>
-        public void RestartRun()
-        {
-            Time.timeScale = 1f;
-            // Static event channels survive scene loads; clear them so handlers on
-            // destroyed objects don't linger into the next run.
-            EventBusRegistry.ClearAll();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+        public void RestartRun() => SceneLoader.ReloadActive();
+
+        /// <summary>Hook the game-over / pause panel's "Village" button here.</summary>
+        public void ReturnToVillage() => SceneLoader.LoadVillage();
+
+        /// <summary>Hook the game-over / pause panel's "Home" button here.</summary>
+        public void ReturnToMainMenu() => SceneLoader.LoadMainMenu();
     }
 }

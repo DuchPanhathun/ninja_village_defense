@@ -19,22 +19,27 @@ namespace NinjaVillage.Gameplay.Bosses
         /// <summary>1-based. Phase 1 is the opening phase.</summary>
         public int CurrentPhase { get; private set; } = 1;
 
+        private EnemyDefinition _bossDefinition;
+
         protected override void OnEnable()
         {
             base.OnEnable();
             HealthComponent.OnDamaged += CheckPhaseTransition;
+            HealthComponent.OnDeath += AnnounceDefeat;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
             HealthComponent.OnDamaged -= CheckPhaseTransition;
+            HealthComponent.OnDeath -= AnnounceDefeat;
         }
 
         public override void Initialize(EnemyDefinition enemyDefinition, float difficultyMultiplier = 1f, bool forceElite = false)
         {
             base.Initialize(enemyDefinition, difficultyMultiplier, forceElite);
             CurrentPhase = 1;
+            _bossDefinition = enemyDefinition;
             EventBus<BossSpawnedEvent>.Raise(new BossSpawnedEvent(enemyDefinition, HealthComponent));
         }
 
@@ -48,6 +53,11 @@ namespace NinjaVillage.Gameplay.Bosses
                 EventBus<BossPhaseChangedEvent>.Raise(new BossPhaseChangedEvent(CurrentPhase));
                 OnPhaseStarted(CurrentPhase);
             }
+        }
+
+        private void AnnounceDefeat(Health health)
+        {
+            EventBus<BossDefeatedEvent>.Raise(new BossDefeatedEvent(_bossDefinition, transform.position));
         }
 
         /// <summary>Hook for concrete bosses to escalate on phase change (faster cooldowns, new attacks...).</summary>

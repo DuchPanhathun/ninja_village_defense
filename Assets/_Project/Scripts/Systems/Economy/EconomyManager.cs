@@ -1,19 +1,23 @@
 using NinjaVillage.Core.Events;
+using NinjaVillage.Systems.Save;
 using UnityEngine;
 
 namespace NinjaVillage.Systems.Economy
 {
     /// <summary>
-    /// Owns the player's persistent currency balances across the Village and Battle
-    /// scenes. Coins are earned through physical <c>CoinPickup</c> drops spawned by
+    /// Owns the player's persistent currency balances across the Main Menu, Village and
+    /// Battle scenes. Coins are earned through physical <c>CoinPickup</c> drops spawned by
     /// <c>LootSpawner</c> — this manager just holds and mutates balances.
+    ///
+    /// The wallet IS the save's wallet (<see cref="SaveService"/>), so every change is
+    /// persisted without any copy-back step. One instance is created automatically before
+    /// the first scene loads; a copy placed in a scene is harmless (it destroys itself).
     /// </summary>
     public class EconomyManager : MonoBehaviour
     {
         public static EconomyManager Instance { get; private set; }
 
-        [SerializeField] private CurrencyWallet wallet = new();
-        public CurrencyWallet Wallet => wallet;
+        public CurrencyWallet Wallet => SaveService.Data.Wallet;
 
         private void Awake()
         {
@@ -26,25 +30,40 @@ namespace NinjaVillage.Systems.Economy
             DontDestroyOnLoad(gameObject);
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        public int Get(CurrencyType type) => Wallet.Get(type);
+
+        public bool CanAfford(CurrencyType type, int amount) => Wallet.Get(type) >= amount;
+
         public void Add(CurrencyType type, int amount)
         {
-            wallet.Add(type, amount);
-            EventBus<CurrencyChangedEvent>.Raise(new CurrencyChangedEvent(type, wallet.Get(type)));
+            if (amount <= 0) return;
+            Wallet.Add(type, amount);
+            SaveService.MarkDirty();
+            EventBus<CurrencyChangedEvent>.Raise(new CurrencyChangedEvent(type, Wallet.Get(type)));
         }
 
         public bool TrySpend(CurrencyType type, int amount)
         {
-            bool success = wallet.TrySpend(type, amount);
+            bool success = Wallet.TrySpend(type, amount);
             if (success)
-                EventBus<CurrencyChangedEvent>.Raise(new CurrencyChangedEvent(type, wallet.Get(type)));
+            {
+                // Spending is a player decision worth persisting right away.
+                SaveService.SaveNow();
+                EventBus<CurrencyChangedEvent>.Raise(new CurrencyChangedEvent(type, Wallet.Get(type)));
+            }
             return success;
         }
 
-        /// <summary>Overwrites the wallet from loaded save data.</summary>
-        public void LoadFrom(CurrencyWallet savedWallet)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Bootstrap()
         {
-            wallet.Coins = savedWallet.Coins;
-            wallet.Gems = savedWallet.Gems;
+            if (Instance != null) return;
+            new GameObject("[EconomyManager]").AddComponent<EconomyManager>();
         }
     }
 }

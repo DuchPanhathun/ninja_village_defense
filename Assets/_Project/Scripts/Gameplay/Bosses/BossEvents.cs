@@ -22,4 +22,16 @@ namespace NinjaVillage.Gameplay.Bosses
         public readonly int NewPhase;
         public BossPhaseChangedEvent(int newPhase) => NewPhase = newPhase;
     }
+
+    /// <summary>Raised once when a boss dies — drives run stats, quests, achievements, music and analytics.</summary>
+    public readonly struct BossDefeatedEvent : IGameEvent
+    {
+        public readonly EnemyDefinition Definition;
+        public readonly UnityEngine.Vector2 Position;
+        public BossDefeatedEvent(EnemyDefinition definition, UnityEngine.Vector2 position)
+        {
+            Definition = definition;
+            Position = position;
+        }
+    }
 }

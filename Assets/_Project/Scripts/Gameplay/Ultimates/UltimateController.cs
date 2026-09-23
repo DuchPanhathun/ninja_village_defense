@@ -39,7 +39,7 @@ namespace NinjaVillage.Gameplay.Ultimates
         private void OnEnemyKilled(EnemyKilledEvent evt)
         {
             if (_charge >= 100f) return;
-            _charge = Mathf.Min(100f, _charge + chargePerKill);
+            _charge = Mathf.Min(100f, _charge + chargePerKill * _stats.UltimateChargeMultiplier);
             EventBus<UltimateChargeChangedEvent>.Raise(new UltimateChargeChangedEvent(ChargeNormalized));
         }
 

@@ -22,6 +22,7 @@ namespace NinjaVillage.Core.Events
     public static class EventBus<T> where T : struct, IGameEvent
     {
         private static event Action<T> Handlers;
+        private static event Action<T> PersistentHandlers;
 
         static EventBus()
         {
@@ -35,19 +36,37 @@ namespace NinjaVillage.Core.Events
         /// <summary>Removes a listener. Always mirror a Subscribe with this in OnDisable.</summary>
         public static void Unsubscribe(Action<T> handler) => Handlers -= handler;
 
+        /// <summary>
+        /// Registers a listener that survives <see cref="Clear"/> / <see cref="EventBusRegistry.ClearAll"/>.
+        /// Only for DontDestroyOnLoad services (audio, save, quests) that must keep listening
+        /// across scene reloads — scene objects should use <see cref="Subscribe"/>.
+        /// </summary>
+        public static void SubscribePersistent(Action<T> handler) => PersistentHandlers += handler;
+
+        public static void UnsubscribePersistent(Action<T> handler) => PersistentHandlers -= handler;
+
         /// <summary>Publishes an event to every current listener.</summary>
         public static void Raise(T evt)
         {
             // Snapshot via the delegate's null check so a handler that unsubscribes
             // mid-dispatch does not throw.
             Handlers?.Invoke(evt);
+            PersistentHandlers?.Invoke(evt);
         }
 
         /// <summary>
-        /// Clears every listener for this event type. Call between scene loads or from
-        /// tests to avoid dangling references to destroyed objects.
+        /// Clears every scene-scoped listener for this event type. Call between scene loads
+        /// or from tests to avoid dangling references to destroyed objects. Persistent
+        /// listeners are kept.
         /// </summary>
         public static void Clear() => Handlers = null;
+
+        /// <summary>Clears persistent listeners too — tests only.</summary>
+        public static void ClearIncludingPersistent()
+        {
+            Handlers = null;
+            PersistentHandlers = null;
+        }
     }
 
     /// <summary>

@@ -6,13 +6,14 @@ namespace NinjaVillage.Core.Combat
     public static class MeleeArc
     {
         private static readonly Collider2D[] Buffer = new Collider2D[32];
-        private static readonly ContactFilter2D Filter = new() { useTriggers = true };
+        // NOT readonly: SetLayerMask on a readonly struct field mutates a defensive copy (mask ignored).
+        private static ContactFilter2D _filter = new() { useTriggers = true };
 
         /// <returns>Number of targets hit.</returns>
         public static int DamageArc(Vector2 origin, Vector2 facingDirection, float radius, float arcDegrees, LayerMask mask, float damage, float knockbackForce, bool isCritical, GameObject source)
         {
-            Filter.SetLayerMask(mask);
-            int count = Physics2D.OverlapCircle(origin, radius, Filter, Buffer);
+            _filter.SetLayerMask(mask);
+            int count = Physics2D.OverlapCircle(origin, radius, _filter, Buffer);
             int hits = 0;
             float halfArc = arcDegrees * 0.5f;
 

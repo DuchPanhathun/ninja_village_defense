@@ -1,0 +1,21 @@
+{
+    "name": "NinjaVillage.Editor",
+    "rootNamespace": "NinjaVillage.EditorTools",
+    "references": [
+        "NinjaVillage",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
