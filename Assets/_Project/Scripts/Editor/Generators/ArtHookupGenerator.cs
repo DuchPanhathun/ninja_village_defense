@@ -415,20 +415,8 @@ namespace NinjaVillage.EditorTools.Generators
             foreach (var label in pause != null ? pause.GetComponentsInChildren<TMP_Text>(true) : new TMP_Text[0])
                 StyleText(label.rectTransform, 48f, Color.white, TextAlignmentOptions.Center);
 
-            var ultimate = Find(scene, "UltimateButton");
-            Place(ultimate, new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(-120f, 150f), new Vector2(170f, 170f));
-            SetSprite(ultimate, "UI/Panels", "panel_wood_panel_2");
-            var charge = Find(scene, "UltimateFillImage");
-            if (charge != null && charge.TryGetComponent<Image>(out var chargeImage))
-            {
-                chargeImage.color = new Color(1f, 0.8f, 0.25f, 0.75f); // gold charge ring over the wood
-                EditorUtility.SetDirty(chargeImage);
-            }
-            if (ultimate != null && ultimate.TryGetComponent<TMP_Text>(out var ultText))
-            {
-                ultText.text = "ULT";
-                StyleText(ultimate, 40f, Color.white, TextAlignmentOptions.Center);
-            }
+            LayOutUltimateButton(scene);
+            EnsureSkillBar(scene);
 
             LayOutPauseAndGameOver(scene);
 
@@ -511,6 +499,97 @@ namespace NinjaVillage.EditorTools.Generators
                     if (t.name.Trim() == name && (parent == null || (t.parent != null && t.parent.name.Trim() == parent)))
                         return t;
             return null;
+        }
+
+        /// <summary>
+        /// Ultimate button: wood frame, the equipped ultimate's icon, a dark cover that recedes as charge
+        /// builds, and a "45%" / "READY!" label. (The scene's version was a bare text object whose only
+        /// visible part was the yellow fill, so it showed as a blob with a faded "ULT".)
+        /// </summary>
+        private static void LayOutUltimateButton(Scene scene)
+        {
+            var ui = Object.FindAnyObjectByType<UltimateButtonUI>(FindObjectsInactive.Include);
+            if (ui == null) return;
+            var root = (RectTransform)ui.transform;
+            Place(root, new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(-125f, 150f), new Vector2(190f, 190f));
+            if (root.TryGetComponent<TMP_Text>(out var oldLabel))
+            {
+                oldLabel.text = string.Empty; // drawn under its children; the new label goes on top
+                EditorUtility.SetDirty(oldLabel);
+            }
+
+            var frame = Child<Image>(root, "UltFrame", 0);
+            UIBuilder.Stretch(frame.rectTransform);
+            SetSprite(frame.rectTransform, "UI/Panels", "panel_wood_panel");
+
+            var icon = Child<Image>(root, "UltIcon", 1);
+            UIBuilder.Stretch(icon.rectTransform, 30f);
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+
+            var cover = Find(scene, "UltimateFillImage");
+            Image coverImage = null;
+            if (cover != null && cover.TryGetComponent(out coverImage))
+            {
+                cover.SetSiblingIndex(2);
+                UIBuilder.Stretch(cover, 30f);
+                coverImage.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+                coverImage.type = Image.Type.Filled;
+                coverImage.fillMethod = Image.FillMethod.Vertical;
+                coverImage.fillOrigin = (int)Image.OriginVertical.Top;
+                coverImage.fillAmount = 1f;
+                coverImage.color = new Color(0f, 0f, 0f, 0.62f);
+                coverImage.raycastTarget = false;
+                EditorUtility.SetDirty(coverImage);
+            }
+
+            var label = Child<TextMeshProUGUI>(root, "UltLabel", 3);
+            label.rectTransform.anchorMin = new Vector2(0f, 0f);
+            label.rectTransform.anchorMax = new Vector2(1f, 0f);
+            label.rectTransform.pivot = new Vector2(0.5f, 0f);
+            label.rectTransform.anchoredPosition = new Vector2(0f, -34f);
+            label.rectTransform.sizeDelta = new Vector2(40f, 50f);
+            label.text = "0%";
+            label.raycastTarget = false;
+            StyleText(label.rectTransform, 34f, Color.white, TextAlignmentOptions.Center);
+
+            if (root.TryGetComponent<Button>(out var button))
+            {
+                button.targetGraphic = frame;
+                EditorUtility.SetDirty(button);
+            }
+            ContentGen.Set(ui, ("iconImage", icon), ("label", label), ("fillShowsRemaining", true));
+            if (coverImage != null) ContentGen.Set(ui, ("chargeFillImage", coverImage));
+        }
+
+        /// <summary>Weapon + picked skills with levels, under the XP bar.</summary>
+        private static void EnsureSkillBar(Scene scene)
+        {
+            var canvas = Find(scene, "Canvas");
+            if (canvas == null) return;
+            var bar = canvas.Find("SkillBar") as RectTransform;
+            if (bar == null)
+            {
+                bar = new GameObject("SkillBar", typeof(RectTransform)).GetComponent<RectTransform>();
+                bar.SetParent(canvas, false);
+            }
+            Place(bar, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -160f), new Vector2(760f, 180f));
+            if (!bar.TryGetComponent<SkillBarUI>(out _)) bar.gameObject.AddComponent<SkillBarUI>();
+        }
+
+        /// <summary>Finds or creates a direct child with component <typeparamref name="T"/> at a sibling index.</summary>
+        private static T Child<T>(RectTransform parent, string name, int siblingIndex) where T : Component
+        {
+            var child = parent.Find(name) as RectTransform;
+            if (child == null)
+            {
+                child = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+                child.SetParent(parent, false);
+            }
+            child.SetSiblingIndex(Mathf.Min(siblingIndex, parent.childCount - 1));
+            if (!child.TryGetComponent<T>(out var component)) component = child.gameObject.AddComponent<T>();
+            EditorUtility.SetDirty(child.gameObject);
+            return component;
         }
 
         /// <summary>Pause and game-over panels: dimmed backdrop, big wood buttons, readable titles.</summary>
