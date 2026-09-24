@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Kunai
   displayName: Kunai
   description: Fast, reliable throwing knife aimed at the nearest demon.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 86a70780e1bd7de5383fcc72606f0cb0, type: 3}
   rarity: 0
   element: 0
   baseDamage: 10

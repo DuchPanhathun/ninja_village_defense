@@ -257,7 +257,9 @@ namespace NinjaVillage.EditorTools.Generators
         {
             ContentGen.EnsureFolder(CatalogFolder);
             var library = ContentGen.CreateOrLoad<CharacterSpriteLibrary>($"{CatalogFolder}/{nameof(CharacterSpriteLibrary)}.asset");
-            library.EditorSetSets(sets.Where(s => s.Key.StartsWith("hero_") || s.Key.StartsWith("skin_") || s.Key.StartsWith("pet_"))
+            // Heroes, skins and pets for the battle/menus; townsfolk and animals for the village.
+            library.EditorSetSets(sets.Where(s => s.Key.StartsWith("hero_") || s.Key.StartsWith("skin_") || s.Key.StartsWith("pet_") ||
+                                                  s.Key.StartsWith("npc_") || s.Key.StartsWith("animal_"))
                 .Select(s => s.Value).ToArray());
         }
 

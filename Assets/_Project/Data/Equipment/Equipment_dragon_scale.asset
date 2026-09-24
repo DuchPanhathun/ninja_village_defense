@@ -15,7 +15,7 @@ MonoBehaviour:
   id: dragon_scale
   displayName: Dragon Scale
   description: "+25% attack, +0.25\xD7 crit damage, heals 0.1 HP/s."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 35c9ce0a6bd0a15e191144b174cbc143, type: 3}
   rarity: 3
   attackDamageBonus: 0.25
   attackSpeedBonus: 0

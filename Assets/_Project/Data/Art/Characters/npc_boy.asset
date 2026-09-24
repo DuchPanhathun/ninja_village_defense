@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: npc_boy
+  m_EditorClassIdentifier: 
+  key: npc_boy
+  idle:
+  - {fileID: 21300000, guid: bfdfb57f165ccc2be93b0fb72e074cd5, type: 3}
+  move:
+  - {fileID: 21300000, guid: 48ae855738ecb61a3b5f9ff5e0dd4c12, type: 3}
+  - {fileID: 21300000, guid: 87f1a739244ca9c6f86f85cf7e8637bf, type: 3}
+  - {fileID: 21300000, guid: e2921b8bea253b209b23669322152395, type: 3}
+  - {fileID: 21300000, guid: 37bfbf860e2f540fba5eeb8ffd00ec33, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

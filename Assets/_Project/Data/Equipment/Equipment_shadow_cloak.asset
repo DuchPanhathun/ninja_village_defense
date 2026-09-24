@@ -15,7 +15,7 @@ MonoBehaviour:
   id: shadow_cloak
   displayName: Shadow Cloak
   description: +8% move speed.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5e32221b8d487ed9e83c549251a45b91, type: 3}
   rarity: 1
   attackDamageBonus: 0
   attackSpeedBonus: 0

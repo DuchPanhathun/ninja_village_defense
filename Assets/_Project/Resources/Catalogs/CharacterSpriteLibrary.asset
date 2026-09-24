@@ -13,11 +13,26 @@ MonoBehaviour:
   m_Name: CharacterSpriteLibrary
   m_EditorClassIdentifier: 
   sets:
+  - {fileID: 11400000, guid: 5cff7ff0b2f5ab3be89f264d2d7a95c7, type: 2}
+  - {fileID: 11400000, guid: b6585c975424637069231d056b8bbb8f, type: 2}
+  - {fileID: 11400000, guid: e40284d46c4c9903c942328f196ff4ca, type: 2}
+  - {fileID: 11400000, guid: 2d04a1feee773d2be9d1be978ca668f4, type: 2}
+  - {fileID: 11400000, guid: 9d6f2d17477339a7c82cc6e05e4c1ad4, type: 2}
+  - {fileID: 11400000, guid: d72846516752d399b8a732cd53bb39a4, type: 2}
   - {fileID: 11400000, guid: c9b4958a08f696d928684271954a42fa, type: 2}
   - {fileID: 11400000, guid: 5f91f5cd1da3758e79e69654a6267e5f, type: 2}
   - {fileID: 11400000, guid: f3147c51506537750afd444e31bad6cf, type: 2}
   - {fileID: 11400000, guid: dbbb8cadeb57c1c84b12d5b7be907763, type: 2}
   - {fileID: 11400000, guid: 03de05e5661f930f2a60eec9d6b6d5ef, type: 2}
+  - {fileID: 11400000, guid: 8632735740e26fcaabda16bfae85a37b, type: 2}
+  - {fileID: 11400000, guid: 70a2ae974d540db4b87ada1d18d91813, type: 2}
+  - {fileID: 11400000, guid: 3a4ba1c9630027f9aaafcac963acb467, type: 2}
+  - {fileID: 11400000, guid: 747c5cb7660319f1e89587447052103a, type: 2}
+  - {fileID: 11400000, guid: 2b778b07076c42c3c971438dc5e2c738, type: 2}
+  - {fileID: 11400000, guid: 0a6dd0e9a1397190b8abdacd97aa7254, type: 2}
+  - {fileID: 11400000, guid: f0dc5c670ada00fae8a87eb39ddebdca, type: 2}
+  - {fileID: 11400000, guid: 241b5534de931d67ea856a4cb31d8fca, type: 2}
+  - {fileID: 11400000, guid: 99b3580d8d2ea2d9e878cd051db8c99c, type: 2}
   - {fileID: 11400000, guid: 633e42c751747c7b383cb88301b5992f, type: 2}
   - {fileID: 11400000, guid: 1122bef0929245dc0b6f3b3f24f3966c, type: 2}
   - {fileID: 11400000, guid: 9d320196c508642aabeaa3738d4b1430, type: 2}

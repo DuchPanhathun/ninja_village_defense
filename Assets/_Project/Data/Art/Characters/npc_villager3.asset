@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: npc_villager3
+  m_EditorClassIdentifier: 
+  key: npc_villager3
+  idle:
+  - {fileID: 21300000, guid: b825778aa38d8fc388311b71c1fa8d1a, type: 3}
+  move:
+  - {fileID: 21300000, guid: 6a25923b1f57ae947960c56df03f892b, type: 3}
+  - {fileID: 21300000, guid: 89b3ddb4fea828156b65cd76981d9a21, type: 3}
+  - {fileID: 21300000, guid: fb92a00b3a81a95f08b84707e193d0c2, type: 3}
+  - {fileID: 21300000, guid: 1faabadc7ece1d8e6b6592c342d59a97, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

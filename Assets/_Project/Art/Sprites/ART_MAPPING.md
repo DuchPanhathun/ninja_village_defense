@@ -280,6 +280,27 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | buildings: dojo, forge, shrine, market, pet house + houses | `TilesetHouse.png` cut-outs; castle: AI (PixelLab) | `building_dojo`, `building_dojo_sign`, `building_forge`, `building_shrine`, `building_market`, `building_pethouse`, `building_house_orange`, `building_house_tan`, `building_house_red`, `building_shop_green`, `building_house_adobe`, `building_house_tall`, `building_house_wood`, `building_hut_wood`, `building_castle` |
 | trees, rocks, bushes, statues, banners | `TilesetNature.png` and `TilesetHouse.png` cut-outs | `prop_statue_guardian`, `prop_statue_frog`, `prop_stone_arch`, `prop_banner_white`, `prop_banner_red`, `prop_banner_orange`, `prop_banner_green`, `prop_banner_red_b`, `prop_banner_purple`, `prop_banner_yellow`, `prop_tree_green`, `prop_tree_pine`, `prop_tree_dead`, `prop_tree_bonsai`, `prop_tree_pine_snow`, `prop_tree_snow`, `prop_tree_cherry`, `prop_tree_light`, `prop_tree_autumn`, `prop_bigtree_pine`, `prop_bigtree_green`, `prop_bigtree_snow`, `prop_bigtree_cherry`, `prop_bigtree_light`, `prop_bigtree_autumn`, `prop_roundtree_cherry`, `prop_roundtree_green`, `prop_roundtree_white`, `prop_roundtree_orange`, `prop_rocks_brown`, `prop_rocks_grey`, `prop_boulder_brown`, `prop_boulder_grey`, `prop_stump`, `prop_stump_orange`, `prop_bush_a`, `prop_bush_b`, `prop_bush_c`, `prop_bush_d` |
 | animated props | `Backgrounds/Animated` (flags, watermill, mill, water ripples) | `prop_flag_black_0..3`, `prop_flag_blue_0..3`, `prop_flag_brown_0..3`, `prop_flag_gray_0..3`, `prop_flag_green_0..3`, `prop_flag_red_0..3`, `prop_flag_white_0..3`, `prop_flag_yellow_0..3`, `prop_watermill_0..2`, `prop_mill_propeller_0..3`, `prop_water_ripple_0..3` |
+| decorations (shop items) | `TilesetElement.png`, `tileset_camp.png`, `TilesetNature.png`, `TilesetHouse.png` cut-outs | `deco_barrel`, `deco_pot`, `deco_crate`, `deco_well`, `deco_chest`, `deco_cart`, `deco_flower_cart`, `deco_hay`, `deco_bench`, `deco_clothesline`, `deco_signpost`, `deco_pot_plant`, `deco_vase`, `deco_scarecrow`, `deco_tent`, `deco_fire_pit`, `deco_lantern_post`, `deco_banner_post`, `deco_stump_table`, `deco_big_barrel`, `deco_log_bench`, `deco_sunflower`, `deco_yellow_flower`, `deco_red_flower`, `deco_white_flower`, `deco_bamboo`, `deco_crystal_red`, `deco_crystal_blue`, `deco_crystal_pink`, `deco_crystal_green`, `deco_weapon_rack`, `deco_statue_orb_monk`, `deco_statue_monk`, `deco_statue_fox`, `deco_stone_pillar`, `deco_statue_monk_moss`, `deco_statue_frog_moss` |
+
+## Villagers
+
+| Item | Source | Output files |
+|---|---|---|
+| villager | `Actor/Character/Villager` | `npc_villager_idle_0`, `npc_villager_walk_0..3` |
+| villager2 | `Actor/Character/Villager2` | `npc_villager2_idle_0`, `npc_villager2_walk_0..3` |
+| villager3 | `Actor/Character/Villager3` | `npc_villager3_idle_0`, `npc_villager3_walk_0..3` |
+| villager4 | `Actor/Character/Villager4` | `npc_villager4_idle_0`, `npc_villager4_walk_0..3` |
+| woman | `Actor/Character/Woman` | `npc_woman_idle_0`, `npc_woman_walk_0..3` |
+| oldman | `Actor/Character/OldMan` | `npc_oldman_idle_0`, `npc_oldman_walk_0..3` |
+| oldwoman | `Actor/Character/OldWoman` | `npc_oldwoman_idle_0`, `npc_oldwoman_walk_0..1` |
+| boy | `Actor/Character/Boy` | `npc_boy_idle_0`, `npc_boy_walk_0..3` |
+| master | `Actor/Character/Master` | `npc_master_idle_0`, `npc_master_walk_0..3` |
+| cat (animal) | `Actor/Animal/Cat/SpriteSheet.png` (2-frame strip) | `animal_cat_idle_0`, `animal_cat_walk_0..1` |
+| chicken (animal) | `Actor/Animal/Chicken/SpriteSheetWhite.png` (2-frame strip) | `animal_chicken_idle_0`, `animal_chicken_walk_0..1` |
+| dog (animal) | `Actor/Animal/Dog/SpriteSheet.png` (2-frame strip) | `animal_dog_idle_0`, `animal_dog_walk_0..1` |
+| pig (animal) | `Actor/Animal/Pig/SpriteSheetPink.png` (2-frame strip) | `animal_pig_idle_0`, `animal_pig_walk_0..1` |
+| frog (animal) | `Actor/Animal/Frog/SpriteSheet.png` (2-frame strip) | `animal_frog_idle_0`, `animal_frog_walk_0..1` |
+| cow (animal) | `Actor/Animal/Cow/SpriteSheetWhite.png` (2-frame strip) | `animal_cow_idle_0`, `animal_cow_walk_0..1` |
 
 ## Backgrounds
 

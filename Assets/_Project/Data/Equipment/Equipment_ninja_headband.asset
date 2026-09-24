@@ -15,7 +15,7 @@ MonoBehaviour:
   id: ninja_headband
   displayName: Ninja Headband
   description: +5% attack speed.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 987375511405b6678a2010cbfb4b56d1, type: 3}
   rarity: 0
   attackDamageBonus: 0
   attackSpeedBonus: 0.05

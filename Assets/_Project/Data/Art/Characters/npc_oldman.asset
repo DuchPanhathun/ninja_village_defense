@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: npc_oldman
+  m_EditorClassIdentifier: 
+  key: npc_oldman
+  idle:
+  - {fileID: 21300000, guid: 99172b8809ef0a8d490627bc57cce4d9, type: 3}
+  move:
+  - {fileID: 21300000, guid: cf85b668fd260e957bfdec10f96980ae, type: 3}
+  - {fileID: 21300000, guid: a9f98763015f4dc6a9ca09b19dd7285b, type: 3}
+  - {fileID: 21300000, guid: cb0a4f74721a34c898e3f2210a5e5e4b, type: 3}
+  - {fileID: 21300000, guid: 0c246f650ab9d27cabe2d9cac661ec73, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

@@ -1215,6 +1215,7 @@ MonoBehaviour:
   margin: 3
   seed: 1234
   baseSortingOrder: -900
+  maxPropSize: 2.6
 --- !u!4 &314254324
 Transform:
   m_ObjectHideFlags: 0

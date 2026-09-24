@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: animal_pig
+  m_EditorClassIdentifier: 
+  key: animal_pig
+  idle:
+  - {fileID: 21300000, guid: 2139c7e8c0aa373b0be01554321672d0, type: 3}
+  move:
+  - {fileID: 21300000, guid: 69789a765a264a94fa7cb448cb08352b, type: 3}
+  - {fileID: 21300000, guid: 7543de9958cd633f3bd0c992cde34e70, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

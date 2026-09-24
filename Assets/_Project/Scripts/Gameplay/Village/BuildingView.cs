@@ -1,6 +1,8 @@
 using System.Collections;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Core.Utilities;
+using NinjaVillage.Gameplay.Animation;
+using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
 using TMPro;
 using UnityEngine;
@@ -8,28 +10,25 @@ using UnityEngine;
 namespace NinjaVillage.Gameplay.Village
 {
     /// <summary>
-    /// One building on the village map, drawn from placeholder shapes in its definition's colors.
-    /// Unbuilt plots show a faint foundation with "Tap to build"; built ones grow with their level and
-    /// show their stage name ("Hut" → "Castle"), so the village itself is the visible progress meter
-    /// (goal.text "Village becomes a visual indicator of progress"). Tapping raises
-    /// <see cref="VillageBuildingTappedEvent"/>.
+    /// One building on the village map, drawn with its pack sprite standing on its plot (the Castle
+    /// changes look as it levels: hut → house → manor → castle). Unbuilt plots show a dark silhouette with
+    /// "Tap to build", so the village itself is the visible progress meter. Levels come from the map's
+    /// <see cref="VillageSnapshot"/> (<see cref="VillageMap"/> calls <see cref="Refresh"/>). Tapping raises
+    /// <see cref="VillageBuildingTappedEvent"/> (not while visiting someone else's village).
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D))]
     public class BuildingView : MonoBehaviour, IVillageTappable
     {
-        private const int BaseSortingOrder = 10;
-
         public string BuildingId { get; private set; }
 
         private BuildingDefinition _definition;
-        private SpriteRenderer _foundation;
-        private SpriteRenderer _body;
-        private SpriteRenderer _roof;
-        private SpriteRenderer _door;
+        private SpriteRenderer _body, _shadow, _sign;
+        private SpriteRenderer[] _flags = System.Array.Empty<SpriteRenderer>();
         private TextMeshPro _label;
         private Transform _visual;
         private BoxCollider2D _collider;
         private Coroutine _pop;
+        private int _shownLevel = -1;
 
         public void Initialize(BuildingDefinition definition)
         {
@@ -38,87 +37,130 @@ namespace NinjaVillage.Gameplay.Village
             name = $"Building_{definition.Id}";
             transform.position = definition.PlotPosition;
 
-            // Buildings lower on the map are drawn in front.
-            int order = BaseSortingOrder + Mathf.RoundToInt(-definition.PlotPosition.y * 4f);
-            Vector2 size = definition.Footprint;
-
-            _foundation = GeneratedSprites.CreateRenderer(transform, "Foundation", GeneratedSprites.Square,
-                new Color(0.35f, 0.28f, 0.2f, 0.55f), order, new Vector2(0f, -size.y * 0.45f), new Vector2(size.x * 1.1f, size.y * 0.25f));
-
             _visual = new GameObject("Visual").transform;
             _visual.SetParent(transform, false);
-            _body = GeneratedSprites.CreateRenderer(_visual, "Body", GeneratedSprites.Square, definition.Color, order + 1,
-                new Vector2(0f, -size.y * 0.1f), new Vector2(size.x, size.y * 0.7f));
-            _roof = GeneratedSprites.CreateRenderer(_visual, "Roof", GeneratedSprites.Triangle, definition.RoofColor, order + 2,
-                new Vector2(0f, size.y * 0.42f), new Vector2(size.x * 1.2f, size.y * 0.5f));
-            _door = GeneratedSprites.CreateRenderer(_visual, "Door", GeneratedSprites.Square, new Color(0.2f, 0.12f, 0.08f, 1f), order + 3,
-                new Vector2(0f, -size.y * 0.3f), new Vector2(size.x * 0.18f, size.y * 0.3f));
+            _shadow = GeneratedSprites.CreateRenderer(transform, "Shadow", GeneratedSprites.Circle, new Color(0f, 0f, 0f, 0.22f), 0);
+            _body = new GameObject("Body").AddComponent<SpriteRenderer>();
+            _body.transform.SetParent(_visual, false);
 
             _label = new GameObject("Label").AddComponent<TextMeshPro>();
             _label.transform.SetParent(transform, false);
-            _label.transform.localPosition = new Vector3(0f, size.y * 0.95f, 0f);
             _label.alignment = TextAlignmentOptions.Center;
-            _label.fontSize = 3.2f;
+            _label.fontSize = 3f;
+            _label.fontStyle = FontStyles.Bold;
             _label.color = Color.white;
-            _label.outlineWidth = 0.2f;
-            _label.outlineColor = new Color32(0, 0, 0, 200);
-            _label.rectTransform.sizeDelta = new Vector2(size.x * 2.2f, 2f);
-            _label.sortingOrder = 200;
+            _label.outlineWidth = 0.22f;
+            _label.outlineColor = new Color32(20, 27, 27, 255);
+            _label.rectTransform.sizeDelta = new Vector2(8f, 2f);
+            _label.sortingOrder = VillageSorting.Labels;
 
             _collider = GetComponent<BoxCollider2D>();
-            _collider.size = new Vector2(size.x * 1.1f, size.y * 1.2f);
-            _collider.offset = new Vector2(0f, size.y * 0.1f);
-
-            Refresh();
         }
 
-        private void OnEnable() => EventBus<BuildingUpgradedEvent>.Subscribe(OnBuildingUpgraded);
-        private void OnDisable() => EventBus<BuildingUpgradedEvent>.Unsubscribe(OnBuildingUpgraded);
-
-        public void Refresh()
+        /// <summary>Redraws for <paramref name="level"/> (0 = not built). <paramref name="castleLevel"/> gates unbuilt plots.</summary>
+        public void Refresh(int level, int castleLevel)
         {
             if (_definition == null) return;
-            int level = VillageService.GetLevel(_definition.Id);
             bool built = level > 0;
+            var art = VillageArt.Load();
+            var sprite = art != null ? art.BuildingSprite(_definition.Id, Mathf.Max(1, level)) : null;
+            if (sprite == null) sprite = GeneratedSprites.Square;
 
-            _visual.gameObject.SetActive(built);
-            _foundation.color = built ? new Color(0.35f, 0.28f, 0.2f, 0.55f) : new Color(1f, 1f, 1f, 0.25f);
+            _body.sprite = sprite;
+            Vector2 size = sprite == GeneratedSprites.Square ? _definition.Footprint : (Vector2)sprite.bounds.size;
+            if (sprite == GeneratedSprites.Square) _body.transform.localScale = new Vector3(size.x, size.y, 1f);
 
+            // The sprite's base sits on the plot's bottom edge.
+            float baseY = -_definition.Footprint.y * 0.5f;
+            _body.transform.localPosition = new Vector3(0f, baseY + size.y * 0.5f, 0f);
+            int order = VillageSorting.Order(transform.position.y + baseY);
+            _body.sortingOrder = order;
+            _body.color = built ? (sprite == GeneratedSprites.Square ? _definition.Color : Color.white) : new Color(0.08f, 0.1f, 0.12f, 0.45f);
+
+            _shadow.transform.localPosition = new Vector3(0f, baseY + 0.1f, 0f);
+            _shadow.transform.localScale = new Vector3(size.x * 0.9f, 0.9f, 1f);
+            _shadow.sortingOrder = VillageSorting.Paths + 1;
+            _shadow.enabled = built;
+
+            _collider.size = size;
+            _collider.offset = new Vector2(0f, baseY + size.y * 0.5f);
+
+            RefreshExtras(art, built, level, size, baseY, order);
+
+            _label.transform.localPosition = new Vector3(0f, baseY + size.y + 0.45f, 0f);
             if (built)
             {
-                // Grows from 75% to 125% of its footprint over its levels.
-                float t = _definition.MaxLevel > 1 ? (level - 1f) / (_definition.MaxLevel - 1f) : 1f;
-                float scale = Mathf.Lerp(0.75f, 1.25f, t);
-                _visual.localScale = new Vector3(scale, scale, 1f);
-                _label.text = $"{_definition.StageName(level)}\n<size=70%>Lv {level}</size>";
+                _label.text = $"{_definition.StageName(level)}\n<size=70%><color=#FFD24D>Lv {level}</color></size>";
             }
             else
             {
-                bool locked = VillageService.CastleLevel < _definition.RequiredCastleLevel;
+                bool locked = castleLevel < _definition.RequiredCastleLevel;
                 _label.text = locked
-                    ? $"{_definition.NameOrId}\n<size=70%>Castle Lv {_definition.RequiredCastleLevel}</size>"
-                    : $"{_definition.NameOrId}\n<size=70%>Tap to build</size>";
+                    ? $"{_definition.NameOrId}\n<size=70%><color=#F2A0A0>Castle Lv {_definition.RequiredCastleLevel}</color></size>"
+                    : $"{_definition.NameOrId}\n<size=70%><color=#9CFF8A>Tap to build</color></size>";
+            }
+
+            if (_shownLevel >= 0 && level > _shownLevel)
+            {
+                if (_pop != null) StopCoroutine(_pop);
+                _pop = StartCoroutine(PopRoutine());
+            }
+            _shownLevel = level;
+        }
+
+        /// <summary>The Dojo's sign, and flags beside the Castle once it's grown.</summary>
+        private void RefreshExtras(VillageArt art, bool built, int level, Vector2 size, float baseY, int order)
+        {
+            if (art == null) return;
+            if (_definition.Id == BuildingIds.Dojo && art.DojoSign != null)
+            {
+                if (_sign == null)
+                {
+                    _sign = new GameObject("Sign").AddComponent<SpriteRenderer>();
+                    _sign.transform.SetParent(_visual, false);
+                    _sign.sprite = art.DojoSign;
+                }
+                _sign.transform.localPosition = new Vector3(0f, baseY + size.y * 0.42f, 0f);
+                _sign.sortingOrder = order + 1;
+                _sign.enabled = built;
+            }
+
+            if (_definition.IsCastle && art.FlagFrames.Length > 0)
+            {
+                if (_flags.Length == 0)
+                {
+                    _flags = new SpriteRenderer[2];
+                    for (int i = 0; i < 2; i++)
+                    {
+                        _flags[i] = new GameObject($"Flag{i}").AddComponent<SpriteRenderer>();
+                        _flags[i].transform.SetParent(_visual, false);
+                        _flags[i].gameObject.AddComponent<SpriteLoop>().SetFrames(art.FlagFrames, 6f);
+                        _flags[i].flipX = i == 0;
+                    }
+                }
+                for (int i = 0; i < 2; i++)
+                {
+                    float x = (i == 0 ? -1f : 1f) * (size.x * 0.5f + 0.5f);
+                    _flags[i].transform.localPosition = new Vector3(x, baseY + 0.7f, 0f);
+                    _flags[i].sortingOrder = order;
+                    _flags[i].enabled = built && level >= 3;
+                }
             }
         }
 
-        public void OnTapped() => EventBus<VillageBuildingTappedEvent>.Raise(new VillageBuildingTappedEvent(BuildingId));
-
-        private void OnBuildingUpgraded(BuildingUpgradedEvent evt)
+        public void OnTapped()
         {
-            // The Castle gates every other plot's "locked" label, so refresh on any upgrade.
-            Refresh();
-            if (evt.BuildingId != BuildingId) return;
-            if (_pop != null) StopCoroutine(_pop);
-            _pop = StartCoroutine(PopRoutine());
+            if (VillageVisit.IsVisiting) return;
+            EventBus<VillageBuildingTappedEvent>.Raise(new VillageBuildingTappedEvent(BuildingId));
         }
 
         private IEnumerator PopRoutine()
         {
-            Vector3 baseScale = _visual.localScale;
+            Vector3 baseScale = Vector3.one;
             const float duration = 0.45f;
             for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
             {
-                float k = 1f + Mathf.Sin(t / duration * Mathf.PI) * 0.25f;
+                float k = 1f + Mathf.Sin(t / duration * Mathf.PI) * 0.12f;
                 _visual.localScale = baseScale * k;
                 yield return null;
             }

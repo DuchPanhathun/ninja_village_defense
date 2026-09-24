@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Shuriken
   description: "Throws a full ring of piercing stars \u2014 weak alone, deadly in
     a crowd."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c2e68e0840a57006cabe1102e695d6c2, type: 3}
   rarity: 0
   element: 0
   baseDamage: 6

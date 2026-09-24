@@ -57,6 +57,7 @@ namespace NinjaVillage.Systems.Save
             Heroes ??= new HeroSaveData();
             Pets ??= new PetSaveData();
             Village ??= new VillageSaveData();
+            Village.Decorations ??= new System.Collections.Generic.List<PlacedDecoration>();
             Talents ??= new TalentSaveData();
             Evolutions ??= new EvolutionSaveData();
             Daily ??= new DailySaveData();

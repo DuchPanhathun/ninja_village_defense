@@ -9,6 +9,8 @@ namespace NinjaVillage.Gameplay.Village
     /// Village "Camera navigation" (EPIC 11): one-finger / mouse drag pans with a little inertia,
     /// pinch / scroll wheel zooms, the view is clamped to the <see cref="VillageMap"/> bounds, and a
     /// short tap (no drag) on a building or villager calls its <see cref="IVillageTappable.OnTapped"/>.
+    /// A press that starts on an <see cref="IVillageDraggable"/> (the decoration being placed) drags it
+    /// instead of panning, and while placing, a tap moves the decoration to the tapped spot.
     /// Gestures that start on UI are ignored so the HUD's buttons never pan the map.
     /// Put on the Village scene's orthographic camera.
     /// </summary>
@@ -16,7 +18,7 @@ namespace NinjaVillage.Gameplay.Village
     public class VillageCameraController : MonoBehaviour
     {
         [SerializeField] private float minZoom = 4f;
-        [SerializeField] private float maxZoom = 11f;
+        [SerializeField] private float maxZoom = 13f;
         [SerializeField] private float scrollZoomSpeed = 0.01f;
         [Tooltip("Screen pixels a press may move and still count as a tap.")]
         [SerializeField] private float tapThresholdPixels = 18f;
@@ -30,6 +32,7 @@ namespace NinjaVillage.Gameplay.Village
         private Vector2 _lastScreen;
         private Vector2 _velocity;
         private float _lastPinchDistance = -1f;
+        private IVillageDraggable _dragging;
 
         private static readonly List<RaycastResult> UiHits = new();
 
@@ -106,9 +109,19 @@ namespace NinjaVillage.Gameplay.Village
                 _lastScreen = screen;
                 _velocity = Vector2.zero;
                 _pressStartedOnUi = IsOverUi(screen);
+                _dragging = _pressStartedOnUi ? null : DraggableAt(ScreenToWorld(screen));
+                _dragging?.BeginDrag(ScreenToWorld(screen));
                 return;
             }
             if (_pressStartedOnUi) return;
+
+            if (_dragging != null)
+            {
+                _dragged = true;
+                _dragging.Drag(ScreenToWorld(screen));
+                _lastScreen = screen;
+                return;
+            }
 
             if (!_dragged && (screen - _pressStartScreen).sqrMagnitude > tapThresholdPixels * tapThresholdPixels)
                 _dragged = true;
@@ -126,22 +139,44 @@ namespace NinjaVillage.Gameplay.Village
         private void PointerReleased(Vector2 screen)
         {
             _pressing = false;
+            if (_dragging != null)
+            {
+                _dragging.EndDrag();
+                _dragging = null;
+                _velocity = Vector2.zero;
+                return;
+            }
             if (_pressStartedOnUi) { _velocity = Vector2.zero; return; }
             if (!_dragged) { _velocity = Vector2.zero; TryTap(screen); }
         }
 
+        private static IVillageDraggable DraggableAt(Vector2 world)
+        {
+            foreach (var hit in Physics2D.OverlapPointAll(world))
+                if (hit.TryGetComponent<IVillageDraggable>(out var draggable) && draggable.CanDrag) return draggable;
+            return null;
+        }
+
         private void TryTap(Vector2 screen)
         {
-            var hit = Physics2D.OverlapPoint(ScreenToWorld(screen));
-            if (hit == null) return;
-            for (Transform t = hit.transform; t != null; t = t.parent)
+            if (DecorationPlacer.IsActive)
             {
-                if (t.TryGetComponent<IVillageTappable>(out var tappable))
+                DecorationPlacer.Instance.MoveTo(ScreenToWorld(screen)); // placing: tap = put it here
+                return;
+            }
+            // Several things can overlap (a hero in front of the Dojo): the one standing lowest is in front.
+            IVillageTappable best = null;
+            float bestY = float.MaxValue;
+            foreach (var hit in Physics2D.OverlapPointAll(ScreenToWorld(screen)))
+            {
+                for (Transform t = hit.transform; t != null; t = t.parent)
                 {
-                    tappable.OnTapped();
-                    return;
+                    if (!t.TryGetComponent<IVillageTappable>(out var tappable)) continue;
+                    if (t.position.y < bestY) { best = tappable; bestY = t.position.y; }
+                    break;
                 }
             }
+            best?.OnTapped();
         }
 
         private void Zoom(float factor, Vector2 screenFocus)

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Katana
   displayName: Katana
   description: Wide sword arcs with high damage and critical hits, but short reach.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c540c72a929183696817cea1d99cc6a4, type: 3}
   rarity: 1
   element: 0
   baseDamage: 22

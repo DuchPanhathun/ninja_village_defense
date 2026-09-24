@@ -26,6 +26,18 @@ namespace NinjaVillage.Systems.Save
         public bool Purchased;
     }
 
+    /// <summary>A decoration the player bought and placed on their village map.</summary>
+    [Serializable]
+    public class PlacedDecoration
+    {
+        /// <summary>Unique per village (two identical lanterns are two uids).</summary>
+        public int Uid;
+        public string Id;
+        public float X;
+        public float Y;
+        public bool Flip;
+    }
+
     /// <summary>Village buildings and the Market's rotating stock (EPIC 11). Owned by the Village system.</summary>
     [Serializable]
     public class VillageSaveData
@@ -39,6 +51,10 @@ namespace NinjaVillage.Systems.Save
         /// <summary>GameClock day index the current Market stock was rolled for.</summary>
         public int MarketStockDay = -1;
         public List<MarketOfferState> MarketOffers = new();
+
+        /// <summary>Bought decorations and where they stand.</summary>
+        public List<PlacedDecoration> Decorations = new();
+        public int NextDecorationUid = 1;
 
         public int GetBuildingLevel(string buildingId) => Buildings.GetLevel(buildingId);
 

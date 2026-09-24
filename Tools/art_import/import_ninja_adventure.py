@@ -846,6 +846,76 @@ def import_village():
     record("Village", "animated props", "`Backgrounds/Animated` (flags, watermill, mill, water ripples)", out)
 
 
+# Village life: townsfolk and farm animals that wander the village map.
+VILLAGERS = [("villager", "Villager"), ("villager2", "Villager2"), ("villager3", "Villager3"), ("villager4", "Villager4"),
+             ("woman", "Woman"), ("oldman", "OldMan"), ("oldwoman", "OldWoman"), ("boy", "Boy"), ("master", "Master")]
+ANIMALS = [("cat", "Actor/Animal/Cat/SpriteSheet.png"), ("chicken", "Actor/Animal/Chicken/SpriteSheetWhite.png"),
+           ("dog", "Actor/Animal/Dog/SpriteSheet.png"), ("pig", "Actor/Animal/Pig/SpriteSheetPink.png"),
+           ("frog", "Actor/Animal/Frog/SpriteSheet.png"), ("cow", "Actor/Animal/Cow/SpriteSheetWhite.png")]
+
+
+def npc_right(char):
+    """Right-facing idle + walk of a 16x16 townsperson (SeparateAnim when present, else the sheet's column 3)."""
+    base = f"Actor/Character/{char}"
+    if os.path.exists(os.path.join(PACK, base, "SeparateAnim", "Walk.png")):
+        walk = column(load(f"{base}/SeparateAnim/Walk.png"), 3, 16, 16)
+        idle = [load(f"{base}/SeparateAnim/Idle.png").crop((48, 0, 64, 16))]
+    else:
+        walk = column(load(f"{base}/SpriteSheet.png"), 3, 16, 16, range(4))
+        idle = walk[:1]
+    return idle, walk
+
+
+def import_villagers():
+    F = "Characters/Villagers"
+    for key, char in VILLAGERS:
+        idle, walk = npc_right(char)
+        out = save_frames(idle, F, f"npc_{key}_idle") + save_frames(walk, F, f"npc_{key}_walk")
+        record("Villagers", key, f"`Actor/Character/{char}`", out)
+    for key, rel in ANIMALS:
+        frames = strip(load(rel), 16, 16)                                  # 2-frame side strips, facing right
+        out = save_frames(frames[:1], F, f"animal_{key}_idle") + save_frames(frames, F, f"animal_{key}_walk")
+        record("Villagers", f"{key} (animal)", f"`{rel}` (2-frame strip)", out)
+
+
+def _cells(c0, r0, c1, r1):
+    return c0 * 16, r0 * 16, (c1 + 1) * 16, (r1 + 1) * 16
+
+
+# Village decorations the player can buy: (name, tileset, box). Cells are 16 px; boxes are trimmed.
+DECOR = [("barrel", "TilesetElement.png", _cells(0, 0, 0, 0)), ("pot", "TilesetElement.png", _cells(1, 0, 1, 0)),
+         ("crate", "TilesetElement.png", _cells(6, 0, 6, 0)), ("well", "TilesetElement.png", _cells(4, 1, 4, 1)),
+         ("chest", "TilesetElement.png", _cells(3, 1, 3, 1)), ("cart", "TilesetElement.png", _cells(0, 3, 1, 4)),
+         ("flower_cart", "TilesetElement.png", _cells(2, 3, 3, 4)), ("hay", "TilesetElement.png", _cells(12, 4, 12, 5)),
+         ("bench", "TilesetElement.png", _cells(11, 1, 13, 1)), ("clothesline", "TilesetElement.png", _cells(11, 2, 15, 3)),
+         ("signpost", "TilesetElement.png", _cells(6, 3, 6, 3)), ("pot_plant", "TilesetElement.png", _cells(0, 8, 0, 8)),
+         ("vase", "TilesetElement.png", _cells(0, 5, 0, 6)), ("scarecrow", "TilesetElement.png", _cells(15, 0, 15, 0)),
+         ("tent", "tileset_camp.png", _cells(4, 0, 6, 2)), ("fire_pit", "tileset_camp.png", _cells(10, 3, 11, 4)),
+         ("lantern_post", "tileset_camp.png", _cells(6, 5, 6, 6)), ("banner_post", "tileset_camp.png", _cells(7, 5, 7, 6)),
+         ("stump_table", "tileset_camp.png", _cells(1, 5, 2, 6)), ("big_barrel", "tileset_camp.png", _cells(4, 6, 5, 7)),
+         ("log_bench", "tileset_camp.png", _cells(0, 7, 2, 7)),
+         ("sunflower", "TilesetNature.png", _cells(0, 11, 0, 11)), ("yellow_flower", "TilesetNature.png", _cells(1, 11, 1, 11)),
+         ("red_flower", "TilesetNature.png", _cells(3, 11, 3, 11)), ("white_flower", "TilesetNature.png", _cells(6, 11, 6, 11)),
+         ("bamboo", "TilesetNature.png", _cells(11, 8, 11, 10)),
+         ("crystal_red", "TilesetNature.png", _cells(0, 14, 0, 14)), ("crystal_blue", "TilesetNature.png", _cells(1, 14, 1, 14)),
+         ("crystal_pink", "TilesetNature.png", _cells(2, 14, 2, 14)), ("crystal_green", "TilesetNature.png", _cells(3, 14, 3, 14)),
+         ("weapon_rack", "TilesetHouse.png", _cells(14, 13, 15, 13)),
+         ("statue_orb_monk", "TilesetHouse.png", (48, 240, 80, 272)), ("statue_monk", "TilesetHouse.png", (80, 240, 112, 272)),
+         ("statue_fox", "TilesetHouse.png", (112, 240, 128, 272)), ("stone_pillar", "TilesetHouse.png", (0, 304, 16, 352)),
+         ("statue_monk_moss", "TilesetHouse.png", (80, 304, 112, 336)), ("statue_frog_moss", "TilesetHouse.png", (48, 336, 80, 368))]
+
+
+def import_decor():
+    F = "Environment/Decor"
+    sheets = {}
+    out = []
+    for name, sheet, box in DECOR:
+        if sheet not in sheets:
+            sheets[sheet] = load(f"Backgrounds/Tilesets/{sheet}")
+        out.append(save(trim(sheets[sheet].crop(box)), F, f"deco_{name}"))
+    record("Village", "decorations (shop items)", "`TilesetElement.png`, `tileset_camp.png`, `TilesetNature.png`, `TilesetHouse.png` cut-outs", out)
+
+
 GROUNDS = [("grass", (0, 12)), ("grass_dark", (11, 12)), ("dirt", (11, 19)), ("sand", (0, 5)), ("snow", (0, 19))]
 
 
@@ -1039,6 +1109,8 @@ def main():
     import_vfx()
     import_tiles()
     import_village()
+    import_villagers()
+    import_decor()
     import_backgrounds()
     export_store_graphics()
 

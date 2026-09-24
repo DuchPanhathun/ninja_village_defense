@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Bow
   displayName: Bow
   description: Very long range. Every third shot is a charged arrow.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 623d8d6a4544533c3bd03f0b23c352ee, type: 3}
   rarity: 1
   element: 0
   baseDamage: 14

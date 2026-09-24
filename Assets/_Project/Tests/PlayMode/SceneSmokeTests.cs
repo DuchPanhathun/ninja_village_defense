@@ -107,11 +107,67 @@ namespace NinjaVillage.Tests
             }
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
-                ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents);
+                ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
             yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        [UnityTest]
+        public IEnumerator Village_ShowsYourHeroesPetsGearAndTalents()
+        {
+            NinjaVillage.Systems.Heroes.HeroService.EnsureDefaults();
+            SaveService.Data.Pets.Owned.SetLevel("fox", 1);
+            SaveService.Data.Pets.ActivePetId = "fox";
+            yield return LoadScene(SceneNames.Village);
+            yield return null;
+
+            var map = NinjaVillage.Gameplay.Village.VillageMap.Instance;
+            Assert.IsNotNull(map);
+            var residents = Object.FindObjectsByType<NinjaVillage.Gameplay.Village.VillageResident>(FindObjectsSortMode.None);
+            Assert.IsTrue(System.Array.Exists(residents, r => r.name.StartsWith("Hero_")), "your heroes live in the village");
+            Assert.IsTrue(System.Array.Exists(residents, r => r.name == "Pet_fox"), "your pets live in the village");
+            Assert.IsTrue(System.Array.Exists(residents, r => r.name.StartsWith("npc_")), "townsfolk walk around");
+            Assert.IsNotNull(Object.FindAnyObjectByType<NinjaVillage.Gameplay.Village.ArmoryDisplay>());
+            Assert.IsNotNull(Object.FindAnyObjectByType<NinjaVillage.Gameplay.Village.TalentTreeDisplay>());
+
+            // Buildings use their pack sprites, not placeholder shapes.
+            var castle = GameObject.Find("Building_castle").transform.Find("Visual/Body").GetComponent<SpriteRenderer>();
+            Assert.AreNotEqual(NinjaVillage.Core.Utilities.GeneratedSprites.Square, castle.sprite);
+            yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        [UnityTest]
+        public IEnumerator Village_BuyPlaceMoveAndSellADecoration()
+        {
+            yield return LoadScene(SceneNames.Village);
+            yield return null;
+            var placer = NinjaVillage.Gameplay.Village.DecorationPlacer.Instance;
+            Assert.IsNotNull(placer, "your own village can be decorated");
+            var well = NinjaVillage.Systems.Village.DecorationService.Get("well");
+            Assert.IsNotNull(well, "decoration catalog missing — run the content generator");
+            int coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+
+            placer.Begin(well, new Vector2(-4f, 6f));
+            Assert.IsTrue(placer.Fits, $"test spot should be free: {placer.Blocker}");
+            Assert.IsTrue(placer.Confirm(out var error), error);
+            yield return null;
+            Assert.AreEqual(coins - well.Price.Amount, SaveService.Data.Wallet.Get(CurrencyType.Coins), "paid on placement");
+            var placed = SaveService.Data.Village.Decorations[0];
+            Assert.IsNotNull(NinjaVillage.Gameplay.Village.VillageMap.Instance.FindDecoration(placed.Uid), "the well stands in the village");
+
+            placer.Begin(well, new Vector2(0f, 3.5f)); // the road up to the castle
+            Assert.IsFalse(placer.Fits, "roads stay clear");
+            placer.Cancel();
+            Assert.AreEqual(coins - well.Price.Amount, SaveService.Data.Wallet.Get(CurrencyType.Coins), "cancelling is free");
+
+            Assert.IsTrue(NinjaVillage.Systems.Village.DecorationService.TryMove(placed.Uid, new Vector2(-5f, 6f), false, out error), error);
+            Assert.AreEqual(-5f, placed.X);
+            Assert.IsTrue(NinjaVillage.Systems.Village.DecorationService.TrySell(placed.Uid, out _));
+            yield return null;
+            Assert.AreEqual(coins - well.Price.Amount + well.Price.Amount / 2, SaveService.Data.Wallet.Get(CurrencyType.Coins), "half back");
+            Assert.IsNull(NinjaVillage.Gameplay.Village.VillageMap.Instance.FindDecoration(placed.Uid));
         }
 
         [UnityTest]
