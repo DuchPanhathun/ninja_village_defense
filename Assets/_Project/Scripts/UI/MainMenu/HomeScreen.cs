@@ -47,7 +47,6 @@ namespace NinjaVillage.UI.MainMenu
             ("menu_quests", "Missions", ScreenIds.Quests, true),
             ("menu_collection", "Collection", ScreenIds.Collection, true),
             ("menu_leaderboard", "Ranking", "leaderboard", true),
-            ("menu_account", "Account", "account", true),
             ("menu_settings", "Settings", ScreenIds.Settings, false),
         };
 
