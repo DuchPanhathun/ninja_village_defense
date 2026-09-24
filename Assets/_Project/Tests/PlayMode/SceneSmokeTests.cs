@@ -435,6 +435,37 @@ namespace NinjaVillage.Tests
         }
 
         [UnityTest]
+        public IEnumerator Battle_UltimateButtonNeverSaysReadyDuringCooldown()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var ultimate = PlayerReference.Instance.GetComponent<NinjaVillage.Gameplay.Ultimates.UltimateController>();
+            var ui = Object.FindAnyObjectByType<NinjaVillage.UI.Battle.UltimateButtonUI>();
+            var button = ui.GetComponent<UnityEngine.UI.Button>();
+            var label = ui.GetComponentsInChildren<TMPro.TMP_Text>(true);
+
+            void Charge()
+            {
+                for (int i = 0; i < 40; i++)
+                    EventBus<EnemyKilledEvent>.Raise(new EnemyKilledEvent(new Vector2(500f, 500f), 0, 0));
+            }
+
+            Charge();
+            yield return null;
+            Assert.IsTrue(ultimate.IsReady);
+            Assert.IsTrue(button.interactable, "charged and off cooldown: tappable");
+            button.onClick.Invoke();
+            Assert.AreEqual(0f, ultimate.ChargeNormalized, "it fired");
+
+            Charge(); // charged again straight away, but the cooldown is still running
+            Time.timeScale = 1f;
+            yield return null;
+            Assert.IsFalse(ultimate.IsReady);
+            Assert.IsFalse(button.interactable, "a tap wouldn't fire, so the button mustn't accept one");
+            Assert.IsFalse(System.Array.Exists(label, t => t.text.Contains("READY")), "and mustn't say READY");
+            Assert.IsTrue(System.Array.Exists(label, t => t.text.Contains(":")), "it shows the time left instead");
+        }
+
+        [UnityTest]
         public IEnumerator Battle_DeathOffersReviveThenRecordsTheRun()
         {
             yield return LoadScene(SceneNames.Battle);

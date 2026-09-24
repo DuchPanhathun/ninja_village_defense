@@ -24,6 +24,11 @@ namespace NinjaVillage.Gameplay.Ultimates
         public UltimateDefinition EquippedUltimate => equippedUltimate;
         public float ChargeNormalized => _charge / 100f;
         public bool IsReady => equippedUltimate != null && _charge >= 100f && Time.time >= _cooldownUntil;
+        /// <summary>Seconds until the ultimate may be used again (charge still builds meanwhile).</summary>
+        public float CooldownRemaining => Mathf.Max(0f, _cooldownUntil - Time.time);
+        /// <summary>1 right after use, falling to 0 when the cooldown is over.</summary>
+        public float CooldownNormalized =>
+            equippedUltimate == null || equippedUltimate.CooldownSeconds <= 0f ? 0f : Mathf.Clamp01(CooldownRemaining / equippedUltimate.CooldownSeconds);
 
         private void Awake()
         {
