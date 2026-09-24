@@ -18,7 +18,7 @@ namespace NinjaVillage.Gameplay.Village
     public class VillageCameraController : MonoBehaviour
     {
         [SerializeField] private float minZoom = 4f;
-        [SerializeField] private float maxZoom = 13f;
+        [SerializeField] private float maxZoom = 16f;
         [SerializeField] private float scrollZoomSpeed = 0.01f;
         [Tooltip("Screen pixels a press may move and still count as a tap.")]
         [SerializeField] private float tapThresholdPixels = 18f;

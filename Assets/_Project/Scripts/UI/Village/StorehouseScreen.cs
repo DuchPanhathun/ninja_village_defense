@@ -8,7 +8,7 @@ using UnityEngine;
 namespace NinjaVillage.UI.Village
 {
     /// <summary>
-    /// The village storehouse: everything harvested (and later cooked, fished, mined) with its count, and
+    /// The village storehouse: everything harvested and cooked (later fished, mined) with its count, and
     /// Sell 1 / Sell all for coins. Opened from the farm sign or the farm bar.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -19,7 +19,7 @@ namespace NinjaVillage.UI.Village
 
         protected override void Populate(RectTransform content)
         {
-            InfoText.text = "Your harvest. Sell it for coins — soon the Kitchen will cook it into meals that power up your battles.";
+            InfoText.text = "Your harvest and meals. Sell them for coins, or cook crops into meals in the Kitchen — meals power up your battles.";
             var stock = GoodsService.InStock();
             if (stock.Count == 0)
             {
@@ -29,8 +29,9 @@ namespace NinjaVillage.UI.Village
             }
             foreach (var (goods, count) in stock)
             {
+                string meal = goods.IsBattleMeal ? $"\n<color=#9CFF8A>Battle meal: {goods.MealEffect}</color>" : "";
                 var actions = UIBuilder.ActionCard(content, $"{goods.NameOrId}   ×{count}",
-                    $"{goods.Description}\nSells for <color=#FFD24D>{goods.SellPrice}</color> coins each", out _, out _, UITheme.Text, goods.Icon);
+                    $"{goods.Description}{meal}\nSells for <color=#FFD24D>{goods.SellPrice}</color> coins each", out _, out _, UITheme.Text, goods.Icon);
                 var g = goods;
                 UIBuilder.SmallButton(actions.transform, "Sell 1", () => Sell(g, 1), UITheme.ButtonSecondary, 200f);
                 UIBuilder.SmallButton(actions.transform, $"Sell all +{count * goods.SellPrice}", () => Sell(g, int.MaxValue), UITheme.Button, 320f);

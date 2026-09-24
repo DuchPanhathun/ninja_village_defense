@@ -41,6 +41,8 @@ namespace NinjaVillage.Gameplay.Village
             "A village with lanterns and flowers? Try the Decorate shop!",
             "Your heroes train here between battles. Tap one to manage them.",
             "Our village was just a hut once. Look at it now!",
+            "Onigiri before a battle? The Kitchen makes you tougher for the whole fight!",
+            "Rice, radish, carrots... the Kitchen turns the farm's harvest into battle meals.",
         };
 
         private static readonly Dictionary<string, string> AnimalSounds = new()

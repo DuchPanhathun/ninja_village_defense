@@ -12,7 +12,7 @@ namespace NinjaVillage.UI.Village
     /// <summary>
     /// The building menu (EPIC 17 Village UI "Building menu"): level, current/next effect, upgrade cost
     /// and whatever blocks the upgrade (Castle level, best wave, coins), plus the building's own action —
-    /// Dojo → Heroes, Forge → Forge, Shrine → Blessings, Pet House → Pets, Market → Shop, Castle → the
+    /// Dojo → Heroes, Forge → Forge, Shrine → Blessings, Pet House → Pets, Market → Shop, Kitchen → Kitchen, Castle → the
     /// overview of what each Castle level unlocks ("Main progression"). Opened with <see cref="Open"/>.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -109,6 +109,7 @@ namespace NinjaVillage.UI.Village
                 case BuildingIds.Shrine: return "Blessings";
                 case BuildingIds.PetHouse: return "Manage Pets";
                 case BuildingIds.Market: return "Today's Shop";
+                case BuildingIds.Kitchen: return "Open Kitchen";
                 default: return null;
             }
         }
@@ -123,6 +124,7 @@ namespace NinjaVillage.UI.Village
                 case BuildingIds.Shrine: UIScreenNavigator.Instance.Show(ScreenIds.Shrine); break;
                 case BuildingIds.PetHouse: UIScreenNavigator.Instance.Show(ScreenIds.Pets); break;
                 case BuildingIds.Market: UIScreenNavigator.Instance.Show(ScreenIds.Market); break;
+                case BuildingIds.Kitchen: UIScreenNavigator.Instance.Show(ScreenIds.Kitchen); break;
             }
         }
 

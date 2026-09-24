@@ -118,7 +118,7 @@ namespace NinjaVillage.EditorTools.Generators
             {
                 (BuildingIds.Dojo, "Village/building_dojo"), (BuildingIds.Forge, "Village/building_forge"),
                 (BuildingIds.Market, "Village/building_market"), (BuildingIds.PetHouse, "Village/building_pethouse"),
-                (BuildingIds.Shrine, "Village/building_shrine"),
+                (BuildingIds.Shrine, "Village/building_shrine"), (BuildingIds.Kitchen, "Village/building_shop_green"),
             };
 
             // Castle look per stage name (Hut, House, Manor, Keep, Fortress, Castle), starting at the first

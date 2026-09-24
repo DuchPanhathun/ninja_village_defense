@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5cbf1b526280eb96b4fdb075a1ff526, type: 3}
+  m_Name: Recipe_fortune_cookie
+  m_EditorClassIdentifier: 
+  id: fortune_cookie
+  displayName: Fortune Cookie
+  description: What does fate hold?
+  icon: {fileID: 21300000, guid: 9dc0b8b9054b99ee694c5129398140f6, type: 3}
+  output: {fileID: 11400000, guid: bf29af2d795dbf06cae9502710375bec, type: 2}
+  outputAmount: 1
+  ingredients:
+  - Goods: {fileID: 11400000, guid: b36ad54c0b6e719569450e9a1f4e5691, type: 2}
+    Amount: 2
+  - Goods: {fileID: 11400000, guid: 7e96fd553ba80497bbe651e3f38fc315, type: 2}
+    Amount: 1
+  cookSeconds: 2700
+  requiredKitchenLevel: 4

@@ -4,6 +4,7 @@ using NinjaVillage.Gameplay.Village;
 using NinjaVillage.Systems.Economy;
 using NinjaVillage.Systems.Farm;
 using NinjaVillage.Systems.GameFlow;
+using NinjaVillage.Systems.Kitchen;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
 using NinjaVillage.UI.Common;
@@ -20,7 +21,7 @@ namespace NinjaVillage.UI.Village
     /// hero, pet, the Armory or the Talent Tree opens that screen; tapping a decoration offers Move / Sell;
     /// while a decoration is being placed a bar offers Flip / Cancel / Place. The Farm button glides the view
     /// to the field ("!" when something is ripe); tapping a bed opens the seed picker or its status (Water,
-    /// Dig up). Visiting someone else's village
+    /// Dig up). The Kitchen button glides to the Kitchen and opens it ("!" when a meal is done). Visiting someone else's village
     /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -32,7 +33,7 @@ namespace NinjaVillage.UI.Village
         private const float TabBarHeight = 210f;
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
-        private GameObject _decorate, _visit, _farm, _farmBadge, _tabBar;
+        private GameObject _decorate, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _tabBar;
         private RectTransform _placeBar, _decoBar;
         private Image _placeIcon;
         private TextMeshProUGUI _placeName, _placeHint, _decoName;
@@ -120,6 +121,29 @@ namespace NinjaVillage.UI.Village
             UIStyle.Place(farm.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -580f), farm.Root.sizeDelta);
             _farm = farm.Root.gameObject;
             _farmBadge = farm.Badge;
+
+            var kitchen = UIStyle.Icon(parent, "item_onigiri", "Kitchen", OpenKitchen, 140f);
+            UIStyle.Place(kitchen.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -780f), kitchen.Root.sizeDelta);
+            _kitchen = kitchen.Root.gameObject;
+            _kitchenBadge = kitchen.Badge;
+        }
+
+        /// <summary>Glides to the Kitchen and opens it — or its build menu while it isn't built yet.</summary>
+        private static void OpenKitchen()
+        {
+            var cam = UnityEngine.Camera.main;
+            var controller = cam != null ? cam.GetComponent<VillageCameraController>() : null;
+            var kitchen = VillageService.Get(BuildingIds.Kitchen);
+            if (controller != null && kitchen != null) controller.FocusOn(kitchen.PlotPosition + new Vector2(0f, 1f));
+            if (KitchenService.IsBuilt)
+            {
+                Sfx.Play(AudioCueIds.UiClick);
+                UIScreenNavigator.Instance.Show(ScreenIds.Kitchen);
+            }
+            else
+            {
+                BuildingScreen.Open(BuildingIds.Kitchen);
+            }
         }
 
         private static void FocusFarm()
@@ -250,6 +274,7 @@ namespace NinjaVillage.UI.Village
             if (Time.unscaledTime < _nextFarmRefresh || _farmBadge == null) return;
             _nextFarmRefresh = Time.unscaledTime + 0.5f;
             _farmBadge.SetActive(!VillageVisit.IsVisiting && FarmService.RipeCount() > 0);
+            if (_kitchenBadge != null) _kitchenBadge.SetActive(!VillageVisit.IsVisiting && KitchenService.ReadyCount() > 0);
             if (_selectedPlot >= 0) RefreshFarmBar(); // live countdown
         }
 
@@ -507,6 +532,7 @@ namespace NinjaVillage.UI.Village
             if (active && _selectedPlot >= 0) SelectPlot(-1);
             _tabBar.SetActive(!active);
             _decorate.SetActive(!active && !VillageVisit.IsVisiting);
+            _kitchen.SetActive(!active && !VillageVisit.IsVisiting);
             _visit.SetActive(!active);
             if (!active) return;
 
@@ -543,6 +569,7 @@ namespace NinjaVillage.UI.Village
 
             bool visiting = VillageVisit.IsVisiting;
             _decorate.SetActive(!visiting && !DecorationPlacer.IsActive);
+            _kitchen.SetActive(!visiting && !DecorationPlacer.IsActive);
             _tabBar.SetActive(!visiting && !DecorationPlacer.IsActive);
         }
     }

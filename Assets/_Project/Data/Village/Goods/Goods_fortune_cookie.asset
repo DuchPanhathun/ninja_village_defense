@@ -17,5 +17,7 @@ MonoBehaviour:
   description: What does fate hold?
   icon: {fileID: 21300000, guid: 9dc0b8b9054b99ee694c5129398140f6, type: 3}
   category: 1
-  sellPrice: 25
+  sellPrice: 140
   sortOrder: 11
+  mealStat: 11
+  mealValue: 0.2

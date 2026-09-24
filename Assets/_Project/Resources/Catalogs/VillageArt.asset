@@ -20,12 +20,14 @@ MonoBehaviour:
   - market
   - pet_house
   - shrine
+  - kitchen
   buildingSprites:
   - {fileID: 21300000, guid: a9ae0f789abe8af7692b05b6c661a0ff, type: 3}
   - {fileID: 21300000, guid: 00637cd042ceb84db8ec6a59061f5ddc, type: 3}
   - {fileID: 21300000, guid: 2c32d7cc5898bcc849115c6c0f0f232c, type: 3}
   - {fileID: 21300000, guid: 748b477ed8283273c8a7289dc34a26c8, type: 3}
   - {fileID: 21300000, guid: ae5bb3cc8ff483b7586de04e6504fb23, type: 3}
+  - {fileID: 21300000, guid: 773869ec2c74a85e5a7161f2f751cc6b, type: 3}
   castleStages:
   - {fileID: 21300000, guid: 991cc9b2d8d2a919585e86d067ab0210, type: 3}
   - {fileID: 21300000, guid: 6cb6d2ff532259132811726cfd01386b, type: 3}

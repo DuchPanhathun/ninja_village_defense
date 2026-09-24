@@ -86,6 +86,11 @@ namespace NinjaVillage.EditorTools.Generators
                 new Vector2(0f, -7.5f), new Vector2(3.4f, 2f), new Color(0.90f, 0.78f, 0.45f), new Color(0.80f, 0.35f, 0.25f),
                 new[] { "Stall", "Market", "Bazaar" });
 
+            Building(BuildingIds.Kitchen, "Kitchen", "Cook your harvest into meals. Pick up to 2 meals before a battle — each one powers you up for that whole run.",
+                5, 0, 2, 1, 0, Cost(300, 1.5f), EffectDisplay.Integer, "Cooking slots", 1f, 3f,
+                new Vector2(-18f, 1.7f), new Vector2(3.6f, 2.4f), new Color(0.42f, 0.52f, 0.46f), new Color(0.36f, 0.46f, 0.40f),
+                new[] { "Cook Stall", "Kitchen", "Tea House" });
+
             var catalog = ContentGen.CreateOrLoad<BuildingCatalog>($"{ContentGen.CatalogRoot}/BuildingCatalog.asset");
             catalog.EditorSetItems(ContentGen.FindAll<BuildingDefinition>(ContentGen.DataRoot).Where(b => !string.IsNullOrEmpty(b.Id)).OrderBy(b => b.Id));
         }

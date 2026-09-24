@@ -62,6 +62,7 @@ namespace NinjaVillage.Core.Events
 
         // Village activities (EPIC 24)
         public const string CropsHarvested = "crops_harvested";    // Amount = goods harvested
+        public const string MealsCooked = "meals_cooked";          // Amount = meals collected from the Kitchen
 
         // Engagement / monetization
         public const string DailyLoginClaimed = "daily_login_claimed";

@@ -7,12 +7,13 @@ namespace NinjaVillage.Systems.Village
     /// Where things live on the village map, shared by the map (drawing) and the decoration rules
     /// (what's free to build on): the buildable area, the paths, and the spots of the fixed displays
     /// next to their buildings — the hero yard by the Dojo, the Armory rack by the Forge, the Talent Tree
-    /// by the Shrine, the pet meadow by the Pet House.
+    /// by the Shrine, the pet meadow by the Pet House. The ground reaches well past the buildings on every
+    /// side so there's open grass to decorate; the Kitchen sits at the west end of the main road, past the farm.
     /// </summary>
     public static class VillageLayout
     {
         /// <summary>The village ground (a forest ring is drawn around it).</summary>
-        public static readonly Rect Bounds = new(-15f, -11f, 30f, 22f);
+        public static readonly Rect Bounds = new(-22f, -16f, 44f, 32f);
 
         public static readonly Vector2 Plaza = new(0f, -1f);
         public static readonly Vector2 PlazaSize = new(5f, 3.6f);
@@ -20,13 +21,14 @@ namespace NinjaVillage.Systems.Village
         /// <summary>Straight dirt paths as (center, size) — the plaza cross plus spurs to each building.</summary>
         public static readonly (Vector2 center, Vector2 size)[] Paths =
         {
-            (new Vector2(0f, -1f), new Vector2(24f, 1.2f)),     // east-west road
+            (new Vector2(-3.3f, -1f), new Vector2(30.6f, 1.2f)), // east-west road, out west to the kitchen
             (new Vector2(0f, 1.1f), new Vector2(1.2f, 4.2f)),   // up to the castle
             (new Vector2(0f, -4.3f), new Vector2(1.2f, 3.4f)),  // down to the market
             (new Vector2(-7.5f, 0f), new Vector2(1.2f, 1.6f)),  // dojo
             (new Vector2(7.5f, 0f), new Vector2(1.2f, 1.6f)),   // forge
             (new Vector2(-8f, -3.2f), new Vector2(1.2f, 3.4f)), // shrine
             (new Vector2(8f, -3.2f), new Vector2(1.2f, 3.4f)),  // pet house
+            (new Vector2(-17.4f, -0.1f), new Vector2(1.2f, 1.2f)), // kitchen (its door is right of centre)
         };
 
         public static readonly Vector2 Armory = new(10.6f, 0.9f);

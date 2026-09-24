@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5cbf1b526280eb96b4fdb075a1ff526, type: 3}
+  m_Name: Recipe_noodle
+  m_EditorClassIdentifier: 
+  id: noodle
+  displayName: Noodle Bowl
+  description: Hot noodles in broth.
+  icon: {fileID: 21300000, guid: 47af92ade27ec89aca7884ce1ca29d36, type: 3}
+  output: {fileID: 11400000, guid: b7132b6298a681f8e9576c5ba7c04849, type: 2}
+  outputAmount: 1
+  ingredients:
+  - Goods: {fileID: 11400000, guid: b36ad54c0b6e719569450e9a1f4e5691, type: 2}
+    Amount: 2
+  - Goods: {fileID: 11400000, guid: 3662bf8183e313e78a25b88ca26b1e2e, type: 2}
+    Amount: 2
+  cookSeconds: 600
+  requiredKitchenLevel: 1

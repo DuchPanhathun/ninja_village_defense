@@ -3,6 +3,7 @@ using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Combat;
 using NinjaVillage.Gameplay.Player;
 using NinjaVillage.Gameplay.Skills;
+using NinjaVillage.Systems.Kitchen;
 using NinjaVillage.UI.Common;
 using TMPro;
 using UnityEngine;
@@ -11,8 +12,8 @@ using UnityEngine.UI;
 namespace NinjaVillage.UI.Battle
 {
     /// <summary>
-    /// The player's build at a glance, under the HP/XP bars: the weapon, then every skill picked this run
-    /// with its level (evolutions get a gold frame). New skills pop in; level-ups update the number.
+    /// The player's build at a glance, under the HP/XP bars: the weapon, the meals eaten for this run (green
+    /// tiles), then every skill picked this run with its level (evolutions get a gold frame). New skills pop in; level-ups update the number.
     /// Built in code; the Battle scene only needs this component on a RectTransform in the HUD canvas.
     /// </summary>
     public class SkillBarUI : MonoBehaviour
@@ -26,6 +27,7 @@ namespace NinjaVillage.UI.Battle
         private AutoAttackController _attack;
         private Image _weaponIcon;
         private Object _shownWeapon;
+        private int _shownMeals;
 
         private void Awake()
         {
@@ -58,6 +60,21 @@ namespace NinjaVillage.UI.Battle
                 if (_weaponIcon == null) _weaponIcon = CreateSlot(null, out _, first: true);
                 _weaponIcon.sprite = weapon != null ? (weapon.Icon != null ? weapon.Icon : UIIcons.Weapon(weapon.Id)) : null;
                 _weaponIcon.enabled = _weaponIcon.sprite != null;
+            }
+
+            // Meals are eaten as the run starts (MealRunModifier), after this bar may already exist.
+            var meals = KitchenService.MealsThisRun;
+            while (_shownMeals < meals.Count)
+            {
+                var meal = meals[_shownMeals];
+                var icon = CreateSlot(null, out _);
+                var tile = (RectTransform)icon.transform.parent;
+                tile.name = $"Meal_{meal.Id}";
+                tile.GetComponent<Image>().color = new Color(0.2f, 0.42f, 0.22f, 0.95f);
+                tile.SetSiblingIndex(Mathf.Min((_weaponIcon != null ? 1 : 0) + _shownMeals, _grid.childCount - 1));
+                icon.sprite = meal.Icon;
+                icon.enabled = meal.Icon != null;
+                _shownMeals++;
             }
         }
 

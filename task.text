@@ -521,11 +521,11 @@ into battles. Order = build order; each phase ends with a phone playtest and a c
 
 ## Phase 2 — Kitchen (village → battle link)
 
-- [ ]  Kitchen building   <!-- new plot using a house sprite; unlocks at Castle Lv 2 -->
-- [ ]  Recipes   <!-- ingredients → meal, cooking time; e.g. Onigiri (rice) +10% max HP, Yakitori +10% attack, Tea +10% XP, Sushi (fish+rice) +15% coins -->
-- [ ]  Meals as one-run buffs   <!-- pick up to 2 meals before a battle; applied by a RunStartModifier, used up once the run starts -->
-- [ ]  Kitchen UI + meal picker   <!-- cook queue; meal slots next to START / the chapter picker -->
-- [ ]  Tests   <!-- buff applied in the run, consumed exactly once, ingredients spent -->
+- [x]  Kitchen building   <!-- green lantern shop at the west end of the main road, past the farm (Castle Lv 2, max Lv 5); stoves 1→3 with its level; "Kitchen" HUD button glides there; village enlarged 30×22 → 44×32 for decorating, zoom out to 16 -->
+- [x]  Recipes   <!-- KitchenGenerator: Onigiri 3 rice 2m +10% HP · Noodle 2 rice+2 radish 10m +10% atk speed · Yakitori (Lv2) 2 carrot+1 radish 20m +12% attack · Sushi Roll (Lv3) 3 rice+1 beet 30m +15% XP · Fortune Cookie (Lv4) 2 rice+1 herbs 45m +20% gold; every meal sells for more than its ingredients; Sushi waits for fishing -->
+- [x]  Meals as one-run buffs   <!-- MealRunModifier (order 450): eats 1 of each packed meal as the run starts, applies it like a talent stat; out-of-stock meals are skipped but stay packed; meals show as green tiles on the battle skill bar -->
+- [x]  Kitchen UI + meal picker   <!-- KitchenScreen: stoves (countdown, Collect), packed meals, recipes (have/need, Cook); home "Meals" icon (shows the packed meal) → MealsScreen; "!" on Kitchen/Village when a meal is done -->
+- [x]  Tests   <!-- KitchenTests (EditMode: stoves, timing, 2-meal limit, eaten once + boost, recipe balance) + Village_KitchenCooksAMealThatPowersUpTheNextBattle (PlayMode: build, cook via UI, collect, pack, battle eats it) -->
 
 ## Phase 3 — Villager requests
 

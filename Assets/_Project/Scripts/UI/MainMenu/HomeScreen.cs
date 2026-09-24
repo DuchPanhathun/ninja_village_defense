@@ -42,6 +42,7 @@ namespace NinjaVillage.UI.MainMenu
             ("store_starter_pack", "Offers", ScreenIds.Store, true),
             ("menu_events", "Events", ScreenIds.Events, true),
             ("menu_achievements", "Trophies", ScreenIds.Achievements, true),
+            ("item_onigiri", "Meals", ScreenIds.Meals, true),
         };
 
         private static readonly (string icon, string label, string screenId, bool tile)[] RightColumn =
@@ -360,7 +361,7 @@ namespace NinjaVillage.UI.MainMenu
 
             var village = UIStyle.Icon(row, "menu_village", "Village", () => SceneLoader.LoadVillage(), 150f, tile: false);
             UIStyle.Place(village.Root, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-40f, 0f), village.Root.sizeDelta);
-            _villageBadge = village.Badge; // "!" when crops are ready to harvest
+            _villageBadge = village.Badge; // "!" when crops are ready to harvest or a meal is cooked
         }
 
         // ------------------------------------------------------------------ bottom tabs
@@ -446,7 +447,24 @@ namespace NinjaVillage.UI.MainMenu
                 if (present) button.Badge.SetActive(ScreenBadges.Has(screenId));
             }
             _seasonBadge.SetActive(ScreenBadges.Has(ScreenIds.BattlePass));
-            _villageBadge.SetActive(NinjaVillage.Systems.Farm.FarmService.RipeCount() > 0);
+            _villageBadge.SetActive(NinjaVillage.Systems.Farm.FarmService.RipeCount() > 0 ||
+                                    NinjaVillage.Systems.Kitchen.KitchenService.ReadyCount() > 0);
+            RefreshMeals();
+        }
+
+        /// <summary>The Meals link shows the first meal packed for the next battle.</summary>
+        private void RefreshMeals()
+        {
+            foreach (var (button, screenId) in _links)
+            {
+                if (screenId != ScreenIds.Meals) continue;
+                var icon = button.Button.transform.Find("Icon")?.GetComponent<Image>();
+                if (icon == null) continue;
+                var picked = NinjaVillage.Systems.Kitchen.KitchenService.SelectedMeals;
+                var meal = picked.Count > 0 ? NinjaVillage.Systems.Farm.GoodsService.Get(picked[0]) : null;
+                icon.sprite = meal != null && meal.Icon != null ? meal.Icon : UIArt.Get("item_onigiri");
+                icon.color = meal != null ? Color.white : new Color(1f, 1f, 1f, 0.6f);
+            }
         }
 
         private void RefreshHero(ProfileSaveData profile)

@@ -84,7 +84,7 @@ namespace NinjaVillage.Tests
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,
                 ScreenIds.DailyLogin, ScreenIds.Quests, ScreenIds.Achievements, ScreenIds.BattlePass, ScreenIds.Events,
-                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, "leaderboard");
+                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, ScreenIds.Meals, "leaderboard");
             yield return new WaitForSecondsRealtime(0.5f);
         }
 
@@ -147,7 +147,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
@@ -280,6 +280,72 @@ namespace NinjaVillage.Tests
                 NinjaVillage.Systems.Farm.FarmService.Plant(1, rice);
                 Assert.AreEqual(1, NinjaVillage.Systems.Village.VillageSnapshot.FromSave(SaveService.Data).Farm.Count, "visitors see what grows");
                 yield return new WaitForSecondsRealtime(0.3f);
+            }
+            finally
+            {
+                NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
+        }
+
+        /// <summary>
+        /// Phase 2: build the Kitchen, cook onigiri from rice, collect it, pack it — and the next battle eats
+        /// exactly one and starts with the boost (and the meal on the skill bar).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Village_KitchenCooksAMealThatPowersUpTheNextBattle()
+        {
+            var now = new System.DateTime(2026, 9, 24, 12, 0, 0, System.DateTimeKind.Utc);
+            NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = () => now;
+            try
+            {
+                SaveService.Data.Village.Buildings.SetLevel(BuildingIds.Castle, 2);
+                NinjaVillage.Systems.Farm.GoodsService.Add("rice", 3);
+                yield return LoadScene(SceneNames.Village);
+                yield return null;
+                Assert.IsNotNull(GameObject.Find($"Building_{BuildingIds.Kitchen}"), "the Kitchen stands on the map");
+
+                var onigiri = NinjaVillage.Systems.Kitchen.KitchenService.GetRecipe("onigiri");
+                Assert.IsNotNull(onigiri, "recipe catalog missing — run the content generator");
+                Assert.AreEqual(NinjaVillage.Systems.Kitchen.KitchenResult.NotBuilt, NinjaVillage.Systems.Kitchen.KitchenService.Cook(onigiri));
+                Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Kitchen), out var blocker), blocker.ToString());
+                Assert.AreEqual(1, NinjaVillage.Systems.Kitchen.KitchenService.SlotCount);
+
+                UIScreenNavigator.Instance.Show(ScreenIds.Kitchen);
+                yield return null;
+                var cook = Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Cook"
+                                         && b.GetComponentInParent<UnityEngine.UI.VerticalLayoutGroup>().name.Contains("Onigiri"));
+                Assert.IsNotNull(cook, "the Onigiri recipe has a Cook button");
+                cook.onClick.Invoke();
+                Assert.AreEqual(0, NinjaVillage.Systems.Farm.GoodsService.Count("rice"), "cooking uses the rice");
+                Assert.IsNotNull(NinjaVillage.Systems.Kitchen.KitchenService.GetJob(0));
+                Assert.AreEqual(NinjaVillage.Systems.Kitchen.KitchenResult.NoFreeSlot, NinjaVillage.Systems.Kitchen.KitchenService.CheckCook(onigiri));
+                Assert.AreEqual(NinjaVillage.Systems.Kitchen.KitchenResult.NotReady, NinjaVillage.Systems.Kitchen.KitchenService.Collect(0, out _, out _));
+
+                now = now.AddSeconds(onigiri.CookSeconds); // ...time passes
+                yield return new WaitForSecondsRealtime(0.6f); // the stove turns to "Collect"
+                Assert.AreEqual(1, NinjaVillage.Systems.Kitchen.KitchenService.ReadyCount());
+                var collect = Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Collect");
+                Assert.IsNotNull(collect, "a finished meal can be collected");
+                collect.onClick.Invoke();
+                Assert.AreEqual(1, NinjaVillage.Systems.Farm.GoodsService.Count("onigiri"));
+
+                var meal = NinjaVillage.Systems.Farm.GoodsService.Get("onigiri");
+                Assert.AreEqual(NinjaVillage.Systems.Kitchen.MealToggle.Added, NinjaVillage.Systems.Kitchen.KitchenService.ToggleMeal(meal));
+                int healthWithoutMeal = NinjaVillage.Systems.Inventory.LoadoutPower.Compute(SaveService.Data).Health;
+
+                yield return LoadScene(SceneNames.Battle);
+                yield return null;
+                var run = PlayerReference.Instance.GetComponent<NinjaVillage.Systems.Meta.RunBootstrapper>().Context;
+                Assert.AreEqual(0, NinjaVillage.Systems.Farm.GoodsService.Count("onigiri"), "the battle ate the onigiri");
+                Assert.IsTrue(NinjaVillage.Systems.Kitchen.KitchenService.IsSelected("onigiri"), "it stays packed for when you cook more");
+                Assert.AreEqual(1, NinjaVillage.Systems.Kitchen.KitchenService.MealsThisRun.Count);
+                // Onigiri adds 10 percentage points on top of the loadout's own health bonuses (e.g. the Assassin's -20%).
+                Assert.AreEqual(healthWithoutMeal + meal.MealValue * (run.BaseMaxHealth + run.MaxHealthFlatBonus), run.FinalMaxHealth, 1f,
+                    "onigiri: +10% max health this run");
+                Assert.AreEqual(run.FinalMaxHealth, PlayerReference.Instance.GetComponent<NinjaVillage.Core.Combat.Health>().MaxHealth, 0.01f);
+                Assert.IsNotNull(GameObject.Find("Meal_onigiri"), "the meal shows on the skill bar");
             }
             finally
             {
