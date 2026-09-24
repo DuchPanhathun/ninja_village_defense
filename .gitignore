@@ -51,3 +51,4 @@ crashlytics-build.properties
 google-services.json
 GoogleService-Info.plist
 firebase_cred.tsx
+Stevedore.conf
