@@ -20,7 +20,15 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "989056664463-skpra6o4vu6o4057captb6kf5mufu0bb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thun.ninjavillagedefense"
+              }
+            }
+          ]
         }
       }
     }
