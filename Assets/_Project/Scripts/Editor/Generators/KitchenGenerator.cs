@@ -25,6 +25,7 @@ namespace NinjaVillage.EditorTools.Generators
             ("yakitori", TalentStat.AttackDamage, 0.12f),
             ("sushi_roll", TalentStat.XpGain, 0.15f),
             ("fortune_cookie", TalentStat.GoldGain, 0.20f),
+            ("sushi", TalentStat.CritChance, 0.06f),
         };
 
         // meal id, cook minutes, kitchen level, ingredients
@@ -35,6 +36,7 @@ namespace NinjaVillage.EditorTools.Generators
             ("yakitori", 20f, 2, new[] { ("carrot", 2), ("radish", 1) }),
             ("sushi_roll", 30f, 3, new[] { ("rice", 3), ("beet", 1) }),
             ("fortune_cookie", 45f, 4, new[] { ("rice", 2), ("herbs", 1) }),
+            ("sushi", 15f, 2, new[] { ("rice", 2), ("fish", 1) }), // fish from the pond (Phase 5)
         };
 
         [ContentGenerator("Kitchen: meals & recipes", 89)]

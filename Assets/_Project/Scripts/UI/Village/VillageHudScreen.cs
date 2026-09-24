@@ -23,7 +23,9 @@ namespace NinjaVillage.UI.Village
     /// while a decoration is being placed a bar offers Flip / Cancel / Place. The Farm button glides the view
     /// to the field ("!" when something is ripe); tapping a bed opens the seed picker or its status (Water,
     /// Dig up). The Kitchen button glides to the Kitchen and opens it ("!" when a meal is done); Requests (or tapping
-    /// a villager with a "!") opens today's villager requests. Visiting someone else's village
+    /// a villager with a "!") opens today's villager requests; tapping a house plot opens its <see cref="HouseScreen"/>;
+    /// Fish (left) or tapping the pond opens the fishing mini-game; tapping the mine collects its bars.
+    /// Visiting someone else's village
     /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -35,7 +37,7 @@ namespace NinjaVillage.UI.Village
         private const float TabBarHeight = 210f;
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
-        private GameObject _decorate, _decorateBadge, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _requests, _requestsBadge, _tabBar;
+        private GameObject _decorate, _decorateBadge, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _requests, _requestsBadge, _fish, _fishBadge, _tabBar;
         private RectTransform _placeBar, _decoBar;
         private Image _placeIcon;
         private TextMeshProUGUI _placeName, _placeHint, _decoName;
@@ -134,6 +136,22 @@ namespace NinjaVillage.UI.Village
             UIStyle.Place(requests.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -980f), requests.Root.sizeDelta);
             _requests = requests.Root.gameObject;
             _requestsBadge = requests.Badge;
+
+            // Left side: the pond (the right column is full).
+            var fish = UIStyle.Icon(parent, "tool_fishing_rod", "Fish", OpenFishing, 140f);
+            UIStyle.Place(fish.Root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(20f, -180f), fish.Root.sizeDelta);
+            _fish = fish.Root.gameObject;
+            _fishBadge = fish.Badge;
+        }
+
+        /// <summary>Glides to the pond and opens the fishing mini-game.</summary>
+        private static void OpenFishing()
+        {
+            var cam = UnityEngine.Camera.main;
+            var controller = cam != null ? cam.GetComponent<VillageCameraController>() : null;
+            if (controller != null) controller.FocusOn(VillageLayout.Pond.center);
+            Sfx.Play(AudioCueIds.UiClick);
+            UIScreenNavigator.Instance.Show(ScreenIds.Fishing);
         }
 
         /// <summary>Glides to the Kitchen and opens it — or its build menu while it isn't built yet.</summary>
@@ -285,6 +303,7 @@ namespace NinjaVillage.UI.Village
             if (_kitchenBadge != null) _kitchenBadge.SetActive(!VillageVisit.IsVisiting && KitchenService.ReadyCount() > 0);
             if (_requestsBadge != null) _requestsBadge.SetActive(!VillageVisit.IsVisiting && RequestService.DeliverableCount() > 0);
             if (_decorateBadge != null) _decorateBadge.SetActive(!VillageVisit.IsVisiting && DecorationService.HasGifts());
+            if (_fishBadge != null) _fishBadge.SetActive(!VillageVisit.IsVisiting && FishingService.Casts >= PondMineRules.MaxCasts);
             if (_selectedPlot >= 0) RefreshFarmBar(); // live countdown
         }
 
@@ -412,6 +431,8 @@ namespace NinjaVillage.UI.Village
             EventBus<DecorationPlacementEvent>.Subscribe(OnPlacement);
             EventBus<FarmPlotTappedEvent>.Subscribe(OnPlotTapped);
             EventBus<VillagerRequestTappedEvent>.Subscribe(OnRequestTapped);
+            EventBus<HousePlotTappedEvent>.Subscribe(OnHouseTapped);
+            EventBus<PondTappedEvent>.Subscribe(OnPondTapped);
             EventBus<FarmChangedEvent>.Subscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Subscribe(OnCurrencyChanged);
         }
@@ -424,6 +445,8 @@ namespace NinjaVillage.UI.Village
             EventBus<DecorationPlacementEvent>.Unsubscribe(OnPlacement);
             EventBus<FarmPlotTappedEvent>.Unsubscribe(OnPlotTapped);
             EventBus<VillagerRequestTappedEvent>.Unsubscribe(OnRequestTapped);
+            EventBus<HousePlotTappedEvent>.Unsubscribe(OnHouseTapped);
+            EventBus<PondTappedEvent>.Unsubscribe(OnPondTapped);
             EventBus<FarmChangedEvent>.Unsubscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Unsubscribe(OnCurrencyChanged);
         }
@@ -436,7 +459,38 @@ namespace NinjaVillage.UI.Village
             if (!IsCurrent || DecorationPlacer.IsActive) return;
             SelectDecoration(0);
             SelectPlot(-1);
+            // The mine hands over its bars with a tap (like the treasury); with nothing to collect it opens its menu.
+            if (evt.BuildingId == BuildingIds.Mine && MineService.Available > 0)
+            {
+                var haul = MineService.Collect();
+                Sfx.Play(AudioCueIds.RewardClaim);
+                UIScreenNavigator.Instance.Toast($"Mine: +{haul}");
+                return;
+            }
             BuildingScreen.Open(evt.BuildingId);
+        }
+
+        private void OnPondTapped(PondTappedEvent evt)
+        {
+            if (!IsCurrent || DecorationPlacer.IsActive || VillageVisit.IsVisiting) return;
+            SelectDecoration(0);
+            SelectPlot(-1);
+            Sfx.Play(AudioCueIds.UiClick);
+            UIScreenNavigator.Instance.Show(ScreenIds.Fishing);
+        }
+
+        private void OnHouseTapped(HousePlotTappedEvent evt)
+        {
+            if (!IsCurrent || DecorationPlacer.IsActive || VillageVisit.IsVisiting) return;
+            SelectDecoration(0);
+            SelectPlot(-1);
+            if (!HouseService.IsUnlocked(evt.Plot))
+            {
+                Sfx.Play(AudioCueIds.UiError);
+                UIScreenNavigator.Instance.Toast(HouseService.Describe(HouseResult.PlotLocked, evt.Plot));
+                return;
+            }
+            HouseScreen.Open(evt.Plot);
         }
 
         private void OnRequestTapped(VillagerRequestTappedEvent evt)
@@ -554,6 +608,7 @@ namespace NinjaVillage.UI.Village
             _decorate.SetActive(!active && !VillageVisit.IsVisiting);
             _kitchen.SetActive(!active && !VillageVisit.IsVisiting);
             _requests.SetActive(!active && !VillageVisit.IsVisiting);
+            _fish.SetActive(!active && !VillageVisit.IsVisiting);
             _visit.SetActive(!active);
             if (!active) return;
 
@@ -593,6 +648,7 @@ namespace NinjaVillage.UI.Village
             _decorate.SetActive(!visiting && !DecorationPlacer.IsActive);
             _kitchen.SetActive(!visiting && !DecorationPlacer.IsActive);
             _requests.SetActive(!visiting && !DecorationPlacer.IsActive);
+            _fish.SetActive(!visiting && !DecorationPlacer.IsActive);
             _tabBar.SetActive(!visiting && !DecorationPlacer.IsActive);
         }
     }

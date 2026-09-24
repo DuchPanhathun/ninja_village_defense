@@ -133,6 +133,8 @@ namespace NinjaVillage.Systems.Village
             }
 
             int newLevel = level + 1;
+            if (def.IsCastle) TreasuryService.Accrue(); // the castle sets the treasury's rate and size
+            if (def.Id == BuildingIds.Mine) MineService.Accrue(); // ...and the mine's level its digging rate
             Data.Buildings.SetLevel(def.Id, newLevel);
             SaveService.SaveNow();
 

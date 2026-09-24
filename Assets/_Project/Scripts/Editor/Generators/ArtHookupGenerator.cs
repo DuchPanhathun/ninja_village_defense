@@ -123,6 +123,7 @@ namespace NinjaVillage.EditorTools.Generators
                     if (AssetImporter.GetAtPath(path) is not TextureImporter importer) continue;
 
                     bool ground = Path.GetFileName(path).StartsWith("bg_ground_");
+                    bool pond = Path.GetFileName(path).StartsWith("pond_water"); // 9-sliced to any pond size
                     var settings = new TextureImporterSettings();
                     importer.ReadTextureSettings(settings);
                     bool dirty = false;
@@ -131,9 +132,15 @@ namespace NinjaVillage.EditorTools.Generators
                         settings.spritePixelsPerUnit = WorldPixelsPerUnit;
                         dirty = true;
                     }
-                    if (ground && settings.spriteMeshType != SpriteMeshType.FullRect)
+                    if ((ground || pond) && settings.spriteMeshType != SpriteMeshType.FullRect)
                     {
-                        settings.spriteMeshType = SpriteMeshType.FullRect; // required for tiled drawing
+                        settings.spriteMeshType = SpriteMeshType.FullRect; // required for tiled / sliced drawing
+                        dirty = true;
+                    }
+                    var border = pond ? new Vector4(128, 128, 128, 128) : Vector4.zero; // 16 source px at 8x
+                    if (pond && settings.spriteBorder != border)
+                    {
+                        settings.spriteBorder = border;
                         dirty = true;
                     }
                     if (!dirty) continue;

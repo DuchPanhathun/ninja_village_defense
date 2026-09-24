@@ -26,7 +26,8 @@ namespace NinjaVillage.Systems.Inventory
     /// <summary>
     /// The Forge (EPIC 11): crafting weapons the player doesn't own, upgrading weapon levels (capped by
     /// the Forge's level — its data-defined effect), and reforging a weapon into the next tier
-    /// (Iron → Steel → Golden → Legendary, goal.text) using coins plus spare equipment as materials.
+    /// (Iron → Steel → Golden → Legendary, goal.text) using coins plus spare equipment as materials — or the
+    /// mine's metal bars in place of missing gear (EPIC 24 Phase 5).
     /// Costs and requirements come from <see cref="EconomyConfig"/>.
     /// </summary>
     public static class ForgeService
@@ -149,10 +150,39 @@ namespace NinjaVillage.Systems.Inventory
             if (ForgeLevel <= 0) return ForgeBlocker.ForgeNotBuilt;
             if (ForgeLevel < next.RequiredForgeLevel) return ForgeBlocker.ForgeLevel;
             if (GetLevel(def.Id) < next.RequiredWeaponLevel) return ForgeBlocker.WeaponLevel;
-            if (!InventoryRules.PickMaterials(inv, InventoryService.RarityIndexOf, (int)next.MaterialMinRarity, next.MaterialCount, MaterialBuffer))
-                return ForgeBlocker.NotEnoughMaterials;
+            var (bar, bars) = MaterialsFor(def, next);
+            if (bars > 0 && Farm.GoodsService.Count(bar) < bars) return ForgeBlocker.NotEnoughMaterials;
             if (!CurrencyService.CanAfford(Price.Coins(next.CoinCost))) return ForgeBlocker.NotEnoughCurrency;
             return ForgeBlocker.None;
+        }
+
+        /// <summary>
+        /// Materials for reforging <paramref name="def"/> into <paramref name="next"/>: spare gear first (picked into
+        /// the material buffer), and for every piece still missing, <see cref="PondMineRules.BarsPerMaterial"/> of
+        /// the tier's metal bar from the mine. Returns that bar and how many are needed (0 when gear covers it all).
+        /// </summary>
+        private static (string bar, int bars) MaterialsFor(WeaponDefinition def, WeaponTierConfig next)
+        {
+            InventoryRules.PickMaterials(InventoryService.Data, InventoryService.RarityIndexOf, (int)next.MaterialMinRarity, next.MaterialCount, MaterialBuffer);
+            int missing = Mathf.Max(0, next.MaterialCount - MaterialBuffer.Count);
+            string bar = PondMineRules.ReforgeBar(GetTier(def.Id) + 1);
+            return missing == 0 || bar == null ? (bar, 0) : (bar, missing * PondMineRules.BarsPerMaterial);
+        }
+
+        /// <summary>"2 spare Common+ gear (or 5 Iron Bars each) · you'd use 1 gear + 5 Iron Bars" for the Forge screen.</summary>
+        public static string DescribeMaterials(WeaponDefinition def)
+        {
+            var next = def != null ? NextTier(def.Id) : null;
+            if (next == null || next.MaterialCount <= 0) return string.Empty;
+            string barId = PondMineRules.ReforgeBar(GetTier(def.Id) + 1);
+            var barGoods = barId != null ? Farm.GoodsService.Get(barId) : null;
+            string barName = barGoods != null ? barGoods.NameOrId + "s" : "bars";
+            string text = $"{next.MaterialCount} spare {next.MaterialMinRarity}+ gear (or {PondMineRules.BarsPerMaterial} {barName} each)";
+            if (!InventoryService.Data.OwnsWeapon(def.Id)) return text;
+            var (bar, bars) = MaterialsFor(def, next);
+            int gear = MaterialBuffer.Count;
+            return bars <= 0 ? $"{text} · you have the gear"
+                : $"{text} · uses {gear} gear + {bars} {barName} (have {Farm.GoodsService.Count(bar)})";
         }
 
         public static bool TryReforge(WeaponDefinition def, out ForgeBlocker blocker)
@@ -168,8 +198,9 @@ namespace NinjaVillage.Systems.Inventory
             }
 
             var inv = InventoryService.Data;
-            InventoryRules.PickMaterials(inv, InventoryService.RarityIndexOf, (int)next.MaterialMinRarity, next.MaterialCount, MaterialBuffer);
+            var (bar, bars) = MaterialsFor(def, next); // fills MaterialBuffer with the spare gear used
             InventoryRules.ConsumeMaterials(inv, MaterialBuffer);
+            if (bars > 0) Farm.GoodsService.TrySpend(bar, bars);
             inv.SetWeaponTier(def.Id, GetTier(def.Id) + 1);
             SaveService.SaveNow();
 
@@ -201,7 +232,7 @@ namespace NinjaVillage.Systems.Inventory
                 case ForgeBlocker.NotEnoughMaterials:
                     if (def == null || NextTier(def.Id) == null) return "Not enough materials";
                     var tier = NextTier(def.Id);
-                    return $"Needs {tier.MaterialCount} spare {tier.MaterialMinRarity}+ equipment";
+                    return $"Needs {tier.MaterialCount} spare {tier.MaterialMinRarity}+ equipment, or {PondMineRules.BarsPerMaterial} mine bars per missing piece";
                 case ForgeBlocker.NotEnoughCurrency: return "Not enough coins";
                 default: return "Unavailable";
             }

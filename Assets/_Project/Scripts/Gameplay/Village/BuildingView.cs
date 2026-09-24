@@ -22,7 +22,7 @@ namespace NinjaVillage.Gameplay.Village
         public string BuildingId { get; private set; }
 
         private BuildingDefinition _definition;
-        private SpriteRenderer _body, _shadow, _sign;
+        private SpriteRenderer _body, _shadow, _sign, _crane;
         private SpriteRenderer[] _flags = System.Array.Empty<SpriteRenderer>();
         private TextMeshPro _label;
         private Transform _visual;
@@ -108,7 +108,7 @@ namespace NinjaVillage.Gameplay.Village
             _shownLevel = level;
         }
 
-        /// <summary>The Dojo's sign, and flags beside the Castle once it's grown.</summary>
+        /// <summary>The Dojo's sign, flags beside the Castle once it's grown, and the Mine's crane.</summary>
         private void RefreshExtras(VillageArt art, bool built, int level, Vector2 size, float baseY, int order)
         {
             if (art == null) return;
@@ -145,6 +145,20 @@ namespace NinjaVillage.Gameplay.Village
                     _flags[i].sortingOrder = order;
                     _flags[i].enabled = built && level >= 3;
                 }
+            }
+
+            if (_definition.Id == BuildingIds.Mine && art.MineCrane != null)
+            {
+                if (_crane == null)
+                {
+                    _crane = new GameObject("Crane").AddComponent<SpriteRenderer>();
+                    _crane.transform.SetParent(_visual, false);
+                    _crane.sprite = art.MineCrane;
+                }
+                // The hoist stands on the right of the rock face, lowering its hook into the pit.
+                _crane.transform.localPosition = new Vector3(size.x * 0.5f + 0.4f, baseY + art.MineCrane.bounds.extents.y, 0f);
+                _crane.sortingOrder = order;
+                _crane.enabled = built;
             }
         }
 

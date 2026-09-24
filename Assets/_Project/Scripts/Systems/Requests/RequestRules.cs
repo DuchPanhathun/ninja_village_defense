@@ -33,9 +33,10 @@ namespace NinjaVillage.Systems.Requests
             return "A villager";
         }
 
-        /// <summary>Whether a request can come up: the village can do it, and a chapter request needs a chapter left to clear.</summary>
-        public static bool IsEligible(RequestKind kind, int requiredCastle, int requiredKitchen, int castleLevel, int kitchenLevel, int nextChapter) =>
-            castleLevel >= requiredCastle && kitchenLevel >= requiredKitchen && (kind != RequestKind.Chapter || nextChapter > 0);
+        /// <summary>Whether a request can come up: the village can do it (castle, kitchen, any building it needs), and a chapter request needs a chapter left to clear.</summary>
+        public static bool IsEligible(RequestKind kind, int requiredCastle, int requiredKitchen, int castleLevel, int kitchenLevel, int nextChapter,
+            bool buildingReady = true) =>
+            buildingReady && castleLevel >= requiredCastle && kitchenLevel >= requiredKitchen && (kind != RequestKind.Chapter || nextChapter > 0);
 
         /// <summary>Base coins grown by <see cref="CoinGrowthPerCastle"/> per castle level, rounded to 5.</summary>
         public static int ScaledCoins(int baseCoins, int castleLevel)

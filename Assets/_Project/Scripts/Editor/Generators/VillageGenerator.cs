@@ -91,6 +91,11 @@ namespace NinjaVillage.EditorTools.Generators
                 new Vector2(-18f, 1.7f), new Vector2(3.6f, 2.4f), new Color(0.42f, 0.52f, 0.46f), new Color(0.36f, 0.46f, 0.40f),
                 new[] { "Cook Stall", "Kitchen", "Tea House" });
 
+            Building(BuildingIds.Mine, "Mine", "Digs up iron bars over time (gold from Lv 3, mithril from Lv 5), with a gem now and then. The Forge takes bars in place of spare gear.",
+                5, 0, 3, 1, 0, Cost(600, 1.5f), EffectDisplay.Integer, "Bars per hour", 4f, 12f,
+                new Vector2(17.25f, 12.2f), new Vector2(4.2f, 2.4f), new Color(0.55f, 0.42f, 0.32f), new Color(0.4f, 0.3f, 0.22f),
+                new[] { "Dig Site", "Mine", "Deep Mine" });
+
             var catalog = ContentGen.CreateOrLoad<BuildingCatalog>($"{ContentGen.CatalogRoot}/BuildingCatalog.asset");
             catalog.EditorSetItems(ContentGen.FindAll<BuildingDefinition>(ContentGen.DataRoot).Where(b => !string.IsNullOrEmpty(b.Id)).OrderBy(b => b.Id));
         }

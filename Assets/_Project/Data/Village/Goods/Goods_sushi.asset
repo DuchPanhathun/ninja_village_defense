@@ -19,5 +19,5 @@ MonoBehaviour:
   category: 1
   sellPrice: 120
   sortOrder: 9
-  mealStat: 0
-  mealValue: 0
+  mealStat: 2
+  mealValue: 0.06

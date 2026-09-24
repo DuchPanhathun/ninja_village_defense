@@ -17,8 +17,8 @@ namespace NinjaVillage.Gameplay.Village
     /// <see cref="VillageVisit"/> has one: grass with dirt roads and a plaza inside a forest ring, one
     /// <see cref="BuildingView"/> per building, the heroes you own training by the Dojo (the selected one
     /// tagged, with the active pet at heel), the other pets in the meadow by the Pet House, the Armory rack
-    /// with your gear, the Talent Tree, your bought decorations, and townsfolk and farm animals whose numbers
-    /// grow with the village, plus today's request-givers on the plaza with a "!" over their heads.
+    /// with your gear, the Talent Tree, your bought decorations, the houses on the residential lane and the treasury
+    /// on the plaza, and townsfolk and farm animals whose numbers grow with the village and its houses, plus today's request-givers on the plaza with a "!" over their heads.
     /// <see cref="RefreshFromSave"/> redraws only what changed.
     /// </summary>
     public class VillageMap : MonoBehaviour
@@ -45,6 +45,10 @@ namespace NinjaVillage.Gameplay.Village
             "Our village was just a hut once. Look at it now!",
             "Onigiri before a battle? The Kitchen makes you tougher for the whole fight!",
             "Rice, radish, carrots... the Kitchen turns the farm's harvest into battle meals.",
+            "Every family in a house pays into the Treasury. Don't forget to collect it!",
+            "The Treasury on the plaza fills up by itself. Once it's full, it stops!",
+            "They say a Golden Koi lives in the pond. Only the best timing lands it!",
+            "No spare gear to reforge with? The Forge takes bars from the mine too.",
         };
 
         private static readonly Dictionary<string, string> AnimalSounds = new()
@@ -92,6 +96,7 @@ namespace NinjaVillage.Gameplay.Village
             EventBus<BuildingUpgradedEvent>.Subscribe(OnBuildingUpgraded);
             EventBus<DecorationsChangedEvent>.Subscribe(OnDecorationsChanged);
             EventBus<RequestsChangedEvent>.Subscribe(OnRequestsChanged);
+            EventBus<HousesChangedEvent>.Subscribe(OnHousesChanged);
         }
 
         private void OnDisable()
@@ -99,6 +104,7 @@ namespace NinjaVillage.Gameplay.Village
             EventBus<BuildingUpgradedEvent>.Unsubscribe(OnBuildingUpgraded);
             EventBus<DecorationsChangedEvent>.Unsubscribe(OnDecorationsChanged);
             EventBus<RequestsChangedEvent>.Unsubscribe(OnRequestsChanged);
+            EventBus<HousesChangedEvent>.Unsubscribe(OnHousesChanged);
         }
 
         private void Start()
@@ -122,6 +128,7 @@ namespace NinjaVillage.Gameplay.Village
             _profileBoard.transform.SetParent(transform, false);
             _profileBoard.transform.position = VillageLayout.ProfileBoard;
             BuildFarm();
+            BuildHousesAndTreasury();
 
             _decorationRoot = new GameObject("Decorations").transform;
             _decorationRoot.SetParent(transform, false);
@@ -148,6 +155,7 @@ namespace NinjaVillage.Gameplay.Village
         private void OnBuildingUpgraded(BuildingUpgradedEvent evt) => RefreshFromSave();
         private void OnDecorationsChanged(DecorationsChangedEvent evt) => RefreshFromSave();
         private void OnRequestsChanged(RequestsChangedEvent evt) => SyncRequestGivers();
+        private void OnHousesChanged(HousesChangedEvent evt) => RefreshFromSave(); // new families move in
 
         private void Redraw()
         {
@@ -297,6 +305,30 @@ namespace NinjaVillage.Gameplay.Village
             sign.transform.SetParent(farm, false);
             sign.transform.position = VillageLayout.FarmSign;
             sign.Build(_art);
+        }
+
+        // ------------------------------------------------------------------ houses, treasury, pond, mine
+
+        private void BuildHousesAndTreasury()
+        {
+            var root = new GameObject("Houses").transform;
+            root.SetParent(transform, false);
+            for (int plot = 0; plot < HousingRules.MaxPlots; plot++)
+            {
+                var view = new GameObject().AddComponent<HouseView>();
+                view.transform.SetParent(root, false);
+                view.Initialize(plot, _art, IsOwnVillage ? null : Snapshot);
+            }
+            var treasury = new GameObject().AddComponent<TreasuryView>();
+            treasury.transform.SetParent(transform, false);
+            treasury.Initialize(_art, !IsOwnVillage);
+
+            var pond = new GameObject().AddComponent<PondView>();
+            pond.transform.SetParent(transform, false);
+            pond.Initialize(_art, !IsOwnVillage);
+            var mine = new GameObject().AddComponent<MineDisplay>();
+            mine.transform.SetParent(transform, false);
+            mine.Initialize(_art, !IsOwnVillage);
         }
 
         // ------------------------------------------------------------------ decorations
@@ -471,25 +503,29 @@ namespace NinjaVillage.Gameplay.Village
         private void SyncTownsfolk()
         {
             if (_art == null) return;
-            int people = VillagerCountFor(Snapshot.TotalBuildingLevels, minVillagers, maxVillagers);
+            // Every house level is a family: one more townsperson each.
+            int people = VillagerCountFor(Snapshot.TotalBuildingLevels, minVillagers, maxVillagers) + Snapshot.HouseLevels;
             int animals = Mathf.Clamp(1 + Snapshot.BuildingLevel(BuildingIds.Castle) / 2, 1, 6);
-            int wanted = people + animals;
+            if (_art.VillagerKeys.Length == 0) people = 0;
             var b = VillageLayout.Bounds;
             var area = new Rect(b.xMin + 2f, b.yMin + 2f, b.width - 4f, b.height - 4f);
-            while (_townsfolk.Count < wanted)
-            {
-                int i = _townsfolk.Count;
-                bool animal = i >= people || _art.VillagerKeys.Length == 0;
-                var keys = animal ? _art.AnimalKeys : _art.VillagerKeys;
-                if (keys.Length == 0) break;
-                string key = keys[i % keys.Length];
-                var set = CharacterSpriteLibrary.Find(key);
-                var roam = animal ? VillageLayout.PetMeadow : area;
-                var spawn = new Vector2(Random.Range(roam.xMin, roam.xMax), Random.Range(roam.yMin, roam.yMax));
-                var resident = VillageResident.Spawn(_townRoot, key, set, spawn, roam, animal ? 0.8f : 1.1f);
-                resident.Says(animal ? () => AnimalSounds.TryGetValue(key, out var sound) ? sound : "..." : () => Tips[Random.Range(0, Tips.Length)]);
-                _townsfolk.Add(resident);
-            }
+            // People and animals are counted apart, so a new family adds a person even after the animals arrived.
+            while (_townPeople < people) AddTownsfolk(false, _townPeople++, area);
+            while (_townAnimals < animals && _art.AnimalKeys.Length > 0) AddTownsfolk(true, _townAnimals++, area);
+        }
+
+        private int _townPeople, _townAnimals;
+
+        private void AddTownsfolk(bool animal, int index, Rect area)
+        {
+            var keys = animal ? _art.AnimalKeys : _art.VillagerKeys;
+            string key = keys[index % keys.Length];
+            var set = CharacterSpriteLibrary.Find(key);
+            var roam = animal ? VillageLayout.PetMeadow : area;
+            var spawn = new Vector2(Random.Range(roam.xMin, roam.xMax), Random.Range(roam.yMin, roam.yMax));
+            var resident = VillageResident.Spawn(_townRoot, key, set, spawn, roam, animal ? 0.8f : 1.1f);
+            resident.Says(animal ? () => AnimalSounds.TryGetValue(key, out var sound) ? sound : "..." : () => Tips[Random.Range(0, Tips.Length)]);
+            _townsfolk.Add(resident);
         }
     }
 }

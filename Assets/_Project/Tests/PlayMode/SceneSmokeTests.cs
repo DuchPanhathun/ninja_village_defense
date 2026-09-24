@@ -147,7 +147,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests, ScreenIds.House, ScreenIds.Fishing);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
@@ -411,6 +411,127 @@ namespace NinjaVillage.Tests
                 Assert.AreEqual(placed + 1, DecorationService.Placed.Count);
                 Assert.AreEqual(coins, SaveService.Data.Wallet.Get(CurrencyType.Coins));
                 Assert.AreEqual(0, DecorationService.GiftCount(reward.Decoration));
+                yield return new WaitForSecondsRealtime(0.3f);
+            }
+            finally
+            {
+                NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
+        }
+
+        /// <summary>
+        /// Phase 4: tap a house plot, build, repaint for free and grow it — families move in — then the treasury
+        /// fills over (fake) time and a tap collects it.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Village_BuildHousesAndCollectTheTreasury()
+        {
+            var now = new System.DateTime(2026, 9, 24, 12, 0, 0, System.DateTimeKind.Utc);
+            NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = () => now;
+            try
+            {
+                SaveService.Data.Village.Buildings.SetLevel(BuildingIds.Castle, 3);
+                yield return LoadScene(SceneNames.Village);
+                yield return null;
+                var houses = Object.FindObjectsByType<NinjaVillage.Gameplay.Village.HouseView>(FindObjectsSortMode.None);
+                Assert.AreEqual(HousingRules.MaxPlots, houses.Length, "six house plots on the lane");
+                var treasury = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Village.TreasuryView>();
+                Assert.IsNotNull(treasury, "the treasury stands on the plaza");
+                int townsfolk = GameObject.Find("Townsfolk").transform.childCount;
+
+                var plot0 = houses.First(h => h.Plot == 0);
+                plot0.OnTapped();
+                yield return null;
+                Assert.AreEqual(ScreenIds.House, UIScreenNavigator.Instance.Current.ScreenId, "tapping a plot opens the house menu");
+                UnityEngine.UI.Button ButtonStartingWith(string text) => Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.interactable && (b.GetComponentInChildren<TMPro.TMP_Text>()?.text ?? "").StartsWith(text));
+
+                int coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                ButtonStartingWith("Build").onClick.Invoke();
+                Assert.IsNotNull(HouseService.Get(0), "built");
+                Assert.AreEqual(coins - HousingRules.BuildCost(0), SaveService.Data.Wallet.Get(CurrencyType.Coins));
+
+                coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                GameObject.Find("Style_clay").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+                Assert.AreEqual("clay", HouseService.Get(0).Style, "repainted");
+                Assert.AreEqual(coins, SaveService.Data.Wallet.Get(CurrencyType.Coins), "for free");
+
+                ButtonStartingWith("Grow").onClick.Invoke();
+                Assert.AreEqual(2, HouseService.Get(0).Level);
+                yield return null;
+                Assert.AreEqual(townsfolk + 2, GameObject.Find("Townsfolk").transform.childCount, "a family per house level");
+                Assert.IsTrue(plot0.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name == "Body" && r.enabled && r.sprite != null), "the house is drawn");
+
+                UIScreenNavigator.Instance.Back();
+                houses.First(h => h.Plot == 5).OnTapped();
+                yield return null;
+                Assert.AreEqual(ScreenIds.VillageHud, UIScreenNavigator.Instance.Current.ScreenId, "a locked plot only says when it opens");
+
+                now = now.AddHours(3);
+                int expected = Mathf.FloorToInt(HousingRules.CoinsPerHour(3, 2) * 3f);
+                Assert.AreEqual(expected, TreasuryService.Available);
+                coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                treasury.OnTapped();
+                Assert.AreEqual(coins + expected, SaveService.Data.Wallet.Get(CurrencyType.Coins), "tap to collect");
+                Assert.AreEqual(0, TreasuryService.Available);
+                yield return null;
+                Assert.IsNotNull(Object.FindAnyObjectByType<NinjaVillage.Gameplay.Village.CoinBurst>(), "with a burst of coins");
+                yield return new WaitForSecondsRealtime(0.3f);
+            }
+            finally
+            {
+                NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
+        }
+
+        /// <summary>
+        /// Phase 5: tap the pond, cast, wait for a bite and reel in while the marker is in the zone; the mine digs
+        /// bars over (fake) time and a tap on it collects them; Sushi is on the Kitchen's menu.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Village_FishAtThePondAndCollectFromTheMine()
+        {
+            var now = new System.DateTime(2026, 9, 24, 12, 0, 0, System.DateTimeKind.Utc);
+            NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = () => now;
+            try
+            {
+                SaveService.Data.Village.Buildings.SetLevel(BuildingIds.Castle, 3);
+                SaveService.Data.Village.Buildings.SetLevel(BuildingIds.Mine, 1);
+                yield return LoadScene(SceneNames.Village);
+                yield return null;
+
+                var pond = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Village.PondView>();
+                Assert.IsNotNull(pond, "the pond is on the map");
+                pond.OnTapped();
+                yield return null;
+                Assert.AreEqual(ScreenIds.Fishing, UIScreenNavigator.Instance.Current.ScreenId);
+                var fishing = (NinjaVillage.UI.Village.FishingScreen)UIScreenNavigator.Instance.Current;
+                Assert.AreEqual(PondMineRules.MaxCasts, FishingService.Casts, "a full set of casts to start");
+
+                UnityEngine.UI.Button ButtonLabelled(string text) => Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.interactable && b.GetComponentInChildren<TMPro.TMP_Text>()?.text == text);
+                ButtonLabelled("Cast").onClick.Invoke();
+                Assert.AreEqual(PondMineRules.MaxCasts - 1, FishingService.Casts, "casting uses a cast");
+
+                float deadline = Time.realtimeSinceStartup + 4f;
+                while (!fishing.IsBiting && Time.realtimeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(fishing.IsBiting, "something bites");
+                deadline = Time.realtimeSinceStartup + 4f;
+                while (!fishing.MarkerInZone && Time.realtimeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(fishing.MarkerInZone, "the marker sweeps through the zone");
+                ButtonLabelled("REEL IN!").onClick.Invoke();
+                Assert.Greater(FishingService.TotalCaught, 0, "reeling in on the zone lands it");
+                UIScreenNavigator.Instance.Back();
+                yield return null;
+
+                now = now.AddHours(2);
+                Assert.AreEqual(8, MineService.Available, "4 bars an hour at Mine Lv 1");
+                GameObject.Find($"Building_{BuildingIds.Mine}").GetComponent<NinjaVillage.Gameplay.Village.BuildingView>().OnTapped();
+                Assert.AreEqual(8, NinjaVillage.Systems.Farm.GoodsService.Count("iron_bar"), "a tap collects the bars");
+                Assert.AreEqual(0, MineService.Available);
+                Assert.AreEqual(ScreenIds.VillageHud, UIScreenNavigator.Instance.Current.ScreenId, "collecting doesn't open a menu");
+
+                Assert.IsNotNull(NinjaVillage.Systems.Kitchen.KitchenService.GetRecipe("sushi"), "fish make Sushi now");
                 yield return new WaitForSecondsRealtime(0.3f);
             }
             finally

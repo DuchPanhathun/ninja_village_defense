@@ -26,6 +26,7 @@ MonoBehaviour:
   - npc_woman
   requiredCastleLevel: 1
   requiredKitchenLevel: 0
+  requiredBuilding: 
   weight: 0.9
   rewardCoins: 250
   rewardGems: 3

@@ -26,6 +26,7 @@ MonoBehaviour:
   - npc_master
   requiredCastleLevel: 4
   requiredKitchenLevel: 0
+  requiredBuilding: 
   weight: 0.8
   rewardCoins: 450
   rewardGems: 2

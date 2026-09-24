@@ -37,14 +37,14 @@ namespace NinjaVillage.Systems.Village
             return null;
         }
 
-        /// <summary>Shop order: by category, then price.</summary>
-        public static List<DecorationDefinition> GetShopItems()
+        /// <summary>Shop order: by category, then price. Gift-only decorations aren't for sale (<paramref name="includeGiftOnly"/> lists them too).</summary>
+        public static List<DecorationDefinition> GetShopItems(bool includeGiftOnly = false)
         {
             var list = new List<DecorationDefinition>();
             var catalog = Catalog;
             if (catalog == null) return list;
             foreach (var item in catalog.All)
-                if (item != null) list.Add(item);
+                if (item != null && (includeGiftOnly || !item.GiftOnly)) list.Add(item);
             list.Sort((a, b) => a.Category != b.Category ? a.Category.CompareTo(b.Category) : a.Price.Amount.CompareTo(b.Price.Amount));
             return list;
         }
@@ -73,7 +73,7 @@ namespace NinjaVillage.Systems.Village
                 VillageLayout.ReservedSpots(), others);
         }
 
-        /// <summary>Building plots (their base, where the walls stand) and every path.</summary>
+        /// <summary>Building plots (their base, where the walls stand), house lots, the farm and every path.</summary>
         public static IEnumerable<Rect> BlockedAreas()
         {
             var catalog = VillageService.Catalog;
@@ -88,6 +88,8 @@ namespace NinjaVillage.Systems.Village
                 yield return new Rect(center - size * 0.5f, size);
             yield return new Rect(VillageLayout.Plaza - VillageLayout.PlazaSize * 0.5f, VillageLayout.PlazaSize);
             yield return VillageLayout.FarmField;
+            for (int plot = 0; plot < HousingRules.MaxPlots; plot++) yield return VillageLayout.HouseLot(plot);
+            yield return VillageLayout.Pond;
         }
 
         /// <summary>Pays for and places a new decoration. Fails (and charges nothing) if the spot is blocked or it's unaffordable.</summary>
@@ -129,7 +131,7 @@ namespace NinjaVillage.Systems.Village
         public static List<(DecorationDefinition definition, int count)> Gifts()
         {
             var list = new List<(DecorationDefinition, int)>();
-            foreach (var item in GetShopItems())
+            foreach (var item in GetShopItems(includeGiftOnly: true))
             {
                 int count = GiftCount(item);
                 if (count > 0) list.Add((item, count));

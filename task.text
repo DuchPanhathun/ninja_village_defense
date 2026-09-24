@@ -535,13 +535,13 @@ into battles. Order = build order; each phase ends with a phone playtest and a c
 
 ## Phase 4 — Treasury & houses
 
-- [ ]  Treasury   <!-- coins pile up over time (rate + cap grow with castle level); tap to collect with a coin burst -->
-- [ ]  Houses   <!-- buildable house plots (6 pack styles); each adds villagers and treasury income -->
+- [x]  Treasury   <!-- chest on the plaza (west side); 30/h +15 per castle level +15 per house level, holds 6h +2h per castle level; coin piles grow + glow when full; tap → coin burst + "+N coins"; banks at the old rate before castle/house changes; "!" on home Village when full -->
+- [x]  Houses   <!-- 6 plots on a new residential lane east of the Forge (1 per castle level); 7 styles (4 new pack cut-outs incl. Snow Igloo), free repaint; Lv 1-3 (Lv2 at Castle 3, Lv3 at Castle 5); each level = +1 townsperson and +15 coins/h; HouseScreen; visitors see houses; HousingTests + Village_BuildHousesAndCollectTheTreasury -->
 
 ## Phase 5 — Fishing pond & mine
 
-- [ ]  Fishing pond   <!-- water tiles + ripples on the map; timing mini-game; fish for cooking or selling, rare fish as decorations -->
-- [ ]  Mine   <!-- ore builds up over time; ore becomes Forge material (instead of only spare gear) + small gem chance -->
+- [x]  Fishing pond   <!-- SW of the Talent Tree: 9-sliced pack pond, ripples, lily pads, fish shadows, boat, dock + path; 5 casts (+1 per 20 min); FishingScreen timing bar (rarer = narrower + faster, dead centre = 2 fish); River Fish/Shrimp, Squid (C2), Octopus + Golden Koi (C3) → gift-only "Golden Koi Pond" decoration; Sushi recipe (2 rice + fish, +6% crit); Fish button on the left of the HUD -->
+- [x]  Mine   <!-- Mine building (Castle 3, Lv 1-5, 4→12 bars/h, holds 8h) at the north end of the house lane: rock mouth + crane + bar pile; tap to collect; iron, gold from Lv 3 (20%), mithril from Lv 5 (8%), a gem per 25 bars; Forge reforge takes 5 bars (iron/gold/mithril by tier) per missing spare gear; pond/mine villager requests; PondMineTests + Village_FishAtThePondAndCollectFromTheMine -->
 
 ## Phase 6 — Social (builds on Visit + Firebase)
 

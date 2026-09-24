@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa020cbfce0096773959a6dfe4d46268, type: 3}
+  m_Name: Request_catch_fish
+  m_EditorClassIdentifier: 
+  id: catch_fish
+  displayName: Catch {0} fish at the pond
+  description: The pond is full of fish this season. Go try your luck!
+  icon: {fileID: 0}
+  kind: 1
+  goods: {fileID: 0}
+  statId: fish_caught
+  amount: 5
+  line: The pond is full of fish this season. Go try your luck!
+  villagers:
+  - npc_villager
+  - npc_boy
+  requiredCastleLevel: 1
+  requiredKitchenLevel: 0
+  requiredBuilding: 
+  weight: 1
+  rewardCoins: 170
+  rewardGems: 0
+  rewardDecoration: {fileID: 0}

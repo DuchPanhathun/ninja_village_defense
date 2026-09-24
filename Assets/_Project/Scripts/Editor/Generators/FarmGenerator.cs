@@ -8,8 +8,8 @@ using UnityEngine;
 namespace NinjaVillage.EditorTools.Generators
 {
     /// <summary>
-    /// Village activities, Phase A + 1: every kind of storehouse goods (crops now; kitchen and fishing goods
-    /// ready for the later phases) and the farm's crops — seed cost, real-time growing time, harvest, castle
+    /// Village activities, Phase A + 1: every kind of storehouse goods (crops, meals, fish and the mine's
+    /// metal bars) and the farm's crops — seed cost, real-time growing time, harvest, castle
     /// unlock and the sprites for each stage on the map. Art comes from import_farm() in
     /// <c>Tools/art_import/import_ninja_adventure.py</c>. Tune the tables here, not the assets.
     /// </summary>
@@ -38,6 +38,9 @@ namespace NinjaVillage.EditorTools.Generators
             ("shrimp", "Shrimp", GoodsCategory.Fish, 40, "Small but tasty."),
             ("calamari", "Calamari", GoodsCategory.Fish, 50, "Squid rings."),
             ("octopus", "Octopus", GoodsCategory.Fish, 70, "A rare catch."),
+            ("iron_bar", "Iron Bar", GoodsCategory.Ore, 15, "Dug up in the mine. The Forge takes bars in place of spare gear."),
+            ("gold_bar", "Gold Bar", GoodsCategory.Ore, 45, "Gold from deep in the mine (Mine Lv 3). For Golden reforges."),
+            ("mithril_bar", "Mithril Bar", GoodsCategory.Ore, 110, "Rare mithril (Mine Lv 5). For Legendary reforges."),
             ("honey", "Honey", GoodsCategory.Other, 60, "Golden and sweet."),
             ("meat", "Meat", GoodsCategory.Other, 45, "For grilling."),
             ("nut", "Nuts", GoodsCategory.Other, 15, "A handful of nuts."),

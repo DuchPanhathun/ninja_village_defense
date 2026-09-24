@@ -12,7 +12,8 @@ namespace NinjaVillage.UI.Village
     /// <summary>
     /// The building menu (EPIC 17 Village UI "Building menu"): level, current/next effect, upgrade cost
     /// and whatever blocks the upgrade (Castle level, best wave, coins), plus the building's own action —
-    /// Dojo → Heroes, Forge → Forge, Shrine → Blessings, Pet House → Pets, Market → Shop, Kitchen → Kitchen, Castle → the
+    /// Dojo → Heroes, Forge → Forge, Shrine → Blessings, Pet House → Pets, Market → Shop, Kitchen → Kitchen,
+    /// Mine → collect bars (plus what it has dug up), Castle → the
     /// overview of what each Castle level unlocks ("Main progression"). Opened with <see cref="Open"/>.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -98,6 +99,7 @@ namespace NinjaVillage.UI.Village
 
             UIBuilder.ClearChildren(_extra);
             if (def.IsCastle) PopulateCastleOverview();
+            if (def.Id == BuildingIds.Mine && level > 0) PopulateMine();
         }
 
         private static string ActionLabel(string buildingId)
@@ -110,6 +112,7 @@ namespace NinjaVillage.UI.Village
                 case BuildingIds.PetHouse: return "Manage Pets";
                 case BuildingIds.Market: return "Today's Shop";
                 case BuildingIds.Kitchen: return "Open Kitchen";
+                case BuildingIds.Mine: return "Collect bars";
                 default: return null;
             }
         }
@@ -125,6 +128,11 @@ namespace NinjaVillage.UI.Village
                 case BuildingIds.PetHouse: UIScreenNavigator.Instance.Show(ScreenIds.Pets); break;
                 case BuildingIds.Market: UIScreenNavigator.Instance.Show(ScreenIds.Market); break;
                 case BuildingIds.Kitchen: UIScreenNavigator.Instance.Show(ScreenIds.Kitchen); break;
+                case BuildingIds.Mine:
+                    var haul = MineService.Collect();
+                    UIScreenNavigator.Instance.Toast(haul.Bars > 0 ? $"Mine: +{haul}" : "Nothing dug up yet. Check back soon!");
+                    Refresh();
+                    break;
             }
         }
 
@@ -145,6 +153,25 @@ namespace NinjaVillage.UI.Village
         }
 
         /// <summary>Castle "Main progression": what the current Castle level allows for every other building.</summary>
+        /// <summary>What the mine has dug up, how fast, and what bars are for.</summary>
+        private void PopulateMine()
+        {
+            UIBuilder.SectionHeader(_extra, "The mine");
+            int level = MineService.Level;
+            string metals = level >= 5 ? "iron, gold and mithril" : level >= 3 ? "iron and gold (mithril from Lv 5)" : "iron (gold from Lv 3, mithril from Lv 5)";
+            UIBuilder.ActionCard(_extra, $"{MineService.Available} / {MineService.Capacity} bars ready",
+                $"Digs up {MineService.BarsPerHour:0} bars an hour: {metals}, and a gem now and then. Tap the mine on the map to collect.\n" +
+                $"The Forge takes <color=#FFD24D>{PondMineRules.BarsPerMaterial} bars</color> in place of each missing piece of spare gear when reforging.",
+                out _, out _, UITheme.Gold, UIArt.Get("item_iron_bar"));
+            foreach (var id in new[] { "iron_bar", "gold_bar", "mithril_bar" })
+            {
+                var goods = NinjaVillage.Systems.Farm.GoodsService.Get(id);
+                if (goods == null) continue;
+                UIBuilder.ActionCard(_extra, $"{goods.NameOrId}   ×{NinjaVillage.Systems.Farm.GoodsService.Count(goods)}", goods.Description,
+                    out _, out _, UITheme.Text, goods.Icon);
+            }
+        }
+
         private void PopulateCastleOverview()
         {
             var catalog = VillageService.Catalog;

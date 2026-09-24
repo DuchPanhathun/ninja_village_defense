@@ -24,3 +24,4 @@ MonoBehaviour:
   price: 180
   radius: 0.35
   sortOrder: 0
+  giftOnly: 0

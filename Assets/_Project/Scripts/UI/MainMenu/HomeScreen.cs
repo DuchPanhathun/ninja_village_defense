@@ -361,7 +361,7 @@ namespace NinjaVillage.UI.MainMenu
 
             var village = UIStyle.Icon(row, "menu_village", "Village", () => SceneLoader.LoadVillage(), 150f, tile: false);
             UIStyle.Place(village.Root, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-40f, 0f), village.Root.sizeDelta);
-            _villageBadge = village.Badge; // "!" when crops are ripe, a meal is cooked or a villager request can be handed in
+            _villageBadge = village.Badge; // "!" when crops are ripe, a meal is cooked, a villager request can be handed in or the treasury is full
         }
 
         // ------------------------------------------------------------------ bottom tabs
@@ -449,7 +449,9 @@ namespace NinjaVillage.UI.MainMenu
             _seasonBadge.SetActive(ScreenBadges.Has(ScreenIds.BattlePass));
             _villageBadge.SetActive(NinjaVillage.Systems.Farm.FarmService.RipeCount() > 0 ||
                                     NinjaVillage.Systems.Kitchen.KitchenService.ReadyCount() > 0 ||
-                                    NinjaVillage.Systems.Requests.RequestService.DeliverableCount() > 0);
+                                    NinjaVillage.Systems.Requests.RequestService.DeliverableCount() > 0 ||
+                                    NinjaVillage.Systems.Village.TreasuryService.IsFull ||
+                                    NinjaVillage.Systems.Village.MineService.IsFull);
             RefreshMeals();
         }
 

@@ -17,6 +17,7 @@ namespace NinjaVillage.Systems.Save
         public const string Market = "market";
         public const string Castle = "castle";
         public const string Kitchen = "kitchen";
+        public const string Mine = "mine";
     }
 
     /// <summary>One purchasable slot in the Market's daily rotation.</summary>

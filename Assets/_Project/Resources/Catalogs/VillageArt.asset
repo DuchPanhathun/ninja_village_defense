@@ -21,6 +21,7 @@ MonoBehaviour:
   - pet_house
   - shrine
   - kitchen
+  - mine
   buildingSprites:
   - {fileID: 21300000, guid: a9ae0f789abe8af7692b05b6c661a0ff, type: 3}
   - {fileID: 21300000, guid: 00637cd042ceb84db8ec6a59061f5ddc, type: 3}
@@ -28,6 +29,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 748b477ed8283273c8a7289dc34a26c8, type: 3}
   - {fileID: 21300000, guid: ae5bb3cc8ff483b7586de04e6504fb23, type: 3}
   - {fileID: 21300000, guid: 773869ec2c74a85e5a7161f2f751cc6b, type: 3}
+  - {fileID: 21300000, guid: 45c6b4f7706568631a0129692684ff3e, type: 3}
   castleStages:
   - {fileID: 21300000, guid: 991cc9b2d8d2a919585e86d067ab0210, type: 3}
   - {fileID: 21300000, guid: 6cb6d2ff532259132811726cfd01386b, type: 3}
@@ -79,3 +81,41 @@ MonoBehaviour:
   noticeBoard: {fileID: 21300000, guid: 8bf475bf6062ac0398ee74aa97506b70, type: 3}
   farmSoil: {fileID: 21300000, guid: cf56c3b16f7cb006d927d39443437d8d, type: 3}
   farmSign: {fileID: 21300000, guid: 758088ad61a2f2572b7d1283bb695d22, type: 3}
+  houseStyleIds:
+  - tan
+  - clay
+  - orange
+  - straw
+  - timber
+  - tall
+  - igloo
+  houseStyleSprites:
+  - {fileID: 21300000, guid: 8005d641a1cbfcb15a2625d4e847f4c0, type: 3}
+  - {fileID: 21300000, guid: ce9a699f63097f275b8d481d49d68b3b, type: 3}
+  - {fileID: 21300000, guid: 588c11bf2a19b6c6b827424d4d50be54, type: 3}
+  - {fileID: 21300000, guid: ac1f6e7896c5cd967a6efbc51f8de27b, type: 3}
+  - {fileID: 21300000, guid: c08bbc03639dd1004914857fe4f308ae, type: 3}
+  - {fileID: 21300000, guid: 3a9c399ecd3a3b290969b7a820354c36, type: 3}
+  - {fileID: 21300000, guid: f7706f70cfc224c8d8f6d6f2183d54ee, type: 3}
+  houseSign: {fileID: 21300000, guid: 758088ad61a2f2572b7d1283bb695d22, type: 3}
+  treasuryChest: {fileID: 21300000, guid: c02a6b930d9f2becbb7df444c259df69, type: 3}
+  coin: {fileID: 21300000, guid: eff4e38ae2fda868b942d5adaf58315f, type: 3}
+  pondWater: {fileID: 21300000, guid: 31c365cdccd5fbc5b9138f23283f9a4b, type: 3}
+  pondDock: {fileID: 21300000, guid: 4fcbd2c40a90a18efa934d05b2af3abd, type: 3}
+  pondLily: {fileID: 21300000, guid: 7b7384af7567722cdb039c33dc6ef77f, type: 3}
+  pondBoat: {fileID: 21300000, guid: c91fa4b2effdc62c793ea6feb6d67903, type: 3}
+  pondNet: {fileID: 21300000, guid: a12813c4500dd55bb865f6fc5e88e27c, type: 3}
+  pondRipples:
+  - {fileID: 21300000, guid: 843efc70c46c94c508e1129e1eacbfa5, type: 3}
+  - {fileID: 21300000, guid: 557b65225fe6f303ca3ab01de67d3255, type: 3}
+  - {fileID: 21300000, guid: 08e2852c8f8bbd90caa67458d05449ec, type: 3}
+  - {fileID: 21300000, guid: 17e5bbdc64323791e8e39d7a5dbb90bc, type: 3}
+  fish:
+  - {fileID: 21300000, guid: 06fc11d8bb1cac896b24a31d17870f13, type: 3}
+  - {fileID: 21300000, guid: 0ebd9923113009cf781ccbff1bd1d3d4, type: 3}
+  - {fileID: 21300000, guid: d298781b78c937dc79ec8d4d8a19da17, type: 3}
+  mineCrane: {fileID: 21300000, guid: 150beecffec982daba7529fb0a1bfa2a, type: 3}
+  bars:
+  - {fileID: 21300000, guid: a0c26e194dca00b1084cf2769ba34918, type: 3}
+  - {fileID: 21300000, guid: 0a7f279df70858f7db6160c8c91d8c77, type: 3}
+  - {fileID: 21300000, guid: df0d2b1231ebacf3ea07ed62ef7cfb60, type: 3}

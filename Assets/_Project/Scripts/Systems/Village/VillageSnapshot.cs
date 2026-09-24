@@ -15,7 +15,7 @@ namespace NinjaVillage.Systems.Village
 
     /// <summary>
     /// Everything the village map shows about one player, in one JsonUtility-friendly object: buildings,
-    /// decorations, the heroes and pets living there, the gear on the Armory rack, talent progress and
+    /// decorations, houses, the farm, the heroes and pets living there, the gear on the Armory rack, talent progress and
     /// profile highlights. The map is drawn from a snapshot rather than straight from the save, so another
     /// player's village can be drawn the same way once snapshots are shared online (upload
     /// <see cref="FromSave"/>'s JSON, download someone else's and hand it to <see cref="VillageVisit"/>).
@@ -34,6 +34,8 @@ namespace NinjaVillage.Systems.Village
         public List<PlacedDecoration> Decorations = new();
         /// <summary>What grows on the farm (visitors see the crops).</summary>
         public List<FarmPlotState> Farm = new();
+        /// <summary>Houses on the house plots.</summary>
+        public List<HouseState> Houses = new();
 
         public List<VillageHero> Heroes = new();
         public string SelectedHeroId;
@@ -51,6 +53,18 @@ namespace NinjaVillage.Systems.Village
         public int AchievementTiers;
 
         public int BuildingLevel(string buildingId) => Buildings.GetLevel(buildingId);
+
+        /// <summary>Families living in houses (a house's level each).</summary>
+        public int HouseLevels
+        {
+            get
+            {
+                int total = 0;
+                foreach (var house in Houses)
+                    if (house != null && house.Level > 0) total += house.Level;
+                return total;
+            }
+        }
 
         public int TotalBuildingLevels
         {
@@ -85,6 +99,10 @@ namespace NinjaVillage.Systems.Village
                 foreach (var p in save.Farm.Plots)
                     if (p != null)
                         snapshot.Farm.Add(new FarmPlotState { Plot = p.Plot, CropId = p.CropId, PlantedTicks = p.PlantedTicks, ReadyTicks = p.ReadyTicks, Watered = p.Watered });
+
+            if (save.Housing?.Houses != null)
+                foreach (var h in save.Housing.Houses)
+                    if (h != null) snapshot.Houses.Add(new HouseState { Plot = h.Plot, Style = h.Style, Level = h.Level });
 
             if (save.Heroes != null)
             {

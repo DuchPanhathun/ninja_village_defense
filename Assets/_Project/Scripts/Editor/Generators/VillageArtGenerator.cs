@@ -119,6 +119,7 @@ namespace NinjaVillage.EditorTools.Generators
                 (BuildingIds.Dojo, "Village/building_dojo"), (BuildingIds.Forge, "Village/building_forge"),
                 (BuildingIds.Market, "Village/building_market"), (BuildingIds.PetHouse, "Village/building_pethouse"),
                 (BuildingIds.Shrine, "Village/building_shrine"), (BuildingIds.Kitchen, "Village/building_shop_green"),
+                (BuildingIds.Mine, "Village/prop_rocks_brown"),
             };
 
             // Castle look per stage name (Hut, House, Manor, Keep, Fortress, Castle), starting at the first
@@ -154,7 +155,19 @@ namespace NinjaVillage.EditorTools.Generators
                 ("animalKeys", new[] { "animal_chicken", "animal_cat", "animal_dog", "animal_pig", "animal_cow", "animal_frog" }.Cast<object>().ToList()),
                 ("weaponRack", Sprite("Decor/deco_weapon_rack")),
                 ("talentTree", Sprite("Village/prop_bigtree_cherry")),
-                ("noticeBoard", Sprite("Decor/deco_bench")));
+                ("noticeBoard", Sprite("Decor/deco_bench")),
+                ("houseStyleIds", HousingRules.Styles.Select(h => (object)h.Id).ToList()),
+                ("houseStyleSprites", HousingRules.Styles.Select(h => (object)Sprite("Village/" + h.Sprite)).ToList()),
+                ("houseSign", Sprite("Decor/deco_signpost")),
+                ("treasuryChest", Sprite("Decor/deco_chest")),
+                ("coin", AssetDatabase.LoadAssetAtPath<Sprite>($"{Sprites}Pickups/pickup_coin_0.png")),
+                ("pondWater", Sprite("Village/pond_water")), ("pondDock", Sprite("Village/pond_dock")),
+                ("pondLily", Sprite("Village/pond_lily")), ("pondBoat", Sprite("Village/pond_boat")),
+                ("pondNet", Sprite("Village/pond_net_full")),
+                ("pondRipples", Frames("Village/pond_ripple_").Cast<object>().ToList()),
+                ("fish", new[] { "fish_red", "fish_white", "fish_yellow" }.Select(n => (object)Sprite("Village/" + n)).Where(x => x != null).ToList()),
+                ("mineCrane", Sprite("Village/mine_crane")),
+                ("bars", new[] { "iron", "gold", "mithril" }.Select(m => (object)AssetDatabase.LoadAssetAtPath<Sprite>($"{Sprites}UI/Icons/item_{m}_bar.png")).ToList()));
         }
 
         private static void BuildDecorations()
@@ -175,6 +188,19 @@ namespace NinjaVillage.EditorTools.Generators
                     ("currency", (int)(gems ? CurrencyType.Gems : CurrencyType.Coins)), ("price", price), ("radius", radius));
                 definitions.Add(definition);
             }
+            // Fishing's legendary catch: never sold, only landed (EPIC 24 Phase 5).
+            var koi = Sprite("Decor/deco_koi_pond");
+            if (koi != null)
+            {
+                var definition = ContentGen.CreateOrLoad<DecorationDefinition>($"{DecorFolder}/Decoration_golden_koi_pond.asset");
+                ContentGen.Set(definition,
+                    ("id", "golden_koi_pond"), ("displayName", "Golden Koi Pond"), ("description", "A little pond for the Golden Koi you landed. Lucky!"),
+                    ("icon", koi), ("category", (int)DecorationCategory.Special), ("frames", new List<object> { koi }), ("fps", 6f),
+                    ("currency", (int)CurrencyType.Coins), ("price", 800), ("radius", 1.5f), ("giftOnly", true));
+                definitions.Add(definition);
+            }
+            else Debug.LogWarning("[VillageArt] Missing sprite Decor/deco_koi_pond.");
+
             var catalog = ContentGen.CreateOrLoad<DecorationCatalog>($"{ContentGen.CatalogRoot}/DecorationCatalog.asset");
             catalog.EditorSetItems(definitions);
             Debug.Log($"[VillageArt] {definitions.Count} decorations.");

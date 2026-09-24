@@ -814,7 +814,10 @@ BUILDINGS = [("dojo", (400, 112, 464, 224)), ("dojo_sign", (64, 64, 96, 80)), ("
              ("shrine", (0, 80, 48, 112)), ("market", (256, 0, 304, 48)), ("pethouse", (48, 128, 96, 160)),
              ("house_orange", (0, 0, 64, 48)), ("house_tan", (64, 0, 128, 48)),
              ("house_red", (192, 0, 256, 48)), ("shop_green", (304, 0, 368, 48)), ("house_adobe", (368, 0, 416, 48)),
-             ("house_tall", (416, 0, 464, 48)), ("house_wood", (464, 0, 528, 64)), ("hut_wood", (0, 112, 48, 160))]
+             ("house_tall", (416, 0, 464, 48)), ("house_wood", (464, 0, 528, 64)), ("hut_wood", (0, 112, 48, 160)),
+             # extra house styles for the buildable houses (EPIC 24 Phase 4)
+             ("house_orange_b", (128, 0, 192, 48)), ("hut_straw", (48, 128, 96, 160)), ("house_timber", (304, 304, 352, 352)),
+             ("igloo", (0, 176, 48, 224))]
 HOUSE_PROPS = [("statue_guardian", (16, 240, 48, 288)), ("statue_frog", (48, 272, 80, 304)), ("stone_arch", (464, 320, 528, 368))] + \
               [(f"banner_{c}", (352 + 16 * i, 320, 368 + 16 * i, 352)) for i, c in enumerate(["white", "red", "orange", "green", "red_b", "purple", "yellow"])]
 NATURE = [("tree_green", (0, 0, 32, 32)), ("tree_pine", (32, 0, 64, 32)), ("tree_dead", (64, 0, 96, 32)), ("tree_bonsai", (96, 0, 128, 32)),
@@ -959,6 +962,38 @@ def import_farm():
     out = [save(trim(load(f"Items/Food/{src}.png")), U, f"item_{name}") for name, src in FOODS]
     out += [save(trim(load(f"Items/Tool/{tool}.png")), U, "tool_" + re.sub(r"(?<!^)([A-Z])", r"_\1", tool).lower()) for tool in TOOLS]
     record("Village", "kitchen & fishing goods, tools", "`Items/Food`, `Items/Tool`", out)
+
+
+def import_pond_and_mine():
+    """EPIC 24 Phase 5: the fishing pond (9-slice pond, dock, lily pad, boat, ripples, fish), the mine's crane,
+    the Golden Koi pond decoration and the metal-bar / fishing-rod icons."""
+    U, V = "UI/Icons", "Environment/Village"
+    water = load("Backgrounds/Tilesets/TilesetWater.png")
+    pond = water.crop((0, 96, 48, 144))                                  # grass-edged pond; 16 px 9-slice borders
+    out = [save(pond, V, "pond_water"), save(trim(water.crop((0, 192, 32, 240))), V, "pond_dock"),
+           save(trim(water.crop((176, 48, 192, 64))), V, "pond_lily"), save(trim(water.crop((416, 0, 448, 16))), V, "pond_boat")]
+    ripples = load("Backgrounds/Animated/Water Ripples/SpriteSheet16x16.png")
+    base = ripples.getpixel((0, 0))
+    frames = []
+    for i in range(ripples.width // 16):
+        f = ripples.crop((i * 16, 0, i * 16 + 16, 16))
+        f.putdata([(0, 0, 0, 0) if px == base else px for px in f.getdata()])   # keep only the ripple marks
+        frames.append(f)
+    out += save_frames(frames, V, "pond_ripple")
+    for colour in ("Red", "White", "Yellow"):
+        out.append(save(trim(load(f"Actor/Animal/Fish/SpriteSheet{colour}.png").crop((0, 0, 16, 16))), V, f"fish_{colour.lower()}"))
+    out += [save(trim(load("Backgrounds/Vehicles/FishNetFull.png")), V, "pond_net_full"),
+            save(trim(load("Backgrounds/Vehicles/Crane.png")), V, "mine_crane")]
+    record("Village", "fishing pond + mine pieces", "`TilesetWater.png` cut-outs, `Water Ripples` (background keyed out), `Actor/Animal/Fish`, `Vehicles`", out)
+
+    koi = pond.copy()
+    fish = trim(load("Actor/Animal/Fish/SpriteSheetYellow.png").crop((0, 0, 16, 16)))
+    koi.alpha_composite(fish, ((48 - fish.width) // 2, (48 - fish.height) // 2))
+    out = [save(koi, "Environment/Decor", "deco_koi_pond")]
+    out += [save(trim(load(f"Items/Resource/Bar{metal}.png")), U, f"item_{metal.lower()}_bar") for metal in ("Iron", "Gold", "Mithril")]
+    out += [save(trim(load("Items/Weapons/Fishing Rod/Sprite.png")), U, "tool_fishing_rod"),
+            save(fish, U, "item_golden_koi")]
+    record("Village", "koi pond decoration, metal bars, fishing rod, golden koi icons", "pond + `Fish/SpriteSheetYellow`, `Items/Resource/Bar*`, `Items/Weapons/Fishing Rod`", out)
 
 
 GROUNDS = [("grass", (0, 12)), ("grass_dark", (11, 12)), ("dirt", (11, 19)), ("sand", (0, 5)), ("snow", (0, 19))]
@@ -1157,6 +1192,7 @@ def main():
     import_villagers()
     import_decor()
     import_farm()
+    import_pond_and_mine()
     import_backgrounds()
     export_store_graphics()
 

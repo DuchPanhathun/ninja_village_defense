@@ -26,6 +26,7 @@ MonoBehaviour:
   - npc_villager
   requiredCastleLevel: 1
   requiredKitchenLevel: 0
+  requiredBuilding: 
   weight: 1
   rewardCoins: 120
   rewardGems: 0

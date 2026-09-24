@@ -59,7 +59,7 @@ namespace NinjaVillage.UI.Village
             if (tierBonus > 0f) body += $"\nTier bonus: +{tierBonus * 100f:0}% attack";
             var nextTier = ForgeService.NextTier(weapon.Id);
             if (nextTier != null)
-                body += $"\nNext tier <b>{nextTier.Name}</b>: {nextTier.CoinCost} coins + {nextTier.MaterialCount} spare {nextTier.MaterialMinRarity}+ gear, needs Lv {nextTier.RequiredWeaponLevel} & Forge Lv {nextTier.RequiredForgeLevel}";
+                body += $"\nNext tier <b>{nextTier.Name}</b>: {nextTier.CoinCost} coins + {ForgeService.DescribeMaterials(weapon)}, needs Lv {nextTier.RequiredWeaponLevel} & Forge Lv {nextTier.RequiredForgeLevel}";
 
             var actions = UIBuilder.ActionCard(content, title, body, out _, out _, RarityColors.For(weapon.Rarity), WeaponIcon(weapon));
 

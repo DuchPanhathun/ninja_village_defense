@@ -64,6 +64,10 @@ namespace NinjaVillage.Core.Events
         public const string CropsHarvested = "crops_harvested";    // Amount = goods harvested
         public const string MealsCooked = "meals_cooked";          // Amount = meals collected from the Kitchen
         public const string RequestDelivered = "request_delivered"; // a villager request was completed; Subject = request id
+        public const string TreasuryCollected = "treasury_collected"; // Amount = coins collected from the treasury
+        public const string HouseBuilt = "house_built";              // a house was built or grew a level
+        public const string FishCaught = "fish_caught";              // Amount = fish landed
+        public const string BarsMined = "bars_mined";                // Amount = metal bars collected from the mine
 
         // Engagement / monetization
         public const string DailyLoginClaimed = "daily_login_claimed";

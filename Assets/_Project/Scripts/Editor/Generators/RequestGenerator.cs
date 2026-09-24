@@ -3,6 +3,7 @@ using System.Linq;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Systems.Farm;
 using NinjaVillage.Systems.Requests;
+using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
 using UnityEditor;
 using UnityEngine;
@@ -77,10 +78,25 @@ namespace NinjaVillage.EditorTools.Generators
             new("open_chests", RequestKind.Stat, "Open {0} treasure chests", 3, null, ProgressStatIds.ChestOpened, 1, 0, 0.8f, 180, 0, "treasure_chest",
                 "Legends say the battlefield hides treasure...", "npc_villager4", "npc_boy"),
 
+            // The pond and the mine (Phase 5)
+            new("bring_fish", RequestKind.Deliver, Bring, 3, "fish", null, 1, 0, 1f, 150, 0, null,
+                "The cats are yowling for fish again. Help me out?", "npc_oldwoman", "npc_villager2"),
+            new("bring_shrimp", RequestKind.Deliver, Bring, 3, "shrimp", null, 1, 0, 0.8f, 160, 0, null,
+                "Shrimp tempura for my birthday. Please?", "npc_woman", "npc_boy"),
+            new("catch_fish", RequestKind.Stat, "Catch {0} fish at the pond", 5, null, ProgressStatIds.FishCaught, 1, 0, 1f, 170, 0, null,
+                "The pond is full of fish this season. Go try your luck!", "npc_villager", "npc_boy"),
+            new("bring_iron", RequestKind.Deliver, Bring, 8, "iron_bar", null, 3, 0, 0.9f, 260, 0, "stone_pillar",
+                "The smithy is out of iron. Bring bars from the mine?", "npc_master", "npc_villager4"),
+            new("mine_bars", RequestKind.Stat, "Dig up {0} bars at the mine", 12, null, ProgressStatIds.BarsMined, 3, 0, 0.9f, 220, 2, null,
+                "Mining is honest work. Show me your haul!", "npc_oldman", "npc_master"),
+
             // The next chapter
             new("clear_chapter", RequestKind.Chapter, "Clear Chapter {0}", 1, null, null, 1, 0, 0.8f, 400, 10, "lantern_post",
                 "Our scouts say a great evil lurks beyond. Clear the way!", "npc_master", "npc_oldman"),
         };
+
+        /// <summary>Bar requests only come up once the mine is built.</summary>
+        private static bool NeedsMine(Row row) => row.Goods == "iron_bar" || row.Stat == ProgressStatIds.BarsMined;
 
         [ContentGenerator("Villager requests", 90)]
         public static void Generate()
@@ -102,7 +118,8 @@ namespace NinjaVillage.EditorTools.Generators
                     ("icon", item != null ? item.Icon : null), ("kind", (int)row.Kind), ("goods", item), ("statId", row.Stat ?? ""),
                     ("amount", row.Amount), ("line", row.Line), ("villagers", row.Villagers.Cast<object>().ToList()),
                     ("requiredCastleLevel", row.Castle), ("requiredKitchenLevel", row.Kitchen), ("weight", row.Weight),
-                    ("rewardCoins", row.Coins), ("rewardGems", row.Gems), ("rewardDecoration", decoration));
+                    ("rewardCoins", row.Coins), ("rewardGems", row.Gems), ("rewardDecoration", decoration),
+                    ("requiredBuilding", NeedsMine(row) ? BuildingIds.Mine : ""));
                 requests.Add(request);
             }
             ContentGen.CreateOrLoad<VillagerRequestCatalog>($"{ContentGen.CatalogRoot}/VillagerRequestCatalog.asset").EditorSetItems(requests);

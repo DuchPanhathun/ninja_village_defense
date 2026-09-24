@@ -92,7 +92,8 @@ namespace NinjaVillage.Systems.Requests
                 int nextChapter = NextChapter();
                 var pool = new List<(string, float)>();
                 foreach (var request in catalog.All)
-                    if (request != null && RequestRules.IsEligible(request.Kind, request.RequiredCastleLevel, request.RequiredKitchenLevel, castle, kitchen, nextChapter))
+                    if (request != null && RequestRules.IsEligible(request.Kind, request.RequiredCastleLevel, request.RequiredKitchenLevel, castle, kitchen, nextChapter,
+                            string.IsNullOrEmpty(request.RequiredBuilding) || VillageService.GetLevel(request.RequiredBuilding) > 0))
                         pool.Add((request.Id, request.Weight));
 
                 int seed = DailyRules.SeedFor(today, SaveService.Data.Profile.PlayerId, RequestRules.Salt);

@@ -30,6 +30,23 @@ namespace NinjaVillage.Gameplay.Village
         [SerializeField] private Sprite noticeBoard;
         [SerializeField] private Sprite farmSoil;
         [SerializeField] private Sprite farmSign;
+        [Header("Houses & treasury")]
+        [SerializeField] private string[] houseStyleIds = System.Array.Empty<string>();
+        [SerializeField] private Sprite[] houseStyleSprites = System.Array.Empty<Sprite>();
+        [SerializeField] private Sprite houseSign;
+        [SerializeField] private Sprite treasuryChest;
+        [SerializeField] private Sprite coin;
+        [Header("Fishing pond & mine")]
+        [SerializeField] private Sprite pondWater;
+        [SerializeField] private Sprite pondDock;
+        [SerializeField] private Sprite pondLily;
+        [SerializeField] private Sprite pondBoat;
+        [SerializeField] private Sprite pondNet;
+        [SerializeField] private Sprite[] pondRipples = System.Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] fish = System.Array.Empty<Sprite>();
+        [SerializeField] private Sprite mineCrane;
+        [Tooltip("Iron, gold, mithril.")]
+        [SerializeField] private Sprite[] bars = System.Array.Empty<Sprite>();
 
         public Sprite Ground => ground;
         public Sprite Path => path;
@@ -45,6 +62,26 @@ namespace NinjaVillage.Gameplay.Village
         public Sprite NoticeBoard => noticeBoard;
         public Sprite FarmSoil => farmSoil;
         public Sprite FarmSign => farmSign;
+        public Sprite HouseSign => houseSign;
+        public Sprite TreasuryChest => treasuryChest;
+        public Sprite Coin => coin;
+        public Sprite PondWater => pondWater;
+        public Sprite PondDock => pondDock;
+        public Sprite PondLily => pondLily;
+        public Sprite PondBoat => pondBoat;
+        public Sprite PondNet => pondNet;
+        public Sprite[] PondRipples => pondRipples;
+        public Sprite[] Fish => fish;
+        public Sprite MineCrane => mineCrane;
+        public Sprite[] Bars => bars;
+
+        /// <summary>The picture for a house style id (<see cref="NinjaVillage.Systems.Village.HousingRules.Styles"/>).</summary>
+        public Sprite HouseSprite(string styleId)
+        {
+            for (int i = 0; i < houseStyleIds.Length && i < houseStyleSprites.Length; i++)
+                if (houseStyleIds[i] == styleId) return houseStyleSprites[i];
+            return houseStyleSprites.Length > 0 ? houseStyleSprites[0] : null;
+        }
 
         public Sprite BuildingSprite(string buildingId, int level)
         {

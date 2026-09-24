@@ -36,6 +36,8 @@ namespace NinjaVillage.Systems.Requests
         [Header("When it can come up")]
         [SerializeField, Min(1)] private int requiredCastleLevel = 1;
         [SerializeField, Min(0)] private int requiredKitchenLevel;
+        [Tooltip("A building that must be built first (e.g. the mine for bar requests); empty = none.")]
+        [SerializeField] private string requiredBuilding;
         [SerializeField, Min(0f)] private float weight = 1f;
 
         [Header("Reward")]
@@ -51,6 +53,7 @@ namespace NinjaVillage.Systems.Requests
         public string[] Villagers => villagers;
         public int RequiredCastleLevel => requiredCastleLevel;
         public int RequiredKitchenLevel => requiredKitchenLevel;
+        public string RequiredBuilding => requiredBuilding;
         public float Weight => weight;
         public int RewardCoins => rewardCoins;
         public int RewardGems => rewardGems;

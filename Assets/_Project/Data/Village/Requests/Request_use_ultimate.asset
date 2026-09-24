@@ -25,6 +25,7 @@ MonoBehaviour:
   - npc_boy
   requiredCastleLevel: 1
   requiredKitchenLevel: 0
+  requiredBuilding: 
   weight: 0.8
   rewardCoins: 150
   rewardGems: 0

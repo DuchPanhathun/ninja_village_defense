@@ -29,6 +29,8 @@ namespace NinjaVillage.Systems.Village
         [Tooltip("Placement footprint radius in world units: decorations can't overlap each other or buildings.")]
         [SerializeField, Min(0.1f)] private float radius = 0.6f;
         [SerializeField] private int sortOrder;
+        [Tooltip("Not sold in the shop: only given as a reward (e.g. the Golden Koi pond from fishing).")]
+        [SerializeField] private bool giftOnly;
 
         public DecorationCategory Category => category;
         public Sprite[] Frames => frames;
@@ -37,6 +39,7 @@ namespace NinjaVillage.Systems.Village
         public Price Price => new(currency, price);
         public float Radius => radius;
         public int SortOrder => sortOrder;
+        public bool GiftOnly => giftOnly;
         public string NameOrId => string.IsNullOrEmpty(DisplayName) ? Id : DisplayName;
     }
 }
