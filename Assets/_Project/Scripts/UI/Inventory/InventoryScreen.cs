@@ -40,7 +40,7 @@ namespace NinjaVillage.UI.Inventory
                     : "Missing definition";
                 Color accent = weapon != null ? RarityColors.For(weapon.Rarity) : UITheme.Text;
 
-                var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent);
+                var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent, UIIcons.Weapon(entry.Id));
                 if (inv.EquippedWeaponId == entry.Id)
                     UIBuilder.Text(actions.transform, "Equipped", UITheme.SmallSize, TextAlignmentOptions.Right, UITheme.Positive);
                 else if (weapon != null)
@@ -74,7 +74,7 @@ namespace NinjaVillage.UI.Inventory
             string body = def != null ? (string.IsNullOrEmpty(def.Description) ? $"{def.Rarity}" : def.Description) : "Missing definition";
             Color accent = def != null ? RarityColors.For(def.Rarity) : UITheme.Text;
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent);
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent, UIIcons.Equipment(stack.Id));
             bool equipped = inv.IsEquipmentEquipped(stack.Id);
             UIBuilder.SmallButton(actions.transform, equipped ? "Unequip" : "Equip", () =>
             {

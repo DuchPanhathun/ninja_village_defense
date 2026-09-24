@@ -121,7 +121,7 @@ namespace NinjaVillage.EditorTools.Generators
             {
                 ("UI/Buttons", "button_normal", new Vector4(32, 24, 32, 24)), ("UI/Buttons", "button_hover", new Vector4(32, 24, 32, 24)),
                 ("UI/Buttons", "button_pressed", new Vector4(32, 24, 32, 24)), ("UI/Buttons", "button_disabled", new Vector4(32, 24, 32, 24)),
-                ("UI/Buttons", "tab_", new Vector4(40, 24, 40, 40)),
+                ("UI/Buttons", "tab_", new Vector4(40, 24, 40, 40)), ("UI/Buttons", "button_tint", new Vector4(32, 24, 32, 24)),
                 ("UI/Panels", "panel_wood_focus", new Vector4(24, 24, 24, 24)),
                 ("UI/Panels", "panel_", new Vector4(40, 40, 40, 40)),
                 ("UI/Bars", "bar_hp_", new Vector4(16, 8, 16, 8)), ("UI/Bars", "bar_xp_", new Vector4(16, 8, 16, 8)),

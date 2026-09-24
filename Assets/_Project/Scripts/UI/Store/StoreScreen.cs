@@ -85,7 +85,7 @@ namespace NinjaVillage.UI.Store
         {
             var product = StoreProducts.Get(productId);
             if (product == null) return;
-            var actions = UIBuilder.ActionCard(content, product.Title, product.Description, out _, out _, accent);
+            var actions = UIBuilder.ActionCard(content, product.Title, product.Description, out _, out _, accent, UIIcons.StoreProduct(productId));
             UIBuilder.SmallButton(actions.transform, StoreService.Price(productId), () =>
             {
                 if (_busy) return;
@@ -108,7 +108,7 @@ namespace NinjaVillage.UI.Store
             {
                 if (hero == null || !hero.IsPremium || HeroService.IsUnlocked(hero)) continue;
                 if (!header) { UIBuilder.SectionHeader(content, "Premium heroes"); header = true; }
-                var actions = UIBuilder.ActionCard(content, hero.NameOrId, hero.RoleSummary, out _, out _, hero.ThemeColor);
+                var actions = UIBuilder.ActionCard(content, hero.NameOrId, hero.RoleSummary, out _, out _, hero.ThemeColor, UIIcons.Hero(hero.Id));
                 UIBuilder.SmallButton(actions.transform, "View", () =>
                 {
                     Sfx.Play(AudioCueIds.UiClick);
@@ -129,7 +129,7 @@ namespace NinjaVillage.UI.Store
 
                 var hero = HeroService.Get(skin.HeroId);
                 string body = $"For {(hero != null ? hero.NameOrId : skin.HeroId)}" + (string.IsNullOrEmpty(skin.Description) ? string.Empty : "\n" + skin.Description);
-                var actions = UIBuilder.ActionCard(content, skin.NameOrId, body, out _, out _, skin.Tint);
+                var actions = UIBuilder.ActionCard(content, skin.NameOrId, body, out _, out _, skin.Tint, UIIcons.Skin(skin.Id));
 
                 if (owned)
                 {

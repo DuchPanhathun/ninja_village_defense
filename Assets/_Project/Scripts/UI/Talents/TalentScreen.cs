@@ -95,7 +95,7 @@ namespace NinjaVillage.UI.Talents
                 body += $"\n<color=#F25A5A>{TalentService.Describe(check, talent)}</color>";
 
             Color accent = rank >= talent.MaxRank ? UITheme.Gold : rank > 0 ? UITheme.Positive : UITheme.Text;
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent);
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent, UIIcons.Talent(talent.Id));
 
             if (check == TalentResult.MaxRank)
             {

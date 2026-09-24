@@ -37,6 +37,9 @@ namespace NinjaVillage.UI.Common
         /// </summary>
         protected virtual bool IsHud => false;
 
+        /// <summary>Full screens show the (dimmed) village art behind them; the home screen draws its own.</summary>
+        protected virtual bool UseArtBackdrop => !IsPopup && !IsHud;
+
         public RectTransform Root { get; private set; }
         /// <summary>Area below the header where <see cref="Build"/> puts content (has a VerticalLayoutGroup).</summary>
         protected RectTransform Body { get; private set; }
@@ -54,6 +57,8 @@ namespace NinjaVillage.UI.Common
                 rootImage.raycastTarget = false;
             }
 
+            if (UseArtBackdrop) AddArtBackdrop();
+
             RectTransform container = Root;
             if (IsPopup)
             {
@@ -67,6 +72,8 @@ namespace NinjaVillage.UI.Common
             var column = UIBuilder.Vertical(container, "Column", 12f, 0);
             UIBuilder.Stretch((RectTransform)column.transform);
             column.childForceExpandHeight = false;
+            // Keep headers and content out of the camera hole / rounded corners on full screens.
+            if (!IsPopup && !IsHud) column.gameObject.AddComponent<SafeAreaFitter>();
 
             if (Title != null)
                 BuildHeader(column.transform);
@@ -93,19 +100,50 @@ namespace NinjaVillage.UI.Common
 
         private void BuildHeader(Transform parent)
         {
-            var header = UIBuilder.Horizontal(parent, "Header", 16f, 16, TextAnchor.MiddleLeft);
+            var header = UIBuilder.Horizontal(parent, "Header", 20f, 18, TextAnchor.MiddleLeft);
             header.childForceExpandWidth = false;
-            header.gameObject.AddComponent<Image>().color = UITheme.Panel;
+            header.childForceExpandHeight = false;
+            var headerImage = header.gameObject.AddComponent<Image>();
+            headerImage.color = UITheme.Panel;
+            UIBuilder.UseWood(headerImage, "panel_tint");
             UIBuilder.SetPreferredSize(header, -1f, 150f);
 
             if (ShowBackButton)
             {
-                var back = UIBuilder.Button(header.transform, "<", OnBackPressed, UITheme.ButtonSecondary, 110f, UITheme.HeaderSize);
+                var arrow = UIArt.Get("arrow_left");
+                var back = UIBuilder.Button(header.transform, arrow != null ? "" : "<", OnBackPressed, UITheme.Button, 110f, UITheme.HeaderSize);
                 UIBuilder.SetPreferredSize(back, 110f, 110f);
+                if (arrow != null)
+                {
+                    var icon = UIBuilder.Image(back.transform, "Arrow", Color.white, arrow);
+                    icon.raycastTarget = false;
+                    UIBuilder.Stretch(icon.rectTransform, 24f);
+                }
             }
 
-            TitleText = UIBuilder.Text(header.transform, Title, UITheme.HeaderSize, TextAlignmentOptions.Left, UITheme.Text, FontStyles.Bold);
+            TitleText = UIBuilder.Text(header.transform, Title, UITheme.TitleSize * 0.85f, TextAlignmentOptions.Left, UITheme.Text, FontStyles.Bold);
+            UIStyle.Chunky(TitleText, 0.24f);
             UIBuilder.SetFlexible(TitleText, 1f, 0f);
+            UIBuilder.SetPreferredSize(TitleText, -1f, 110f);
+        }
+
+        private void AddArtBackdrop()
+        {
+            var sprite = UIArt.Get("bg_mainmenu");
+            if (sprite == null) return;
+            if (Root.TryGetComponent<Image>(out var rootImage)) rootImage.color = Color.black;
+
+            var art = UIBuilder.Image(Root, "BackdropArt", Color.white, sprite);
+            art.raycastTarget = false;
+            art.preserveAspect = false;
+            UIBuilder.Stretch(art.rectTransform);
+            var fitter = art.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = sprite.rect.width / sprite.rect.height;
+
+            var dim = UIBuilder.Image(Root, "BackdropDim", new Color(0.06f, 0.04f, 0.03f, 0.72f));
+            dim.raycastTarget = false;
+            UIBuilder.Stretch(dim.rectTransform);
         }
 
         /// <summary>Called once from Awake. Lay out static content under <paramref name="body"/>.</summary>

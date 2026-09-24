@@ -66,7 +66,7 @@ namespace NinjaVillage.UI.Pets
             var gear = PetService.GetEquippedItem(pet);
             if (unlocked) body += "\nGear: " + (gear != null ? RarityColors.Colorize(gear.NameOrId, gear.Rarity) : "none");
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, pet.PlaceholderColor);
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, pet.PlaceholderColor, UIIcons.Pet(pet.Id));
 
             if (!unlocked)
             {
@@ -104,7 +104,7 @@ namespace NinjaVillage.UI.Pets
         {
             bool owned = PetService.OwnsItem(item);
             string body = item.Bonus.Describe();
-            var actions = UIBuilder.ActionCard(content, item.NameOrId, body, out _, out _, RarityColors.For(item.Rarity));
+            var actions = UIBuilder.ActionCard(content, item.NameOrId, body, out _, out _, RarityColors.For(item.Rarity), UIIcons.PetGear(item.Id));
             if (owned)
             {
                 UIBuilder.Text(actions.transform, "Owned", UITheme.SmallSize, TextAlignmentOptions.Right, UITheme.Positive);
@@ -137,7 +137,7 @@ namespace NinjaVillage.UI.Pets
             {
                 if (!PetService.OwnsItem(item)) continue;
                 any = true;
-                var actions = UIBuilder.ActionCard(content, item.NameOrId, item.Bonus.Describe(), out _, out _, RarityColors.For(item.Rarity));
+                var actions = UIBuilder.ActionCard(content, item.NameOrId, item.Bonus.Describe(), out _, out _, RarityColors.For(item.Rarity), UIIcons.PetGear(item.Id));
                 if (current == item)
                 {
                     UIBuilder.Text(actions.transform, "Equipped", UITheme.SmallSize, TextAlignmentOptions.Right, UITheme.Positive);

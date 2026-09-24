@@ -612,6 +612,7 @@ UI/Buttons/button_hover.png
 UI/Buttons/button_no.png
 UI/Buttons/button_normal.png
 UI/Buttons/button_pressed.png
+UI/Buttons/button_tint.png
 UI/Buttons/button_unchecked.png
 UI/Buttons/button_unchecked_disabled.png
 UI/Buttons/button_yes.png
@@ -819,6 +820,7 @@ UI/Panels/panel_metal.png
 UI/Panels/panel_metal2.png
 UI/Panels/panel_metal3.png
 UI/Panels/panel_red.png
+UI/Panels/panel_tint.png
 UI/Panels/panel_wood2.png
 UI/Panels/panel_wood3.png
 UI/Panels/panel_wood4.png

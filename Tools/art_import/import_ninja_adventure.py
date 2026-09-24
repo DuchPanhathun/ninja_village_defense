@@ -166,6 +166,22 @@ def purple(img):
     return out
 
 
+def tintable(img):
+    """Greyscale with the most common (fill) brightness mapped to white; outlines stay dark."""
+    px = img.load()
+    lum = lambda c: 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+    fill = Counter(round(lum(px[x, y])) for y in range(img.height) for x in range(img.width) if px[x, y][3]).most_common(1)[0][0]
+    out = img.copy()
+    o = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a:
+                v = min(255, round(lum((r, g, b)) * 255 / max(1, fill)))
+                o[x, y] = (v, v, v, a)
+    return out
+
+
 def remove_ground_shadow(img, colour=(80, 80, 79), tolerance=4):
     """PixelLab sometimes adds a flat grey shadow stripe under animals; drop it (bottom 2 rows only)."""
     box = img.getbbox()
@@ -683,7 +699,11 @@ def import_ui():
             bars.append(save(img, "UI/Bars", n))
         else:
             buttons.append(save(img, "UI/Buttons", n if n.startswith(("button", "arrow", "tab")) else "toggle_" + n))
-    record("UI", "buttons, arrows, toggles, tabs", "`Ui/Theme/Theme Wood` (nine-slice friendly)", buttons)
+    # Greyscale copies whose main fill is pure white: tinting them with any UI colour keeps the pixel-art
+    # frame, bevel and dark outline (the code-built UI tints its buttons and cards per state).
+    buttons.append(save(tintable(load("Ui/Theme/Theme Wood/button_normal.png")), "UI/Buttons", "button_tint"))
+    panels.append(save(tintable(load("Ui/Theme/Theme Wood/nine_path_panel.png")), "UI/Panels", "panel_tint"))
+    record("UI", "buttons, arrows, toggles, tabs", "`Ui/Theme/Theme Wood` (nine-slice friendly; `button_tint`/`panel_tint` are greyscale tintable copies)", buttons)
     record("UI", "panels", "`Ui/Theme/Theme Wood` nine_path_* and inventory_cell", panels)
     record("UI", "sliders", "`Ui/Theme/Theme Wood` slider/grabber", bars)
 

@@ -52,7 +52,9 @@ namespace NinjaVillage.UI.Collection
             if (!known)
             {
                 string hint = string.IsNullOrEmpty(recipe.Hint) ? "An undiscovered technique..." : recipe.Hint;
-                UIBuilder.ActionCard(content, "???", $"<i>{hint}</i>", out _, out _, UITheme.TextMuted);
+                // Undiscovered: the technique's icon as a black silhouette — you can see there's something to find.
+                UIBuilder.ActionCard(content, "???", $"<i>{hint}</i>", out _, out _, UITheme.TextMuted,
+                    UIIcons.Evolution(recipe.Id), new Color(0.34f, 0.25f, 0.2f, 1f));
                 return;
             }
 
@@ -67,7 +69,8 @@ namespace NinjaVillage.UI.Collection
             if (recipe.ResultSkill != null && !string.IsNullOrEmpty(recipe.ResultSkill.Description))
                 body += "\n" + recipe.ResultSkill.Description;
 
-            UIBuilder.ActionCard(content, isNew ? $"{result}  (NEW!)" : result, body, out _, out _, isNew ? UITheme.Gold : new Color(0.8f, 0.6f, 1f));
+            UIBuilder.ActionCard(content, isNew ? $"{result}  (NEW!)" : result, body, out _, out _, isNew ? UITheme.Gold : new Color(0.8f, 0.6f, 1f),
+                UIIcons.Evolution(recipe.Id));
         }
 
         protected override void OnShown()

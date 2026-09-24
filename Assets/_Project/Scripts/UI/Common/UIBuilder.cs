@@ -10,14 +10,16 @@ namespace NinjaVillage.UI.Common
     /// <summary>Placeholder palette for code-built screens — swap for real art/theme later in one place.</summary>
     public static class UITheme
     {
-        public static readonly Color Backdrop = new(0.05f, 0.06f, 0.09f, 0.92f);
-        public static readonly Color Panel = new(0.13f, 0.15f, 0.21f, 0.97f);
-        public static readonly Color Card = new(0.19f, 0.22f, 0.30f, 1f);
-        public static readonly Color Button = new(0.80f, 0.27f, 0.22f, 1f);   // ninja red
-        public static readonly Color ButtonSecondary = new(0.30f, 0.34f, 0.45f, 1f);
-        public static readonly Color ButtonDisabled = new(0.25f, 0.25f, 0.28f, 1f);
-        public static readonly Color Text = new(0.96f, 0.94f, 0.88f, 1f);
-        public static readonly Color TextMuted = new(0.70f, 0.70f, 0.74f, 1f);
+        // Warm wood palette matching the Ninja Adventure UI kit. Buttons and cards tint the greyscale
+        // wood sprites (button_tint / panel_tint), so these colours keep the pixel frame and bevel.
+        public static readonly Color Backdrop = new(0.08f, 0.06f, 0.05f, 0.92f);
+        public static readonly Color Panel = new(0.30f, 0.20f, 0.14f, 0.97f);
+        public static readonly Color Card = new(0.42f, 0.29f, 0.20f, 1f);
+        public static readonly Color Button = new(0.94f, 0.52f, 0.22f, 1f);   // pack orange
+        public static readonly Color ButtonSecondary = new(0.58f, 0.44f, 0.33f, 1f);
+        public static readonly Color ButtonDisabled = new(0.36f, 0.33f, 0.31f, 1f);
+        public static readonly Color Text = new(0.98f, 0.95f, 0.88f, 1f);
+        public static readonly Color TextMuted = new(0.88f, 0.80f, 0.70f, 1f);
         public static readonly Color Gold = new(1f, 0.80f, 0.25f, 1f);
         public static readonly Color Gem = new(0.45f, 0.85f, 1f, 1f);
         public static readonly Color Positive = new(0.40f, 0.85f, 0.45f, 1f);
@@ -124,6 +126,7 @@ namespace NinjaVillage.UI.Common
             float height = UITheme.ButtonHeight, float fontSize = UITheme.BodySize)
         {
             var image = Image(parent, $"Button_{label}", color ?? UITheme.Button);
+            UseWood(image, "button_tint");
             var button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             if (onClick != null) button.onClick.AddListener(onClick);
@@ -131,6 +134,12 @@ namespace NinjaVillage.UI.Common
             var text = Text(image.transform, label, fontSize, TextAlignmentOptions.Center);
             Stretch(text.rectTransform, 8f);
             text.name = "Label";
+            UIStyle.Chunky(text, 0.18f);
+            // Long labels ("Unlock 1200 Coins") shrink to fit instead of wrapping onto two lines.
+            text.enableAutoSizing = true;
+            text.fontSizeMax = fontSize;
+            text.fontSizeMin = Mathf.Max(16f, fontSize * 0.6f);
+            text.textWrappingMode = TextWrappingModes.NoWrap;
 
             SetPreferredSize(image, -1f, height);
             return button;
@@ -187,7 +196,27 @@ namespace NinjaVillage.UI.Common
             var layout = Vertical(parent, name, spacing, padding, TextAnchor.UpperLeft);
             var image = layout.gameObject.AddComponent<Image>();
             image.color = UITheme.Card;
+            UseWood(image, "panel_tint");
+            if (image.sprite != null)
+            {
+                // Keep text inside the wood frame's inner line (4 source px = 32 canvas px from the edge).
+                int inner = padding + 16;
+                layout.padding = new RectOffset(inner, inner, inner, inner);
+            }
             return layout;
+        }
+
+        /// <summary>
+        /// Gives an Image a 9-sliced greyscale wood sprite from <see cref="UIArt"/> (tinted by its colour);
+        /// leaves it flat when the art catalog isn't there (tests, other scenes).
+        /// </summary>
+        public static void UseWood(Image image, string spriteName)
+        {
+            var sprite = UIArt.Get(spriteName);
+            if (sprite == null) return;
+            image.sprite = sprite;
+            image.type = UnityEngine.UI.Image.Type.Sliced;
+            image.preserveAspect = false;
         }
 
         /// <summary>
@@ -195,22 +224,42 @@ namespace NinjaVillage.UI.Common
         /// action buttons (returned). <paramref name="accent"/> tints the title (rarity, hero theme...).
         /// </summary>
         public static HorizontalLayoutGroup ActionCard(Transform parent, string title, string body,
-            out TextMeshProUGUI titleText, out TextMeshProUGUI bodyText, Color? accent = null)
+            out TextMeshProUGUI titleText, out TextMeshProUGUI bodyText, Color? accent = null, Sprite icon = null,
+            Color? iconTint = null)
         {
             var card = Card(parent, "Card_" + title, 10f, 22);
-            titleText = Text(card.transform, title, UITheme.HeaderSize * 0.85f, TextAlignmentOptions.Left, accent ?? UITheme.Text, FontStyles.Bold);
-            bodyText = Text(card.transform, body, UITheme.SmallSize, TextAlignmentOptions.Left, UITheme.TextMuted);
+            Transform column = card.transform;
+            if (icon != null)
+            {
+                // Picture on the left in a dark tile, title/body beside it; actions stay full width below.
+                var row = Horizontal(card.transform, "Row", 20f, 0, TextAnchor.UpperLeft);
+                row.childForceExpandWidth = false;
+                row.childForceExpandHeight = false;
+                var tile = Image(row.transform, "IconTile", new Color(0.16f, 0.11f, 0.08f, 1f));
+                UseWood(tile, "panel_tint");
+                SetPreferredSize(tile, 150f, 150f);
+                var picture = Image(tile.transform, "Icon", iconTint ?? Color.white, icon);
+                picture.raycastTarget = false;
+                Stretch(picture.rectTransform, 18f);
+                var textColumn = Vertical(row.transform, "Text", 8f, 0, TextAnchor.UpperLeft);
+                SetFlexible(textColumn, 1f, 0f);
+                column = textColumn.transform;
+            }
+            titleText = Text(column, title, UITheme.HeaderSize * 0.85f, TextAlignmentOptions.Left, accent ?? UITheme.Text, FontStyles.Bold);
+            UIStyle.Chunky(titleText, 0.18f);
+            bodyText = Text(column, body, UITheme.SmallSize, TextAlignmentOptions.Left, UITheme.TextMuted);
             bodyText.richText = true;
             if (string.IsNullOrEmpty(body)) bodyText.gameObject.SetActive(false);
 
             var actions = Horizontal(card.transform, "Actions", 12f, 0, TextAnchor.MiddleRight);
             actions.childForceExpandWidth = false;
             SetPreferredSize(actions, -1f, 96f);
+            actions.gameObject.AddComponent<CollapseWhenEmpty>(); // cards without buttons don't keep an empty strip
             return actions;
         }
 
         /// <summary>Compact button for card action rows.</summary>
-        public static Button SmallButton(Transform parent, string label, UnityAction onClick, Color? color = null, float width = 260f)
+        public static Button SmallButton(Transform parent, string label, UnityAction onClick, Color? color = null, float width = 300f)
         {
             var button = Button(parent, label, onClick, color, 90f, UITheme.SmallSize + 2f);
             SetPreferredSize(button, width, 90f);
@@ -221,6 +270,7 @@ namespace NinjaVillage.UI.Common
         public static TextMeshProUGUI SectionHeader(Transform parent, string text)
         {
             var header = Text(parent, text, UITheme.HeaderSize, TextAlignmentOptions.Left, UITheme.Gold, FontStyles.Bold);
+            UIStyle.Chunky(header, 0.22f);
             SetPreferredSize(header, -1f, 70f);
             return header;
         }
@@ -349,8 +399,16 @@ namespace NinjaVillage.UI.Common
         public static Image ProgressBar(Transform parent, string name, out Image fill, Color? fillColor = null, float height = 28f)
         {
             var background = Image(parent, name, new Color(0f, 0f, 0f, 0.5f));
+            var frame = UIArt.Get("bar_hp_bg");
+            if (frame != null)
+            {
+                background.sprite = frame;
+                background.type = UnityEngine.UI.Image.Type.Sliced;
+                background.preserveAspect = false;
+                background.color = Color.white;
+            }
             fill = Image(background.transform, "Fill", fillColor ?? UITheme.Positive);
-            Stretch(fill.rectTransform);
+            Stretch(fill.rectTransform, frame != null ? 6f : 0f);
             fill.type = UnityEngine.UI.Image.Type.Filled;
             fill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
             fill.fillAmount = 0f;
@@ -383,6 +441,10 @@ namespace NinjaVillage.UI.Common
             {
                 element.preferredHeight = height;
                 element.minHeight = height;
+                // A fixed height means fixed: without this, rows built as HorizontalLayoutGroups (which force
+                // child height) report flexibleHeight 1 and soak up spare space on tall screens — the
+                // half-screen headers and currency gaps.
+                element.flexibleHeight = 0f;
             }
             return element;
         }

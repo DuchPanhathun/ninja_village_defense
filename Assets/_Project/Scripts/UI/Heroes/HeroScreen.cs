@@ -48,7 +48,7 @@ namespace NinjaVillage.UI.Heroes
                           hero.GetStatsAtLevel(Mathf.Max(1, level)).Describe(" · ");
             if (hero.SignatureWeapon != null) body += $"\nWeapon: {hero.SignatureWeapon.DisplayName}";
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, hero.ThemeColor);
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, hero.ThemeColor, UIIcons.Hero(hero.Id));
 
             if (!unlocked)
             {

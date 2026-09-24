@@ -27,6 +27,7 @@ namespace NinjaVillage.UI.MainMenu
     public class HomeScreen : UIScreen
     {
         public override string ScreenId => ScreenIds.Home;
+        protected override bool UseArtBackdrop => false; // draws its own, brighter background
 
         private const float Side = 190f;          // width reserved for each icon column
         private const float TabBarHeight = 210f;
@@ -124,7 +125,7 @@ namespace NinjaVillage.UI.MainMenu
             UIStyle.Place(_heroLine.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 1f), new Vector2(180f, -2f), new Vector2(360f, 40f));
 
             _gems = CurrencyPill(bar, "store_gems_100", new Vector2(-22f, 0f), UITheme.Gem);
-            _coins = CurrencyPill(bar, "pickup_coin", new Vector2(-282f, 0f), UITheme.Gold);
+            _coins = CurrencyPill(bar, "pickup_coin_0", new Vector2(-282f, 0f), UITheme.Gold);
         }
 
         private TextMeshProUGUI CurrencyPill(RectTransform bar, string icon, Vector2 position, Color color)
