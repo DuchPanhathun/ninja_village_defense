@@ -29,7 +29,8 @@ namespace NinjaVillage.UI.Battle
             var ui = canvas.gameObject.AddComponent<DashButtonUI>();
             ui._dash = dash;
 
-            var image = UIBuilder.Image(canvas.transform, "DashButton", new Color(0.25f, 0.55f, 0.95f, 0.85f), UIBuilder.WhiteSprite);
+            // Wood button from the pixel-art UI kit (flat blue when the art catalog is missing).
+            var image = UIStyle.Sprite(canvas.transform, "DashButton", "panel_wood_panel", new Color(0.25f, 0.55f, 0.95f, 0.85f));
             var rt = image.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot = new Vector2(1f, 0f);
@@ -40,7 +41,7 @@ namespace NinjaVillage.UI.Battle
             ui._button.targetGraphic = image;
             ui._button.onClick.AddListener(() => ui._dash.TryDash());
 
-            var label = UIBuilder.Text(rt, "DASH", UITheme.HeaderSize, TMPro.TextAlignmentOptions.Center);
+            var label = UIStyle.Label(rt, "DASH", UITheme.HeaderSize, Color.white);
             UIBuilder.Stretch(label.rectTransform);
 
             ui._cooldownFill = UIBuilder.Image(rt, "Cooldown", new Color(0f, 0f, 0f, 0.55f), UIBuilder.WhiteSprite);

@@ -8,6 +8,8 @@ using NinjaVillage.Gameplay.Progression;
 using NinjaVillage.Gameplay.Vfx;
 using NinjaVillage.Gameplay.World;
 using NinjaVillage.UI.Battle;
+using NinjaVillage.UI.Common;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -65,6 +67,8 @@ namespace NinjaVillage.EditorTools.Generators
             HookPickups();
             BuildPickupArt();
             BuildVfxArt();
+            ConfigureUiImporters();
+            BuildUiArt();
         }
 
         // ------------------------------------------------------------------ import settings
@@ -106,6 +110,63 @@ namespace NinjaVillage.EditorTools.Generators
                 AssetDatabase.StopAssetEditing();
             }
             Debug.Log($"[ArtHookup] Import settings updated on {changed.Count} world sprite(s).");
+        }
+
+        // ------------------------------------------------------------------ UI art
+
+        /// <summary>9-slice borders (in texture px, 8 per source pixel) so wood panels/buttons/bars stretch cleanly.</summary>
+        private static void ConfigureUiImporters()
+        {
+            var borders = new List<(string folder, string prefix, Vector4 border)>
+            {
+                ("UI/Buttons", "button_normal", new Vector4(32, 24, 32, 24)), ("UI/Buttons", "button_hover", new Vector4(32, 24, 32, 24)),
+                ("UI/Buttons", "button_pressed", new Vector4(32, 24, 32, 24)), ("UI/Buttons", "button_disabled", new Vector4(32, 24, 32, 24)),
+                ("UI/Buttons", "tab_", new Vector4(40, 24, 40, 40)),
+                ("UI/Panels", "panel_wood_focus", new Vector4(24, 24, 24, 24)),
+                ("UI/Panels", "panel_", new Vector4(40, 40, 40, 40)),
+                ("UI/Bars", "bar_hp_", new Vector4(16, 8, 16, 8)), ("UI/Bars", "bar_xp_", new Vector4(16, 8, 16, 8)),
+            };
+            int changed = 0;
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { $"{SpriteRoot}/UI" }))
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    string file = Path.GetFileNameWithoutExtension(path);
+                    string folder = Path.GetDirectoryName(path)?.Replace('\\', '/');
+                    var rule = borders.FirstOrDefault(b => folder != null && folder.EndsWith(b.folder) && file.StartsWith(b.prefix));
+                    if (rule.folder == null || AssetImporter.GetAtPath(path) is not TextureImporter importer) continue;
+                    if (importer.spriteBorder == rule.border) continue;
+                    importer.spriteBorder = rule.border;
+                    importer.SaveAndReimport();
+                    changed++;
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
+            Debug.Log($"[ArtHookup] 9-slice borders set on {changed} UI sprite(s).");
+        }
+
+        /// <summary>Every UI sprite (+ pickups and the menu background) by name, for code-built screens.</summary>
+        private static void BuildUiArt()
+        {
+            var sprites = new List<Sprite>();
+            foreach (var folder in new[] { $"{SpriteRoot}/UI", $"{SpriteRoot}/Pickups" })
+                foreach (var guid in AssetDatabase.FindAssets("t:Sprite", new[] { folder }))
+                {
+                    var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(guid));
+                    if (sprite != null) sprites.Add(sprite);
+                }
+            var background = Load("Environment/Backgrounds", "bg_mainmenu");
+            if (background != null) sprites.Add(background);
+
+            ContentGen.EnsureFolder(CatalogFolder);
+            var art = ContentGen.CreateOrLoad<UIArt>($"{CatalogFolder}/{nameof(UIArt)}.asset");
+            art.EditorSetSprites(sprites.OrderBy(sp => sp.name).ToArray());
+            Debug.Log($"[ArtHookup] UIArt: {sprites.Count} sprites.");
         }
 
         // ------------------------------------------------------------------ character frames
@@ -280,6 +341,146 @@ namespace NinjaVillage.EditorTools.Generators
             DressBar(Object.FindAnyObjectByType<PlayerHealthBarUI>(), "bar_hp_fill", "HPBarBackground");
             DressBar(Object.FindAnyObjectByType<XpBarUI>(), "bar_xp_fill", "XPBarBackground");
             DressBar(Object.FindAnyObjectByType<BossHealthBarUI>(), "bar_hp_fill", "BossBarRoot");
+            LayOutHud(scene);
+        }
+
+        /// <summary>
+        /// The Battle HUD was placed by hand for another aspect ratio: the level-up cards ran off the left
+        /// edge (panel offset -150), the timer sat under the pause button, bar fills had a stray pivot, and
+        /// the skill descriptions / ultimate label were white "New Text" on white. This re-lays it for the
+        /// 1080-wide portrait canvas and gives it the wood UI kit.
+        /// </summary>
+        private static void LayOutHud(Scene scene)
+        {
+            foreach (var scaler in Object.FindObjectsByType<CanvasScaler>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+                EditorUtility.SetDirty(scaler);
+            }
+
+            Place(Find(scene, "HPBarBackground"), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -40f), new Vector2(520f, 52f));
+            Place(Find(scene, "XPBarBackground"), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -104f), new Vector2(520f, 40f));
+            FillParent(Find(scene, "HPBarFill"), 8f);
+            FillParent(Find(scene, "XPBarFill"), 6f);
+            FillParent(Find(scene, "BossBarFill"), 8f);
+            Place(Find(scene, "BossBarRoot"), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(760f, 56f));
+
+            var wave = Find(scene, "WaveText");
+            Place(wave, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(300f, 76f));
+            StyleText(wave, 52f, Color.white, TextAlignmentOptions.Center);
+            var coins = Find(scene, "CoinText");
+            Place(coins, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -156f), new Vector2(320f, 60f));
+            StyleText(coins, 40f, UITheme.Gold, TextAlignmentOptions.Right);
+
+            var pause = Find(scene, "PauseButton");
+            Place(pause, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(110f, 110f));
+            SetSprite(pause, "UI/Panels", "panel_wood_panel");
+            foreach (var label in pause != null ? pause.GetComponentsInChildren<TMP_Text>(true) : new TMP_Text[0])
+                StyleText(label.rectTransform, 48f, Color.white, TextAlignmentOptions.Center);
+
+            var ultimate = Find(scene, "UltimateButton");
+            Place(ultimate, new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(-120f, 150f), new Vector2(170f, 170f));
+            SetSprite(ultimate, "UI/Panels", "panel_wood_panel_2");
+            var charge = Find(scene, "UltimateFillImage");
+            if (charge != null && charge.TryGetComponent<Image>(out var chargeImage))
+            {
+                chargeImage.color = new Color(1f, 0.8f, 0.25f, 0.75f); // gold charge ring over the wood
+                EditorUtility.SetDirty(chargeImage);
+            }
+            if (ultimate != null && ultimate.TryGetComponent<TMP_Text>(out var ultText))
+            {
+                ultText.text = "ULT";
+                StyleText(ultimate, 40f, Color.white, TextAlignmentOptions.Center);
+            }
+
+            var panel = Find(scene, "SkillChoicePanel");
+            if (panel != null)
+            {
+                panel.anchorMin = Vector2.zero;
+                panel.anchorMax = Vector2.one;
+                panel.anchoredPosition = Vector2.zero;
+                panel.sizeDelta = Vector2.zero;
+                EditorUtility.SetDirty(panel);
+            }
+            for (int i = 1; i <= 3; i++)
+            {
+                var card = Find(scene, $"SkillCard{i}");
+                Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2((i - 2) * 345f, 0f), new Vector2(320f, 560f));
+                SetSprite(card, "UI/Panels", "panel_map");
+                var name = Find(scene, $"SkillCard{i}_Name");
+                if (name != null)
+                {
+                    name.anchorMin = new Vector2(0f, 1f);
+                    name.anchorMax = new Vector2(1f, 1f);
+                    name.pivot = new Vector2(0.5f, 1f);
+                    name.anchoredPosition = new Vector2(0f, -40f);
+                    name.sizeDelta = new Vector2(-40f, 130f);
+                    StyleText(name, 38f, new Color(0.3f, 0.17f, 0.1f), TextAlignmentOptions.Center);
+                }
+                var description = Find(scene, $"SkillCard{i}_Description");
+                if (description != null)
+                {
+                    description.anchorMin = Vector2.zero;
+                    description.anchorMax = Vector2.one;
+                    description.pivot = new Vector2(0.5f, 0.5f);
+                    description.offsetMin = new Vector2(30f, 40f);
+                    description.offsetMax = new Vector2(-30f, -190f);
+                    StyleText(description, 28f, new Color(0.25f, 0.18f, 0.14f), TextAlignmentOptions.Top);
+                }
+            }
+        }
+
+        private static RectTransform Find(Scene scene, string name)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var t in root.GetComponentsInChildren<RectTransform>(true))
+                    if (t.name.Trim() == name) return t;
+            return null;
+        }
+
+        private static void Place(RectTransform rt, Vector2 anchor, Vector2 pivot, Vector2 position, Vector2 size)
+        {
+            if (rt == null) return;
+            rt.anchorMin = rt.anchorMax = anchor;
+            rt.pivot = pivot;
+            rt.anchoredPosition = position;
+            rt.sizeDelta = size;
+            EditorUtility.SetDirty(rt);
+        }
+
+        private static void FillParent(RectTransform rt, float inset)
+        {
+            if (rt == null) return;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.pivot = new Vector2(0f, 0.5f);
+            rt.offsetMin = new Vector2(inset, inset);
+            rt.offsetMax = new Vector2(-inset, -inset);
+            EditorUtility.SetDirty(rt);
+        }
+
+        private static void SetSprite(RectTransform rt, string folder, string sprite)
+        {
+            if (rt == null || !rt.TryGetComponent<Image>(out var image)) return;
+            var loaded = Load(folder, sprite);
+            if (loaded == null) return;
+            image.sprite = loaded;
+            image.type = loaded.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;
+            image.color = Color.white;
+            EditorUtility.SetDirty(image);
+        }
+
+        private static void StyleText(RectTransform rt, float size, Color color, TextAlignmentOptions align)
+        {
+            if (rt == null || !rt.TryGetComponent<TMP_Text>(out var text)) return;
+            text.fontSize = size;
+            text.color = color;
+            text.alignment = align;
+            text.fontStyle |= FontStyles.Bold;
+            text.textWrappingMode = TextWrappingModes.Normal;
+            // No outline here: TMP outlines need a per-text material instance, which doesn't survive being
+            // saved into the scene. Runtime-built UI (UIStyle.Chunky) gets outlines instead.
+            EditorUtility.SetDirty(text);
         }
 
         private static void DressBar(Component bar, string fillSprite, string backgroundName)
@@ -295,7 +496,7 @@ namespace NinjaVillage.EditorTools.Generators
                 fill.color = Color.white;
                 EditorUtility.SetDirty(fill);
             }
-            var background = GameObject.Find(backgroundName);
+            var background = Find(bar.gameObject.scene, backgroundName);
             if (background != null && background.TryGetComponent<Image>(out var bg))
             {
                 bg.sprite = Load("UI/Bars", "bar_hp_bg");

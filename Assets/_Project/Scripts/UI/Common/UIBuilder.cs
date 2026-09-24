@@ -53,7 +53,9 @@ namespace NinjaVillage.UI.Common
             var scaler = go.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = ReferenceResolution;
-            scaler.matchWidthOrHeight = 0.5f;
+            // Expand: the whole 1080x1920 design always fits — tall phones get extra height, tablets extra
+            // width. (Blending width/height made tall phones' canvas narrower than 1080, clipping the right edge.)
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
             EnsureEventSystem();
             return canvas;
