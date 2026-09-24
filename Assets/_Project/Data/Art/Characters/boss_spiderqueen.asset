@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: boss_spiderqueen
+  m_EditorClassIdentifier: 
+  key: boss_spiderqueen
+  idle:
+  - {fileID: 21300000, guid: 2d916371a6e3218bfaa07d205a7fc4d5, type: 3}
+  - {fileID: 21300000, guid: 75d831af11d1bd3d7b1f5e96132de235, type: 3}
+  - {fileID: 21300000, guid: 63491353414390e3ba41128748efbbd5, type: 3}
+  - {fileID: 21300000, guid: 1214294e3306c439db8bab3e0d537716, type: 3}
+  - {fileID: 21300000, guid: 69bea971eac5727e7ad6c61dfab1d690, type: 3}
+  - {fileID: 21300000, guid: f478b69c0e074741c9425c6a8c3e417c, type: 3}
+  - {fileID: 21300000, guid: a9550d2505cd495eab7e8fa6ec3429a0, type: 3}
+  move:
+  - {fileID: 21300000, guid: 38bbe3ad8ca8b0994a961643550d57ca, type: 3}
+  - {fileID: 21300000, guid: bf488b38e83002647aa67397c2ae2cb7, type: 3}
+  - {fileID: 21300000, guid: 3f62a1c3d8e606a74b554c8ba0b5b34d, type: 3}
+  - {fileID: 21300000, guid: 0c2dbf93477c69047a3556ada60a884d, type: 3}
+  - {fileID: 21300000, guid: 9e502033a99c955cdb645553d4b3f44a, type: 3}
+  - {fileID: 21300000, guid: 06f41478b035f5c839a86a3193e4eeec, type: 3}
+  - {fileID: 21300000, guid: bc2295340a6e8e53c960b3214ad181ea, type: 3}
+  attack:
+  - {fileID: 21300000, guid: e4cc967cef18a8694a0cbfbfca56a620, type: 3}
+  - {fileID: 21300000, guid: 312d8eb81e73fa94094207c673b666d3, type: 3}
+  - {fileID: 21300000, guid: 2ce53d0f60f63f0cca38e4d21ea6f732, type: 3}
+  - {fileID: 21300000, guid: 20500394d78d0e21eaa6aeb40992a139, type: 3}
+  - {fileID: 21300000, guid: 4e63bca50fe2cfe4b948d5659a179441, type: 3}
+  hurt: []
+  death: []
+  idleFps: 8
+  moveFps: 8
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

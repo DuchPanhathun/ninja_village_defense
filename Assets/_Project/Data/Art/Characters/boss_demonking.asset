@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: boss_demonking
+  m_EditorClassIdentifier: 
+  key: boss_demonking
+  idle:
+  - {fileID: 21300000, guid: 55f6fa2956b961655880747b332b80dc, type: 3}
+  - {fileID: 21300000, guid: 009b4342053cb16c6b8f7994d124681c, type: 3}
+  - {fileID: 21300000, guid: 49f1bf0489552e85ab0424ea589672d5, type: 3}
+  - {fileID: 21300000, guid: a0ad8b5c0b91cbf8dadd5433181f8455, type: 3}
+  - {fileID: 21300000, guid: 8a91326554bfd393ab5ec84231cda563, type: 3}
+  - {fileID: 21300000, guid: 92d6af870a65bcea6b5db2de446317d0, type: 3}
+  move:
+  - {fileID: 21300000, guid: af435292550cadad28b782c9e64d2573, type: 3}
+  - {fileID: 21300000, guid: a94b0d73d52040b349a9f24eb93df754, type: 3}
+  - {fileID: 21300000, guid: acbc9b7fa8924bce2b7f5d478f11d8fc, type: 3}
+  - {fileID: 21300000, guid: 8547356f16be6ebb881f7506bae22f7c, type: 3}
+  - {fileID: 21300000, guid: 9b37e6aa6783f5624865b59f278ba8fa, type: 3}
+  - {fileID: 21300000, guid: 185e0a67baff3e9a5a37f2a8a730c907, type: 3}
+  - {fileID: 21300000, guid: 50c61610525d9c7b2ac2c864a907b96d, type: 3}
+  - {fileID: 21300000, guid: 80f209cd249a9052dba75c20f55c7df0, type: 3}
+  - {fileID: 21300000, guid: 2c342625573b94a339234731f90f832a, type: 3}
+  - {fileID: 21300000, guid: 94bc402e76e11a59aa643f72386fa224, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 28e558b11f75ec2c9986c31e4b5bdc67, type: 3}
+  - {fileID: 21300000, guid: 1a48d874e722c47fea4e635f9af8d4ee, type: 3}
+  - {fileID: 21300000, guid: da25e2ecfab063f0ea6d1768609cee65, type: 3}
+  - {fileID: 21300000, guid: c4249eaedc74d3552ab25fd53af737d7, type: 3}
+  - {fileID: 21300000, guid: 369a82dd42e94926fa30ac692b8f2a07, type: 3}
+  - {fileID: 21300000, guid: 4742958e5e2eafe2eab4be8e9295bef8, type: 3}
+  - {fileID: 21300000, guid: 426b0beadd484a75cb102a5e07e25503, type: 3}
+  - {fileID: 21300000, guid: 8cfbf7b16125e886a9316dd9e7889640, type: 3}
+  - {fileID: 21300000, guid: 4c6fe02e1761a08f9a48965d20ccb0d9, type: 3}
+  - {fileID: 21300000, guid: 1b1b6280a579730a9b302e93bd3ba4af, type: 3}
+  - {fileID: 21300000, guid: d46bec5c8532703528ea651164b54e39, type: 3}
+  - {fileID: 21300000, guid: 9abe82327711f5940a08ddde678c25c5, type: 3}
+  - {fileID: 21300000, guid: 6f51348302f662984a42df8857c56224, type: 3}
+  - {fileID: 21300000, guid: 26d1ae260712f08d190e0b9b6a6c509c, type: 3}
+  - {fileID: 21300000, guid: 9e3d63bfe59639a55babd1466a07ac38, type: 3}
+  hurt: []
+  death: []
+  idleFps: 8
+  moveFps: 8
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

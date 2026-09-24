@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2874323832398188345}
   - component: {fileID: 8783127372687392368}
   - component: {fileID: 2010114291752415731}
+  - component: {fileID: 7841701640387215098}
   m_Layer: 6
   m_Name: Oni
   m_TagString: Untagged
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 26ccf1b7a89e3c911805341f8ae093ab, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -200,3 +201,18 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   flashColor: {r: 1, g: 0.3, b: 0.3, a: 1}
   flashDuration: 0.08
+--- !u!114 &7841701640387215098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6941790597773720769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e94068f3be47946d4a5ae98c7489ec16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteSet: {fileID: 11400000, guid: 799fedf10c1997e0987f417d99ee9038, type: 2}
+  target: {fileID: 5322511946135844407}
+  movingSpeedThreshold: 0.15

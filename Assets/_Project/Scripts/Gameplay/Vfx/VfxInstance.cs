@@ -11,6 +11,8 @@ namespace NinjaVillage.Gameplay.Vfx
         private float _duration, _elapsed;
         private bool _spin;
         private float _spinFrom, _spinTo;
+        private Sprite[] _frames;
+        private float _fps;
 
         public void Play(Sprite sprite, Vector2 position, Color color, float startSize, float endSize, float duration, int sortingOrder)
         {
@@ -27,7 +29,18 @@ namespace NinjaVillage.Gameplay.Vfx
             _duration = Mathf.Max(0.01f, duration);
             _elapsed = 0f;
             _spin = false;
+            _frames = null;
             Apply(0f);
+        }
+
+        /// <summary>Plays a pixel-art frame strip once at a fixed size and rotation (the frames animate themselves).</summary>
+        public void PlayFrames(Sprite[] frames, float fps, Vector2 position, float scale, float rotationDegrees, Color color, int sortingOrder)
+        {
+            Play(frames[0], position, color, scale, scale, frames.Length / Mathf.Max(1f, fps), sortingOrder);
+            _frames = frames;
+            _fps = fps;
+            transform.rotation = Quaternion.Euler(0f, 0f, rotationDegrees);
+            _renderer.color = color;
         }
 
         public void SetScaleAxes(Vector2 start, Vector2 end)
@@ -52,6 +65,12 @@ namespace NinjaVillage.Gameplay.Vfx
             if (t >= 1f)
             {
                 Vfx.Return(this);
+                return;
+            }
+            if (_frames != null)
+            {
+                int index = Mathf.Min(_frames.Length - 1, (int)(_elapsed * _fps));
+                _renderer.sprite = _frames[index];
                 return;
             }
             Apply(t);

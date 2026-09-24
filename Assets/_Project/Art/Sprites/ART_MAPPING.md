@@ -191,7 +191,7 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | panel colour themes | `Ui/Theme/Wip/*/nine_path_panel.png` | `panel_bamboo`, `panel_bocal`, `panel_bubble`, `panel_dark`, `panel_map`, `panel_metal`, `panel_metal2`, `panel_metal3`, `panel_red`, `panel_wood2`, `panel_wood3`, `panel_wood4` |
 | dialog boxes | `Ui/Dialog` (the 300+ px wide boxes at 6x to stay under 2048) | `dialog_choice`, `dialog_box`, `dialog_box_faceset`, `dialog_info`, `dialog_box_simple`, `dialog_faceset_frame` |
 | yes / no buttons | `Ui/Dialog` | `button_yes`, `button_no` |
-| HP bar, hearts | `Ui/Receptacle` (Heart strips split into fill states) | `bar_hp_bg`, `bar_hp_fill`, `bar_heart_icon`, `bar_heart_0..4`, `bar_heart2_0..3`, `bar_heart3_0..3` |
+| HP bar, hearts | `Ui/Receptacle` (Heart strips split into fill states) | `bar_hp_bg`, `bar_hp_fill`, `bar_xp_fill`, `bar_heart_icon`, `bar_heart_0..4`, `bar_heart2_0..3`, `bar_heart3_0..3` |
 | gauges (Receptacle Sphere) | `Ui/Receptacle/Receptacle Sphere` | `bar_orb_background_bamboo`, `bar_orb_background_flask`, `bar_orb_background_iron`, `bar_orb_background_iron2`, `bar_orb_background_metal`, `bar_orb_background_red`, `bar_orb_background_wood`, `bar_orb_over`, `bar_orb_progress_black`, `bar_orb_progress_green`, `bar_orb_progress_health`, `bar_orb_progress_mana`, `bar_orb_progress_purple`, `bar_orb_progress_white`, `bar_orb_progress_yellow` |
 | gauges (Receptacle Rectangle) | `Ui/Receptacle/Receptacle Rectangle` | `bar_rect_ammo_skill`, `bar_rect_ammo_special`, `bar_rect_ammokunai`, `bar_rect_background_bag`, `bar_rect_background_bamboo`, `bar_rect_background_bottle`, `bar_rect_background_scroll`, `bar_rect_background_wood`, `bar_rect_progress_health`, `bar_rect_progress_white` |
 

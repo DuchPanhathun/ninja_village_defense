@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: enemy_wolf
+  m_EditorClassIdentifier: 
+  key: enemy_wolf
+  idle:
+  - {fileID: 21300000, guid: d0653e4c440820e42a1b6001b2219b02, type: 3}
+  - {fileID: 21300000, guid: f0b743efd24ce64a3acf6c18a3e86096, type: 3}
+  - {fileID: 21300000, guid: 61c67b431098a26e38459b05037739d0, type: 3}
+  - {fileID: 21300000, guid: 84d7bc2819e8b103d9fda9aa907162c3, type: 3}
+  - {fileID: 21300000, guid: 8fc0ed5e4d97d59059927457ba6e5d97, type: 3}
+  move:
+  - {fileID: 21300000, guid: 5ac997c672bd80e82b64942ce600f741, type: 3}
+  - {fileID: 21300000, guid: 0fa2344bcbe0a5c739faaa4f85dba381, type: 3}
+  - {fileID: 21300000, guid: 5000385b7e7d00913a73578b80d88657, type: 3}
+  - {fileID: 21300000, guid: 8882648d88366e7c8b89b36da7f4a07e, type: 3}
+  - {fileID: 21300000, guid: b7931ee0c01efeaf1be5d10f79ea9d54, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

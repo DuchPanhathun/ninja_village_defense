@@ -704,6 +704,7 @@ def import_ui():
 
     rec = "Ui/Receptacle"
     out = [save(load(f"{rec}/LifeBarMiniUnder.png"), "UI/Bars", "bar_hp_bg"), save(load(f"{rec}/LifeBarMiniProgress.png"), "UI/Bars", "bar_hp_fill"),
+           save(recolour(load(f"{rec}/LifeBarMiniProgress.png"), (0, 360), 200, 0.9, 1.1), "UI/Bars", "bar_xp_fill"),
            save(load(f"{rec}/IconHeart.png"), "UI/Bars", "bar_heart_icon")]
     out += save_frames(strip(load(f"{rec}/Heart.png"), 16, 16), "UI/Bars", "bar_heart")
     out += save_frames(strip(load(f"{rec}/Heart2.png"), 16, 16), "UI/Bars", "bar_heart2")

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: hero_assassin
+  m_EditorClassIdentifier: 
+  key: hero_assassin
+  idle:
+  - {fileID: 21300000, guid: 787c9cd904bdaaae2ba10704436d63bf, type: 3}
+  move:
+  - {fileID: 21300000, guid: a23c01823bd6cd4909059b455cba3791, type: 3}
+  - {fileID: 21300000, guid: 25234d7bee06210cca195be5cb43c1ad, type: 3}
+  - {fileID: 21300000, guid: f0bcc4cc877da0f948904cd649966465, type: 3}
+  - {fileID: 21300000, guid: 0e4c8fcf01d70853d8cd34878901c2d1, type: 3}
+  attack:
+  - {fileID: 21300000, guid: eddcf34b71d75c3ccbdb27f046884466, type: 3}
+  hurt:
+  - {fileID: 21300000, guid: f77f61fce39e0bbd19b747b6566cab4b, type: 3}
+  - {fileID: 21300000, guid: 2827f6cc82b8ac09392caa85dcea14a3, type: 3}
+  - {fileID: 21300000, guid: 5603d0d87297a5945829ce743fb6ce07, type: 3}
+  - {fileID: 21300000, guid: 393f68495633f8e0b84f0dd21b1b07e3, type: 3}
+  death:
+  - {fileID: 21300000, guid: f48ef5c26150a94c4addd9e5b3978dc1, type: 3}
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

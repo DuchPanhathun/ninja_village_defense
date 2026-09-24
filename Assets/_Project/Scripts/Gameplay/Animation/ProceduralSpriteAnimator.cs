@@ -35,6 +35,18 @@ namespace NinjaVillage.Gameplay.Animation
         private SpriteRenderer _renderer;
 
         private Color _rendererColor = Color.white;
+        private SpriteFrameAnimator _frames;
+
+        // Real frame animation (added in the prefab or at run start) takes over walking and attacking;
+        // this then only adds a lighter squash on top plus the hit squash and death fade.
+        private SpriteFrameAnimator Frames
+        {
+            get
+            {
+                if (_frames == null) TryGetComponent(out _frames);
+                return _frames != null && _frames.HasSet ? _frames : null;
+            }
+        }
 
         private void Awake()
         {
@@ -71,6 +83,8 @@ namespace NinjaVillage.Gameplay.Animation
         public void ResetAfterRevive()
         {
             StopAllCoroutines();
+            var frames = Frames;
+            if (frames != null) frames.ResetState();
             _dying = false;
             if (_renderer != null) _renderer.color = _rendererColor;
             if (_hasBase)
@@ -81,7 +95,12 @@ namespace NinjaVillage.Gameplay.Animation
         }
 
         /// <summary>A quick forward stretch — call when this character attacks.</summary>
-        public void Punch(float strength = 1f) => _punch = Mathf.Max(_punch, Mathf.Clamp01(strength));
+        public void Punch(float strength = 1f)
+        {
+            _punch = Mathf.Max(_punch, Mathf.Clamp01(strength));
+            var frames = Frames;
+            if (frames != null) frames.PlayAttack();
+        }
 
         private void OnDamaged(float amount, float current, float max) => _squash = 1f;
 
@@ -107,6 +126,7 @@ namespace NinjaVillage.Gameplay.Animation
 
             _phase += dt * (moving ? walkFrequency : 2.5f);
             float stretch = moving ? Mathf.Abs(Mathf.Sin(_phase)) * walkStretch : Mathf.Sin(_phase) * idleBreath;
+            if (Frames != null) stretch *= 0.3f; // the frames already walk and breathe
 
             float sy = 1f + stretch;
             float sx = 1f - stretch * 0.5f; // roughly volume-preserving
@@ -132,11 +152,15 @@ namespace NinjaVillage.Gameplay.Animation
         {
             Vector3 start = transform.localScale;
             Color startColor = _renderer != null ? _renderer.color : Color.white;
+            var frames = Frames;
+            bool hasDeathFrames = frames != null && frames.Has(CharacterAnim.Death);
+            if (hasDeathFrames) yield return new WaitForSeconds(0.6f); // let the fall play, then fade
             const float duration = 0.6f;
             for (float t = 0f; t < duration; t += Time.deltaTime)
             {
                 float k = t / duration;
-                transform.localScale = new Vector3(start.x * (1f + k * 0.3f), start.y * (1f - k), start.z);
+                if (!hasDeathFrames)
+                    transform.localScale = new Vector3(start.x * (1f + k * 0.3f), start.y * (1f - k), start.z);
                 if (_renderer != null)
                 {
                     var c = startColor;

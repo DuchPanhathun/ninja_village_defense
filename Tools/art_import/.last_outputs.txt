@@ -592,6 +592,7 @@ UI/Bars/bar_rect_background_scroll.png
 UI/Bars/bar_rect_background_wood.png
 UI/Bars/bar_rect_progress_health.png
 UI/Bars/bar_rect_progress_white.png
+UI/Bars/bar_xp_fill.png
 UI/Bars/h_slider_grabber.png
 UI/Bars/h_slider_grabber_disabled.png
 UI/Bars/h_slider_grabber_hover.png

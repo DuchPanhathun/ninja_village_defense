@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: boss_ninetailedfox
+  m_EditorClassIdentifier: 
+  key: boss_ninetailedfox
+  idle:
+  - {fileID: 21300000, guid: 91ce4e542567c764faaa77e102265195, type: 3}
+  - {fileID: 21300000, guid: f39c3fb35f6e89e9b970b1d3af66defc, type: 3}
+  - {fileID: 21300000, guid: 904f2fa6ce814033882e2c6dcd49cb27, type: 3}
+  - {fileID: 21300000, guid: e34731f884ed3cc9abfb2dd582ade5bc, type: 3}
+  - {fileID: 21300000, guid: 9f5f8ffd0d14b4d5cae08a59b290a18a, type: 3}
+  - {fileID: 21300000, guid: ce67550b7f4e717b7954b126e6b403a1, type: 3}
+  - {fileID: 21300000, guid: 2dcb9c10040d1f9049d1871beab5b892, type: 3}
+  move:
+  - {fileID: 21300000, guid: 16d58e56c42fc12e6a5cbf39c9aaed0e, type: 3}
+  - {fileID: 21300000, guid: 3b0eaf7c294e172cf89dcef8468037a9, type: 3}
+  - {fileID: 21300000, guid: 1ec9c9a845ca487ca833b4e2fce297c2, type: 3}
+  - {fileID: 21300000, guid: 534cc6240262860a4808ec7d463c4223, type: 3}
+  - {fileID: 21300000, guid: 974ed4616b995f7fca9e89458ff33b04, type: 3}
+  - {fileID: 21300000, guid: bb574a9301367c26da13381fa1c96182, type: 3}
+  - {fileID: 21300000, guid: e0d35023db7038b69b951638383fb0f1, type: 3}
+  attack:
+  - {fileID: 21300000, guid: c3fe19d7254fdd71dac57cc39f838433, type: 3}
+  - {fileID: 21300000, guid: 3a9d251cfbad5d93c9dc7ff3b25ba0d4, type: 3}
+  - {fileID: 21300000, guid: 8e2e2ca1d23c55d86b66d4c093926f41, type: 3}
+  - {fileID: 21300000, guid: dec5e291e48b14a36a7185d55d24248f, type: 3}
+  - {fileID: 21300000, guid: 400a0e39ef9f454a5bf2c293fe69293d, type: 3}
+  hurt: []
+  death: []
+  idleFps: 8
+  moveFps: 8
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

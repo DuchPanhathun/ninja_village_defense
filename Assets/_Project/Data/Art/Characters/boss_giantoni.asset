@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: boss_giantoni
+  m_EditorClassIdentifier: 
+  key: boss_giantoni
+  idle:
+  - {fileID: 21300000, guid: 0285237fe700eeed9bfea413e1abc701, type: 3}
+  - {fileID: 21300000, guid: 9631ae57a5009abd1bd0efdba9cf7a84, type: 3}
+  - {fileID: 21300000, guid: cbfd3fd6889abcef5a6a313b17fd724c, type: 3}
+  - {fileID: 21300000, guid: 676fad73cee9ef4989426fab028b0d04, type: 3}
+  - {fileID: 21300000, guid: a0f9950a31c7030c9a45febcc44eb3e0, type: 3}
+  - {fileID: 21300000, guid: e4b86f267e3b5612eb1ee9095ae66514, type: 3}
+  move:
+  - {fileID: 21300000, guid: a313c2793b25adb97a5c82cf1cfb9fe0, type: 3}
+  - {fileID: 21300000, guid: 5cafaa8f9a06ca1b68e831b02df37d8c, type: 3}
+  - {fileID: 21300000, guid: fd884076eb50f75b9a8cd82254a45d35, type: 3}
+  - {fileID: 21300000, guid: 09274d011c7dbcd519299411f957738e, type: 3}
+  - {fileID: 21300000, guid: bfad4cb5d9b72b85087b23504b1aaf65, type: 3}
+  - {fileID: 21300000, guid: 29ab49b2ee24130ef936b207feb9f53f, type: 3}
+  attack:
+  - {fileID: 21300000, guid: c0320b68b974f7b18869606a5a2fd83b, type: 3}
+  - {fileID: 21300000, guid: b9f0224bb15c08555bfa4a7cef5706b1, type: 3}
+  - {fileID: 21300000, guid: edffa9fbb2d516ce5989c5e0563db861, type: 3}
+  - {fileID: 21300000, guid: 56ab78e7b9839e893a189927ea461ca3, type: 3}
+  hurt: []
+  death: []
+  idleFps: 8
+  moveFps: 8
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

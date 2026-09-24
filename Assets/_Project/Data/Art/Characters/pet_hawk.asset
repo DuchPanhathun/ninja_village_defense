@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: pet_hawk
+  m_EditorClassIdentifier: 
+  key: pet_hawk
+  idle:
+  - {fileID: 21300000, guid: 7b4f35c85c96fce889b1f2afcb35ff71, type: 3}
+  - {fileID: 21300000, guid: 8bbea140fbb2e61f19d1f137db2c09e9, type: 3}
+  - {fileID: 21300000, guid: cfdb40d403457bdc2892dc64c8e805e5, type: 3}
+  - {fileID: 21300000, guid: 7e333d639d7f2b144954e1e65b280e4b, type: 3}
+  - {fileID: 21300000, guid: 5c3d30b1343e9ddc989237158bcf631e, type: 3}
+  move:
+  - {fileID: 21300000, guid: 0a68ea4ed82af66e8a4ec9e2f7e09187, type: 3}
+  - {fileID: 21300000, guid: a5c1218ef10b2f37da7a68ab43c2c5a0, type: 3}
+  - {fileID: 21300000, guid: 9e114d274e520449e81467b1893f0a0f, type: 3}
+  - {fileID: 21300000, guid: c3fe922289183d7bd9ad60e1676ddc9e, type: 3}
+  - {fileID: 21300000, guid: c7490f48b3a140fa4bbeaf78b13e3000, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

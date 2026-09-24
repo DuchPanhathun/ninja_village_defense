@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: enemy_dragon
+  m_EditorClassIdentifier: 
+  key: enemy_dragon
+  idle:
+  - {fileID: 21300000, guid: d88c8eed705081fa0acf57783295d122, type: 3}
+  move:
+  - {fileID: 21300000, guid: d41592ab23b4675d0893acdfb93b6d53, type: 3}
+  - {fileID: 21300000, guid: 55f2585cc03cdc2acaee16e001ecbae8, type: 3}
+  - {fileID: 21300000, guid: 717a8b26fedd1aea99650bfa136dbbf7, type: 3}
+  - {fileID: 21300000, guid: ec64c98d796b2787e932b555a5d70f4f, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

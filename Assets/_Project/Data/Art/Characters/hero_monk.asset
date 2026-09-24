@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: hero_monk
+  m_EditorClassIdentifier: 
+  key: hero_monk
+  idle:
+  - {fileID: 21300000, guid: 464d38ab3eb1c4600a15e243393bac33, type: 3}
+  move:
+  - {fileID: 21300000, guid: a716e479373ebb1f5b90857b6226861d, type: 3}
+  - {fileID: 21300000, guid: 0cc89c53171574b1d80e32c6d36c8cef, type: 3}
+  - {fileID: 21300000, guid: 8aafe1783eff3f6a8b645a5dfdb84ed6, type: 3}
+  - {fileID: 21300000, guid: 177ff5d1edf1a642dab030bd169d0f29, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 57fe2d57ef51c8861b5de3dd92bfe98a, type: 3}
+  hurt:
+  - {fileID: 21300000, guid: b056f64d84c7f5066a69f0909bdc218f, type: 3}
+  - {fileID: 21300000, guid: d88aaf756032cdccd962319b30b4207d, type: 3}
+  - {fileID: 21300000, guid: eaf2e355c12f7d8759410d85f161f4d9, type: 3}
+  - {fileID: 21300000, guid: 74918a93c7b482ef09a9286217f8893c, type: 3}
+  death:
+  - {fileID: 21300000, guid: 80005da494fcef24abf00496886f8563, type: 3}
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

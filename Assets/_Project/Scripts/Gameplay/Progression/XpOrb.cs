@@ -16,12 +16,21 @@ namespace NinjaVillage.Gameplay.Progression
         [SerializeField] private float pickupDistance = 0.3f;
         [SerializeField] private float flySpeed = 8f;
 
+        [Header("Look by value (optional)")]
+        [Tooltip("Gem sprites from small to large; the orb shows the first whose threshold its XP doesn't exceed.")]
+        [SerializeField] private Sprite[] tierSprites = System.Array.Empty<Sprite>();
+        [SerializeField] private int[] tierMaxXp = { 5, 15 };
+
         private int _xpAmount;
         private PlayerStats _playerStats;
 
         public void Initialize(int xpAmount)
         {
             _xpAmount = xpAmount;
+            if (tierSprites.Length == 0 || !TryGetComponent<SpriteRenderer>(out var spriteRenderer)) return;
+            int tier = 0;
+            while (tier < tierMaxXp.Length && tier < tierSprites.Length - 1 && xpAmount > tierMaxXp[tier]) tier++;
+            if (tierSprites[tier] != null) spriteRenderer.sprite = tierSprites[tier];
         }
 
         private void Start()

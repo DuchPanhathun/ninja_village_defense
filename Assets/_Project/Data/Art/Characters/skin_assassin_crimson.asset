@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: skin_assassin_crimson
+  m_EditorClassIdentifier: 
+  key: skin_assassin_crimson
+  idle:
+  - {fileID: 21300000, guid: d1ae19d93744b848fa2a9c588d69ec11, type: 3}
+  move:
+  - {fileID: 21300000, guid: ef75d1302332b6ddaae3f751bc212607, type: 3}
+  - {fileID: 21300000, guid: e9919299a3bcfdd158e2bb1f3be8f219, type: 3}
+  - {fileID: 21300000, guid: 1e09b1043c50e73afacdd9b89718a266, type: 3}
+  - {fileID: 21300000, guid: 5c98a2afe5bd929a0b2143cc6c3672ef, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 900ec2112f1cd6ef18a4f68f7bc18f49, type: 3}
+  hurt:
+  - {fileID: 21300000, guid: 6e356a259977a25a7a14aeb2890c24cb, type: 3}
+  - {fileID: 21300000, guid: 59d8b1cd03fbb7a21a223e3558e6f09f, type: 3}
+  - {fileID: 21300000, guid: 4132879f4318d0e0eba57b44bef6e46c, type: 3}
+  - {fileID: 21300000, guid: 5b4961ef26ea07c98b57ce2697f7867d, type: 3}
+  death:
+  - {fileID: 21300000, guid: 98a82a2ee75a05277b4dfe0f93376a4a, type: 3}
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

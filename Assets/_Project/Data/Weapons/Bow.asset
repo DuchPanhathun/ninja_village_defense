@@ -26,7 +26,7 @@ MonoBehaviour:
   knockbackForce: 2
   damagePerLevel: 2.5
   attacksPerSecondPerLevel: 0.03
-  projectilePrefab: {fileID: 8179992011265535766, guid: 781cb998c88da481d83f8556aa338b71, type: 3}
+  projectilePrefab: {fileID: 8179992011265535766, guid: e8224b32055a928b898195e533cc7bb4, type: 3}
   projectileSpeed: 18
   shotsPerCharge: 3
   chargedDamageMultiplier: 2.5

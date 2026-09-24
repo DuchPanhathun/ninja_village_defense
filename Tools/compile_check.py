@@ -53,7 +53,10 @@ def find_rsp(name):
     hits = glob.glob(f"{PROJECT}/Library/Bee/artifacts/*.dag/{name}.rsp")
     if not hits:
         sys.exit(f"No {name}.rsp under Library/Bee — open/import the project once in Unity first.")
-    return max(hits, key=os.path.getmtime)
+    # Editor compilations live in "<hash>E.dag"; after a player build there are also "<hash>P*.dag"
+    # folders (no UNITY_EDITOR). Always start from the Editor settings: --player derives from them.
+    editor = [h for h in hits if os.path.basename(os.path.dirname(h)).endswith("E.dag")]
+    return max(editor or hits, key=os.path.getmtime)
 
 
 def sources(globs, excludes):

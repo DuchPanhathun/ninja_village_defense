@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 5555047725782020464}
   - component: {fileID: 7333565249675800410}
   - component: {fileID: 7658135500434629733}
+  - component: {fileID: 7330755258867033331}
   m_Layer: 6
   m_Name: SkeletonNinja
   m_TagString: Untagged
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: bff3bb6c697500f6e9cf6c582fd4fff6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -200,3 +201,18 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   flashColor: {r: 1, g: 0.3, b: 0.3, a: 1}
   flashDuration: 0.08
+--- !u!114 &7330755258867033331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607075163655323988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e94068f3be47946d4a5ae98c7489ec16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteSet: {fileID: 11400000, guid: 5333601cb67a1b42a9819ca82b1bd448, type: 2}
+  target: {fileID: 7775806621620832423}
+  movingSpeedThreshold: 0.15

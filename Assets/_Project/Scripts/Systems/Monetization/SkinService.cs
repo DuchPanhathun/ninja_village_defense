@@ -82,8 +82,19 @@ namespace NinjaVillage.Systems.Monetization
 
             var renderer = context.Player.GetComponentInChildren<SpriteRenderer>();
             if (renderer == null) return;
-            if (skin.Sprite != null) renderer.sprite = skin.Sprite;
-            renderer.color = skin.Tint;
+            // Skins with their own recoloured frames (skin_<hero>_<name>) swap the animation set;
+            // anything else falls back to a sprite + tint.
+            var skinFrames = NinjaVillage.Gameplay.Animation.CharacterSpriteLibrary.Find(skin.Id);
+            if (skinFrames != null && context.Player.TryGetComponent<NinjaVillage.Gameplay.Animation.SpriteFrameAnimator>(out var frames))
+            {
+                frames.SetSpriteSet(skinFrames);
+                renderer.color = Color.white;
+            }
+            else
+            {
+                if (skin.Sprite != null) renderer.sprite = skin.Sprite;
+                renderer.color = skin.Tint;
+            }
             if (context.Player.TryGetComponent<HitFlash>(out var flash)) flash.RefreshBaseColor();
         }
 

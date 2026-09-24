@@ -30,8 +30,19 @@ namespace NinjaVillage.Gameplay.Loot
             var go = new GameObject("Chest");
             go.transform.position = position;
             GeneratedSprites.CreateRenderer(go.transform, "Glow", GeneratedSprites.Glow, new Color(1f, 0.85f, 0.3f, 0.5f), 38, Vector2.zero, new Vector2(2f, 2f));
-            GeneratedSprites.CreateRenderer(go.transform, "Box", GeneratedSprites.Square, new Color(0.6f, 0.38f, 0.18f), 39, Vector2.zero, new Vector2(0.9f, 0.6f));
-            GeneratedSprites.CreateRenderer(go.transform, "Lid", GeneratedSprites.Square, new Color(1f, 0.8f, 0.25f), 40, new Vector2(0f, 0.2f), new Vector2(0.95f, 0.2f));
+            var art = Core.Data.CatalogLoader.Load<PickupArt>();
+            if (art != null && art.ChestClosed != null)
+            {
+                var chestRenderer = new GameObject("Chest").AddComponent<SpriteRenderer>();
+                chestRenderer.transform.SetParent(go.transform, false);
+                chestRenderer.sprite = art.ChestClosed;
+                chestRenderer.sortingOrder = 39;
+            }
+            else
+            {
+                GeneratedSprites.CreateRenderer(go.transform, "Box", GeneratedSprites.Square, new Color(0.6f, 0.38f, 0.18f), 39, Vector2.zero, new Vector2(0.9f, 0.6f));
+                GeneratedSprites.CreateRenderer(go.transform, "Lid", GeneratedSprites.Square, new Color(1f, 0.8f, 0.25f), 40, new Vector2(0f, 0.2f), new Vector2(0.95f, 0.2f));
+            }
 
             var body = go.AddComponent<Rigidbody2D>();
             body.bodyType = RigidbodyType2D.Kinematic;

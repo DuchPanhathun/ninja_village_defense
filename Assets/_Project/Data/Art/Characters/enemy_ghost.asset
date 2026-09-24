@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80015d85f7094a47db01fb1bf85aa7e0, type: 3}
+  m_Name: enemy_ghost
+  m_EditorClassIdentifier: 
+  key: enemy_ghost
+  idle:
+  - {fileID: 21300000, guid: c3ff06ec96e2b432d8eb08faa4c1de8d, type: 3}
+  move:
+  - {fileID: 21300000, guid: 4718db11c4ddffb68a47721ca8f28917, type: 3}
+  - {fileID: 21300000, guid: ce6b3dc878f035911babb23e1ad3f735, type: 3}
+  - {fileID: 21300000, guid: 4f58a02450594a3c2b540ed7a5de8d7d, type: 3}
+  - {fileID: 21300000, guid: 077fbe1c5fe5006229444b953c0c6194, type: 3}
+  attack: []
+  hurt: []
+  death: []
+  idleFps: 5
+  moveFps: 9
+  attackFps: 14
+  hurtFps: 12
+  deathFps: 8

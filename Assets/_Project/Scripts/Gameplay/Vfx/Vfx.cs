@@ -21,15 +21,49 @@ namespace NinjaVillage.Gameplay.Vfx
 
         private static readonly Stack<VfxInstance> Free = new();
 
-        public static void HitSpark(Vector2 position, bool critical) =>
-            Spawn(GeneratedSprites.Glow, position, critical ? CritColor : HitColor, critical ? 0.9f : 0.55f, critical ? 1.5f : 1.1f, 0.14f);
+        private static VfxArt _art;
+        private static bool _artLoaded;
 
-        public static void DeathPuff(Vector2 position, Color color) =>
+        // Pixel-art frames when the VfxArt catalog exists; the generated shapes below otherwise.
+        private static VfxArt Art
+        {
+            get
+            {
+                if (!_artLoaded)
+                {
+                    _artLoaded = true;
+                    _art = Resources.Load<VfxArt>($"{Core.Data.CatalogLoader.ResourcesFolder}/{nameof(VfxArt)}");
+                }
+                return _art;
+            }
+        }
+
+        private static bool TryFrames(Sprite[] frames, Vector2 position, float scale, float rotation = 0f, Color? color = null, int sortingOrder = 150)
+        {
+            var art = Art;
+            if (art == null || frames == null || frames.Length == 0) return false;
+            Spawn(frames[0], position, Color.white, scale, scale, 0.1f, sortingOrder)
+                .PlayFrames(frames, art.Fps, position, scale, rotation, color ?? Color.white, sortingOrder);
+            return true;
+        }
+
+        public static void HitSpark(Vector2 position, bool critical)
+        {
+            if (TryFrames(Art != null ? Art.Hit : null, position, critical ? 0.75f : 0.5f, 0f, critical ? CritColor : Color.white)) return;
+            Spawn(GeneratedSprites.Glow, position, critical ? CritColor : HitColor, critical ? 0.9f : 0.55f, critical ? 1.5f : 1.1f, 0.14f);
+        }
+
+        public static void DeathPuff(Vector2 position, Color color)
+        {
+            if (TryFrames(Art != null ? Art.Smoke : null, position, 0.6f)) return;
             Spawn(GeneratedSprites.Circle, position, new Color(color.r, color.g, color.b, 0.7f), 0.4f, 1.4f, 0.35f);
+        }
 
         /// <summary>Expanding ring to <paramref name="radius"/> plus a bright flash — explosions, shockwaves, area skills.</summary>
         public static void Explosion(Vector2 position, float radius, Color? color = null)
         {
+            // The explosion frames are 40 px = 3 world units at scale 1.
+            if (color == null && TryFrames(Art != null ? Art.Explosion : null, position, Mathf.Max(0.5f, radius * 2f / 3f * 1.1f))) return;
             Color c = color ?? FireColor;
             float diameter = Mathf.Max(0.5f, radius * 2f);
             Spawn(GeneratedSprites.Ring, position, c, diameter * 0.2f, diameter, 0.35f);
@@ -39,6 +73,7 @@ namespace NinjaVillage.Gameplay.Vfx
         /// <summary>A bolt from the sky onto <paramref name="position"/>.</summary>
         public static void Lightning(Vector2 position)
         {
+            if (TryFrames(Art != null ? Art.Thunder : null, position + new Vector2(0f, 1f), 1.4f)) return;
             var bolt = Spawn(GeneratedSprites.Square, position + new Vector2(0f, 3f), LightningColor, 1f, 1f, 0.18f);
             bolt.SetScaleAxes(new Vector2(0.18f, 6f), new Vector2(0.05f, 6f));
             Spawn(GeneratedSprites.Glow, position, LightningColor, 0.8f, 2f, 0.25f);
@@ -48,6 +83,8 @@ namespace NinjaVillage.Gameplay.Vfx
         public static void Slash(Vector2 position, Vector2 direction, float radius, Color? color = null)
         {
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            // The slash frames are 32 px = 2.4 world units at scale 1.
+            if (TryFrames(Art != null ? Art.Slash : null, position, Mathf.Max(0.4f, radius * 2f / 2.4f), angle, color)) return;
             var slash = Spawn(GeneratedSprites.Arc, position, color ?? HitColor, radius * 1.6f, radius * 2.1f, 0.16f);
             slash.transform.rotation = Quaternion.Euler(0f, 0f, angle);
             slash.SetSpin(angle, angle + 40f);
@@ -56,6 +93,7 @@ namespace NinjaVillage.Gameplay.Vfx
         /// <summary>Radial burst — level up, evolution unlock, chest open.</summary>
         public static void Burst(Vector2 position, Color color, float size = 3f, float duration = 0.5f)
         {
+            if (TryFrames(Art != null ? Art.Ring : null, position, size / 2.4f, 0f, color)) return;
             Spawn(GeneratedSprites.Ring, position, color, size * 0.2f, size, duration);
             Spawn(GeneratedSprites.Glow, position, new Color(color.r, color.g, color.b, 0.6f), size * 0.4f, size * 0.8f, duration * 0.7f);
         }
@@ -85,6 +123,8 @@ namespace NinjaVillage.Gameplay.Vfx
         private static void Init()
         {
             Free.Clear();
+            _art = null;
+            _artLoaded = false;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }

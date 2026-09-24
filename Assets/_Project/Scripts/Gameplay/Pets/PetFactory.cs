@@ -73,8 +73,19 @@ namespace NinjaVillage.Gameplay.Pets
 
             var visual = new GameObject("Visual");
             visual.transform.SetParent(root.transform, false);
-            visual.transform.localScale = Vector3.one * Mathf.Max(0.1f, definition.PlaceholderScale);
 
+            // Real pet art (pet_fox, pet_babydragon...) when the sprite library has it.
+            var frames = Animation.CharacterSpriteLibrary.Find(Animation.CharacterSpriteLibrary.PetKey(definition.Id));
+            if (frames != null)
+            {
+                var petRenderer = visual.AddComponent<SpriteRenderer>();
+                petRenderer.sprite = frames.DefaultSprite;
+                petRenderer.sortingOrder = PlaceholderSortingOrder;
+                visual.AddComponent<Animation.SpriteFrameAnimator>().SetSpriteSet(frames);
+                return root;
+            }
+
+            visual.transform.localScale = Vector3.one * Mathf.Max(0.1f, definition.PlaceholderScale);
             var spriteRenderer = visual.AddComponent<SpriteRenderer>();
             bool hasIcon = definition.Icon != null;
             spriteRenderer.sprite = hasIcon ? definition.Icon : PetPlaceholderSprites.Circle;

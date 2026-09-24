@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6989102245815367762}
   - component: {fileID: 4670039814424122940}
   - component: {fileID: 453295366344006012}
+  - component: {fileID: 7915895501595900263}
   m_Layer: 6
   m_Name: Wolf
   m_TagString: Untagged
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d0653e4c440820e42a1b6001b2219b02, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -200,3 +201,18 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   flashColor: {r: 1, g: 0.3, b: 0.3, a: 1}
   flashDuration: 0.08
+--- !u!114 &7915895501595900263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1332076865796907475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e94068f3be47946d4a5ae98c7489ec16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteSet: {fileID: 11400000, guid: ab3c09fb8bcecad2b8ed956a63a22ee7, type: 2}
+  target: {fileID: 6689004526837326153}
+  movingSpeedThreshold: 0.15
