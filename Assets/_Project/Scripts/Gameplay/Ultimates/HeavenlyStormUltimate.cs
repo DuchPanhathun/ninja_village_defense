@@ -28,9 +28,11 @@ namespace NinjaVillage.Gameplay.Ultimates
                 if (context.PlayerTransform == null) yield break;
 
                 Vector2 burstCenter = (Vector2)context.PlayerTransform.position + Random.insideUnitCircle * stormRadius;
-                AreaDamage.DamageCircle(burstCenter, burstRadius, context.EnemyMask, damagePerBurst, 2f, context.Runner.gameObject);
-
-                // TODO(VFX): falling shuriken + impact effect at burstCenter (EPIC 23).
+                var source = context.Runner.gameObject;
+                var mask = context.EnemyMask;
+                // Damage lands with the shuriken (a quarter second later), not before it.
+                UltimateFx.FallingShuriken(context.Runner, burstCenter,
+                    () => AreaDamage.DamageCircle(burstCenter, burstRadius, mask, damagePerBurst, 2f, source));
                 yield return new WaitForSeconds(interval);
             }
         }

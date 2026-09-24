@@ -18,6 +18,12 @@ namespace NinjaVillage.Gameplay.Vfx
         [SerializeField] private Sprite[] ring = Array.Empty<Sprite>();
         [SerializeField] private float fps = 20f;
 
+        [Header("Ultimates")]
+        [SerializeField] private Sprite[] shuriken = Array.Empty<Sprite>();     // Heavenly Storm (spin frames)
+        [SerializeField] private Sprite[] dragon = Array.Empty<Sprite>();       // Dragon Slash (flying, faces right)
+        [SerializeField] private Sprite[] bigSlash = Array.Empty<Sprite>();     // Dragon Slash trail
+        [SerializeField] private Sprite kunai;                                  // Shadow clones' throw (fallback)
+
         public Sprite[] Hit => hit;
         public Sprite[] Smoke => smoke;
         public Sprite[] Explosion => explosion;
@@ -25,5 +31,9 @@ namespace NinjaVillage.Gameplay.Vfx
         public Sprite[] Slash => slash;
         public Sprite[] Ring => ring;
         public float Fps => fps;
+        public Sprite[] Shuriken => shuriken;
+        public Sprite[] Dragon => dragon;
+        public Sprite[] BigSlash => bigSlash;
+        public Sprite Kunai => kunai;
     }
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using NinjaVillage.Core.Combat;
 using NinjaVillage.Core.Utilities;
 using NinjaVillage.Gameplay.Player;
+using NinjaVillage.Gameplay.Combat;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Ultimates
@@ -46,6 +47,7 @@ namespace NinjaVillage.Gameplay.Ultimates
                     cloneGo.transform.position = spawnPos;
                 }
 
+                NinjaVillage.Gameplay.Vfx.Vfx.DeathPuff(spawnPos, ShadowCloneAttacker.ShadowColor); // appear in a puff of smoke
                 var cloneAttacker = cloneGo.GetComponent<ShadowCloneAttacker>();
                 if (cloneAttacker == null)
                     cloneAttacker = cloneGo.AddComponent<ShadowCloneAttacker>();
@@ -76,8 +78,9 @@ namespace NinjaVillage.Gameplay.Ultimates
 
             foreach (var clone in spawnedClones)
             {
-                if (clone != null)
-                    Object.Destroy(clone);
+                if (clone == null) continue;
+                NinjaVillage.Gameplay.Vfx.Vfx.DeathPuff(clone.transform.position, ShadowCloneAttacker.ShadowColor);
+                Object.Destroy(clone);
             }
         }
     }
@@ -93,6 +96,10 @@ namespace NinjaVillage.Gameplay.Ultimates
         private float _damageFraction;
         private LayerMask _enemyMask;
         private float _cooldownRemaining;
+        private Transform _visual;
+        private Sprite _projectileSprite;
+
+        public static readonly Color ShadowColor = new(0.42f, 0.28f, 0.72f, 0.82f);
 
         private const float AttacksPerSecond = 2f;
         private const float ProjectileSpeed = 10f;
@@ -105,7 +112,29 @@ namespace NinjaVillage.Gameplay.Ultimates
             _damageFraction = damageFraction;
             _enemyMask = enemyMask;
 
-            // Clones spawned without a prefab would be invisible — give them a shadowy placeholder body.
+            // Shadow copies of the player: the hero's (or skin's) own animated frames, tinted shadow purple.
+            var heroFrames = playerTransform != null ? playerTransform.GetComponent<NinjaVillage.Gameplay.Animation.SpriteFrameAnimator>() : null;
+            if (GetComponentInChildren<SpriteRenderer>() == null && heroFrames != null && heroFrames.SpriteSet != null)
+            {
+                var body = new GameObject("ShadowBody");
+                body.transform.SetParent(transform, false);
+                var bodyRenderer = body.AddComponent<SpriteRenderer>();
+                bodyRenderer.sprite = heroFrames.SpriteSet.DefaultSprite;
+                bodyRenderer.color = ShadowColor;
+                bodyRenderer.sortingOrder = 25;
+                body.AddComponent<NinjaVillage.Gameplay.Animation.SpriteFrameAnimator>().SetSpriteSet(heroFrames.SpriteSet);
+                _visual = body.transform;
+            }
+
+            // They throw what the player throws (the weapon's projectile sprite), else a kunai.
+            var attack = playerTransform != null ? playerTransform.GetComponent<AutoAttackController>() : null;
+            var prefab = attack != null && attack.Weapon != null ? attack.Weapon.Definition.ProjectilePrefab : null;
+            var prefabRenderer = prefab != null ? prefab.GetComponentInChildren<SpriteRenderer>() : null;
+            _projectileSprite = prefabRenderer != null ? prefabRenderer.sprite : null;
+            if (_projectileSprite == null && NinjaVillage.Gameplay.Vfx.Vfx.ArtCatalog != null)
+                _projectileSprite = NinjaVillage.Gameplay.Vfx.Vfx.ArtCatalog.Kunai;
+
+            // No hero art at all: a shadowy placeholder body.
             if (GetComponentInChildren<SpriteRenderer>() == null)
             {
                 GeneratedSprites.CreateRenderer(transform, "ShadowBody", GeneratedSprites.Circle, new Color(0.25f, 0.1f, 0.4f, 0.75f), 25,
@@ -131,6 +160,8 @@ namespace NinjaVillage.Gameplay.Ultimates
         {
             float baseDamage = _playerStats != null ? 10f * _playerStats.AttackDamageMultiplier * _damageFraction : 5f;
             Vector2 dir = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            if (_visual != null && Mathf.Abs(dir.x) > 0.01f) // face the target (sprites face right)
+                _visual.localScale = new Vector3(Mathf.Sign(dir.x), 1f, 1f);
 
             var go = new GameObject("CloneProjectile");
             go.transform.position = transform.position;
@@ -141,8 +172,20 @@ namespace NinjaVillage.Gameplay.Ultimates
             rb.gravityScale = 0f;
             rb.linearVelocity = dir * ProjectileSpeed;
 
-            GeneratedSprites.CreateRenderer(go.transform, "Glow", GeneratedSprites.Glow, new Color(0.7f, 0.4f, 1f, 0.9f), 30,
-                Vector2.zero, new Vector2(0.45f, 0.45f));
+            if (_projectileSprite != null)
+            {
+                var sprite = new GameObject("Sprite").AddComponent<SpriteRenderer>();
+                sprite.transform.SetParent(go.transform, false);
+                sprite.transform.localScale = Vector3.one * 0.8f;
+                sprite.sprite = _projectileSprite;
+                sprite.color = new Color(0.75f, 0.55f, 1f, 1f);
+                sprite.sortingOrder = 30;
+            }
+            else
+            {
+                GeneratedSprites.CreateRenderer(go.transform, "Glow", GeneratedSprites.Glow, new Color(0.7f, 0.4f, 1f, 0.9f), 30,
+                    Vector2.zero, new Vector2(0.45f, 0.45f));
+            }
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
             col.radius = 0.15f;

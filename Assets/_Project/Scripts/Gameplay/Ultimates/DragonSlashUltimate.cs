@@ -16,8 +16,7 @@ namespace NinjaVillage.Gameplay.Ultimates
         {
             AreaDamage.DamageCircle(context.PlayerTransform.position, radius, context.EnemyMask, damage, 10f, context.Runner.gameObject, isCritical: true);
             EventBus<CameraShakeRequestEvent>.Raise(new CameraShakeRequestEvent(0.6f, 0.4f));
-
-            // TODO(VFX): dragon sweep animation across the map (EPIC 23).
+            UltimateFx.DragonSweep(context.Runner, context.PlayerTransform.position);
         }
     }
 }

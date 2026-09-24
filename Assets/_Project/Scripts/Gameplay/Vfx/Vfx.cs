@@ -38,6 +38,13 @@ namespace NinjaVillage.Gameplay.Vfx
             }
         }
 
+        /// <summary>The pixel-art catalog (null when missing) — for effects built elsewhere (ultimates).</summary>
+        public static VfxArt ArtCatalog => Art;
+
+        /// <summary>Plays a frame strip once at a position; false when there are no frames (caller can fall back).</summary>
+        public static bool PlayFrames(Sprite[] frames, Vector2 position, float scale, float rotation = 0f, Color? color = null, int sortingOrder = 150) =>
+            TryFrames(frames, position, scale, rotation, color, sortingOrder);
+
         private static bool TryFrames(Sprite[] frames, Vector2 position, float scale, float rotation = 0f, Color? color = null, int sortingOrder = 150)
         {
             var art = Art;

@@ -56,3 +56,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 7e2743d1d96d27d73bf973369a3dc81d, type: 3}
   - {fileID: 21300000, guid: 530219f6465dcb4878e0fab50cf890ce, type: 3}
   fps: 20
+  shuriken:
+  - {fileID: 21300000, guid: b2b568ed6be1c6d6c98932396008e51a, type: 3}
+  - {fileID: 21300000, guid: 508cded40a6f9704b85651fcf929e1a9, type: 3}
+  dragon:
+  - {fileID: 21300000, guid: d41592ab23b4675d0893acdfb93b6d53, type: 3}
+  - {fileID: 21300000, guid: 55f2585cc03cdc2acaee16e001ecbae8, type: 3}
+  - {fileID: 21300000, guid: 717a8b26fedd1aea99650bfa136dbbf7, type: 3}
+  - {fileID: 21300000, guid: ec64c98d796b2787e932b555a5d70f4f, type: 3}
+  bigSlash:
+  - {fileID: 21300000, guid: e96a7dc9fdf86d38aaa2083d19fc5a0a, type: 3}
+  - {fileID: 21300000, guid: d4e676189c1a8f6b68e19f46f4c8eaae, type: 3}
+  - {fileID: 21300000, guid: 15281005177948329a4b12f867d93711, type: 3}
+  - {fileID: 21300000, guid: 3068c3d4acfa40a4f9ad608c40673154, type: 3}
+  - {fileID: 21300000, guid: b3ce6bce89473a38192998d727864f3a, type: 3}
+  - {fileID: 21300000, guid: 30f9878f02337e067b83bc1540d7c715, type: 3}
+  kunai: {fileID: 21300000, guid: 93cc099bd51e3d631b1ec8255db086c3, type: 3}

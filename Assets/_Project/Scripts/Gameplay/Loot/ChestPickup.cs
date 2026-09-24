@@ -60,9 +60,12 @@ namespace NinjaVillage.Gameplay.Loot
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (_opened) return;
-            if (!other.CompareTag("Player")) return;
+            // Identify the player by component: the Battle scene's player isn't tagged "Player", which is
+            // why chests could never be opened.
+            var stats = other.GetComponentInParent<PlayerStats>();
+            if (stats == null && !other.CompareTag("Player")) return;
 
-            Open(other.GetComponent<PlayerStats>());
+            Open(stats);
         }
 
         private void Open(PlayerStats playerStats)
@@ -95,6 +98,7 @@ namespace NinjaVillage.Gameplay.Loot
             }
 
             Sfx.PlayAt(AudioCueIds.ChestOpen, transform.position);
+            NinjaVillage.Gameplay.Vfx.Vfx.Burst(transform.position, NinjaVillage.Gameplay.Vfx.Vfx.GoldColor, 2.5f, 0.45f);
             Progress.Report(ProgressStatIds.ChestOpened);
             Destroy(gameObject);
         }

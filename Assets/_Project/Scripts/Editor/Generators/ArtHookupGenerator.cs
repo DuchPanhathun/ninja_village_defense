@@ -333,7 +333,9 @@ namespace NinjaVillage.EditorTools.Generators
             var art = ContentGen.CreateOrLoad<VfxArt>($"{CatalogFolder}/{nameof(VfxArt)}.asset");
             ContentGen.Set(art, ("hit", Frames("VFX", "vfx_hit")), ("smoke", Frames("VFX", "vfx_smoke")),
                 ("explosion", Frames("VFX", "vfx_explosion")), ("thunder", Frames("VFX", "vfx_thunder")),
-                ("slash", Frames("VFX", "vfx_slash_curved")), ("ring", Frames("VFX", "vfx_hit_ring")), ("fps", 20f));
+                ("slash", Frames("VFX", "vfx_slash_curved")), ("ring", Frames("VFX", "vfx_hit_ring")), ("fps", 20f),
+                ("shuriken", Frames("Projectiles", "projectile_giantshuriken")), ("dragon", Frames("Characters/Enemies", "enemy_dragon_walk")),
+                ("bigSlash", Frames("VFX", "vfx_slash_02")), ("kunai", Load("Projectiles", "projectile_kunai")));
         }
 
         // ------------------------------------------------------------------ Battle scene
@@ -363,6 +365,9 @@ namespace NinjaVillage.EditorTools.Generators
                 if (!ground.TryGetComponent<InfiniteGround>(out _)) ground.AddComponent<InfiniteGround>();
                 EditorUtility.SetDirty(ground);
             }
+
+            // Chests (and anything else checking CompareTag) need the player tagged.
+            if (!player.CompareTag("Player")) player.tag = "Player";
 
             // Default look before the run-start modifiers pick the selected hero and skin.
             var heroSet = AssetDatabase.LoadAssetAtPath<CharacterSpriteSet>($"{SetFolder}/hero_assassin.asset");
@@ -400,7 +405,8 @@ namespace NinjaVillage.EditorTools.Generators
             FillParent(Find(scene, "HPBarFill"), 8f);
             FillParent(Find(scene, "XPBarFill"), 6f);
             FillParent(Find(scene, "BossBarFill"), 8f);
-            Place(Find(scene, "BossBarRoot"), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(760f, 56f));
+            // Below the skill bar (up to three rows of icons), so they never overlap.
+            Place(Find(scene, "BossBarRoot"), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -460f), new Vector2(760f, 56f));
 
             var wave = Find(scene, "WaveText", parent: "Canvas"); // the game-over panel has its own WaveText
             Place(wave, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(300f, 76f));
