@@ -496,3 +496,65 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 - [x]  Mobile optimization   <!-- touch joystick + dash button, portrait UI scaling, pause on app background -->
 - [x]  Battery optimization   <!-- 30 FPS battery saver, screen sleeps outside battle, capped frame delta -->
 - [x]  Asset compression   <!-- TextureImportRules: ASTC 6x6 Android/iOS, no mipmaps; 'Create Sprite Atlas' menu -->
+---
+
+# 🎮 EPIC 24 - Village Activities
+
+Goal: things to do in the village between battles — come back every few hours, and village goods feed back
+into battles. Order = build order; each phase ends with a phone playtest and a commit.
+
+## Phase A — Foundations (shared by every activity)
+
+- [x]  Village goods inventory   <!-- GoodsSaveData (SaveData.Goods: id → count) + GoodsService (add, spend, sell); rides the cloud save -->
+- [x]  Item catalog + icons   <!-- GoodsDefinition/GoodsCatalog: 19 goods (6 crops, meals, fish, other) with icons + sell prices (FarmGenerator) -->
+- [x]  Real-time timers   <!-- plots store UTC ticks from GameClock (server-synced when online); crops grow while the app is closed -->
+- [x]  Art import   <!-- import_farm(): tilled soil (field bed corners, recoloured), seeds, crops, 13 foods, 6 tools; ore bars come with the Mine (Phase 5) -->
+- [x]  "Ready!" bubbles + badges   <!-- ripe crops bob on a glow with "Ready!"; "!" on the village Farm button and the home Village button -->
+
+## Phase 1 — Farm
+
+- [x]  Farm plots on the map   <!-- FarmPlotView ×6, top-left beside the Dojo (VillageLayout.FarmField); 2 open at Castle Lv1, +1 per level; Farm button glides the camera there -->
+- [x]  Crop catalog   <!-- rice 5m, radish 30m, carrot 1h, beet 2h, herbs 4h, tea 8h (castle-gated), seed cost + yield (FarmGenerator) -->
+- [x]  Plant / water / harvest   <!-- FarmService: plant (pays seeds), water once (−30% time left), tap ripe bed to harvest into the Storehouse, dig up -->
+- [x]  Farm UI   <!-- HUD farm bar: seed picker (time/cost/locks) or status (countdown, Water, Dig up, Storehouse); StorehouseScreen (Sell 1 / Sell all) -->
+- [x]  Tests   <!-- FarmTests (EditMode: unlocks, stages, watering, labels) + Village_FarmPlantWaterHarvestAndSell (PlayMode, fake clock) -->
+
+## Phase 2 — Kitchen (village → battle link)
+
+- [ ]  Kitchen building   <!-- new plot using a house sprite; unlocks at Castle Lv 2 -->
+- [ ]  Recipes   <!-- ingredients → meal, cooking time; e.g. Onigiri (rice) +10% max HP, Yakitori +10% attack, Tea +10% XP, Sushi (fish+rice) +15% coins -->
+- [ ]  Meals as one-run buffs   <!-- pick up to 2 meals before a battle; applied by a RunStartModifier, used up once the run starts -->
+- [ ]  Kitchen UI + meal picker   <!-- cook queue; meal slots next to START / the chapter picker -->
+- [ ]  Tests   <!-- buff applied in the run, consumed exactly once, ingredients spent -->
+
+## Phase 3 — Villager requests
+
+- [ ]  Request generator   <!-- "Bring 5 carrots", "Cook 2 onigiri", "Clear Chapter 2"...; 3 active, refresh daily -->
+- [ ]  "!" bubble on villagers   <!-- tap → request card → Deliver → coins / gems / decoration rewards -->
+- [ ]  Progress hooks   <!-- reuse the quest/progress stats already tracked -->
+
+## Phase 4 — Treasury & houses
+
+- [ ]  Treasury   <!-- coins pile up over time (rate + cap grow with castle level); tap to collect with a coin burst -->
+- [ ]  Houses   <!-- buildable house plots (6 pack styles); each adds villagers and treasury income -->
+
+## Phase 5 — Fishing pond & mine
+
+- [ ]  Fishing pond   <!-- water tiles + ripples on the map; timing mini-game; fish for cooking or selling, rare fish as decorations -->
+- [ ]  Mine   <!-- ore builds up over time; ore becomes Forge material (instead of only spare gear) + small gem chance -->
+
+## Phase 6 — Social (builds on Visit + Firebase)
+
+- [ ]  Likes & gifts   <!-- visitors leave a like or a small gift; "3 ninjas visited today" on return; Firestore subcollection + rules -->
+- [ ]  Help a neighbour   <!-- visitors can water your crops (once a day per village) -->
+- [ ]  Weekly "Best Village"   <!-- ranking by likes; trophy decoration for the top villages -->
+
+## Phase 7 — Atmosphere & pets
+
+- [ ]  Day / night + weather   <!-- follows the phone's time; lanterns glow at night; occasional rain or snow -->
+- [ ]  Pet care   <!-- pet or feed your pets for a small daily bonus and happy animations -->
+
+## Phase 8 — Plaza mini-games
+
+- [ ]  Shuriken target practice   <!-- 3 free tries a day for coins/tickets -->
+- [ ]  Dojo sparring   <!-- 60-second arena challenge with a daily reward; try heroes and skills -->

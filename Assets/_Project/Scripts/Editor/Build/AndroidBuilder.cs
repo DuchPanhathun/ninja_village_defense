@@ -13,8 +13,8 @@ namespace NinjaVillage.EditorTools.Build
     /// Enforces the settings the game depends on before every build: IL2CPP + ARM64, portrait only, the
     /// Firebase Gradle templates (the External Dependency Manager writes Firebase's libraries into them, and
     /// Unity ignores them unless these flags are on), the debug keystore for development builds, and the
-    /// app icon (<c>Art/AppIcon</c>, made by <c>Tools/art_import/make_app_icon.py</c>). Development APKs also
-    /// include x86_64 so they run on the Android emulator.
+    /// app icon (<c>Art/AppIcon</c>, made by <c>Tools/art_import/make_app_icon.py</c>). Phone builds are ARM64
+    /// only (half the install size); <see cref="BuildEmulatorApkBatch"/> adds x86_64 for the desktop emulator.
     /// </summary>
     public static class AndroidBuilder
     {
@@ -28,11 +28,15 @@ namespace NinjaVillage.EditorTools.Build
 
         public static void BuildDevApkBatch() => EditorApplication.Exit(BuildDevApk() ? 0 : 1);
 
-        public static bool BuildDevApk()
+        /// <summary>Like the dev APK, plus an x86_64 slice so it runs natively on the Android emulator (~2x the size).</summary>
+        public static void BuildEmulatorApkBatch() => EditorApplication.Exit(BuildDevApk(emulator: true) ? 0 : 1);
+
+        public static bool BuildDevApk() => BuildDevApk(emulator: false);
+
+        public static bool BuildDevApk(bool emulator)
         {
             ApplyAndroidSettings();
-            // Phones are ARM64; the x86_64 slice lets the same APK run natively on the desktop emulator.
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
+            if (emulator) PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android &&
                 !EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android))
             {

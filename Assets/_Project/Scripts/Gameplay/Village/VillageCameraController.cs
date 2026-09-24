@@ -33,6 +33,10 @@ namespace NinjaVillage.Gameplay.Village
         private Vector2 _velocity;
         private float _lastPinchDistance = -1f;
         private IVillageDraggable _dragging;
+        private Vector2? _focus;
+
+        /// <summary>Glides the view to <paramref name="world"/> (the HUD's Farm button); any drag cancels it.</summary>
+        public void FocusOn(Vector2 world) => _focus = world;
 
         private static readonly List<RaycastResult> UiHits = new();
 
@@ -46,6 +50,23 @@ namespace NinjaVillage.Gameplay.Village
         {
             bool touchActive = Touchscreen.current != null && HandleTouches();
             if (!touchActive) HandleMouse();
+
+            if (_focus.HasValue)
+            {
+                if (_pressing) _focus = null;
+                else
+                {
+                    Vector2 p = transform.position;
+                    Vector2 next = Vector2.Lerp(p, _focus.Value, 1f - Mathf.Exp(-6f * Time.unscaledDeltaTime));
+                    transform.position = new Vector3(next.x, next.y, transform.position.z);
+                    _velocity = Vector2.zero;
+                    ClampToBounds();
+                    // Arrived — or as close as the village edge allows.
+                    Vector2 moved = (Vector2)transform.position - p;
+                    bool blocked = (next - p).sqrMagnitude > 1e-6f && moved.sqrMagnitude < 1e-8f;
+                    if ((next - _focus.Value).sqrMagnitude < 0.01f || blocked) _focus = null;
+                }
+            }
 
             if (!_pressing && _velocity.sqrMagnitude > 0.0001f)
             {

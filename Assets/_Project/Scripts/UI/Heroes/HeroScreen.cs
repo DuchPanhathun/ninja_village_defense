@@ -28,7 +28,7 @@ namespace NinjaVillage.UI.Heroes
             var heroes = HeroService.GetSortedHeroes();
             if (heroes.Count == 0)
             {
-                UIBuilder.Text(content, "No heroes found. Run Ninja Village → Generate Default Content.", UITheme.BodySize);
+                UIBuilder.Text(content, "No heroes found. Run Ninja Village > Generate Default Content.", UITheme.BodySize);
                 return;
             }
 

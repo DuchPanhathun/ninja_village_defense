@@ -24,6 +24,7 @@ namespace NinjaVillage.UI.Common
         public const string VillageHud = "village_hud";
         public const string Decorations = "decorations";   // village decoration shop
         public const string Neighbours = "neighbours";     // other players' villages to visit
+        public const string Storehouse = "storehouse";     // village goods (harvest)
         public const string Building = "building";         // generic building detail/upgrade menu
         public const string Forge = "forge";
         public const string Shrine = "shrine";

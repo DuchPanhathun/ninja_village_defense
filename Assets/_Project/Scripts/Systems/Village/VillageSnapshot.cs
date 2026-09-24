@@ -32,6 +32,8 @@ namespace NinjaVillage.Systems.Village
 
         public List<IdLevelEntry> Buildings = new();
         public List<PlacedDecoration> Decorations = new();
+        /// <summary>What grows on the farm (visitors see the crops).</summary>
+        public List<FarmPlotState> Farm = new();
 
         public List<VillageHero> Heroes = new();
         public string SelectedHeroId;
@@ -79,6 +81,10 @@ namespace NinjaVillage.Systems.Village
                 foreach (var d in save.Village.Decorations)
                     if (d != null) snapshot.Decorations.Add(new PlacedDecoration { Uid = d.Uid, Id = d.Id, X = d.X, Y = d.Y, Flip = d.Flip });
             }
+            if (save.Farm?.Plots != null)
+                foreach (var p in save.Farm.Plots)
+                    if (p != null)
+                        snapshot.Farm.Add(new FarmPlotState { Plot = p.Plot, CropId = p.CropId, PlantedTicks = p.PlantedTicks, ReadyTicks = p.ReadyTicks, Watered = p.Watered });
 
             if (save.Heroes != null)
             {

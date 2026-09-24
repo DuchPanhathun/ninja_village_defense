@@ -65,7 +65,7 @@ namespace NinjaVillage.UI.MainMenu
         private Image _portrait, _seasonFill, _heroImage, _chapterBoss;
         private Button _chapterPrev, _chapterNext;
         private UIImageAnimator _heroAnimator;
-        private GameObject _seasonBadge, _heroesBadge;
+        private GameObject _seasonBadge, _heroesBadge, _villageBadge;
         private string _shownHeroKey;
 
         protected override void Build(RectTransform body)
@@ -358,6 +358,7 @@ namespace NinjaVillage.UI.MainMenu
 
             var village = UIStyle.Icon(row, "menu_village", "Village", () => SceneLoader.LoadVillage(), 150f, tile: false);
             UIStyle.Place(village.Root, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-40f, 0f), village.Root.sizeDelta);
+            _villageBadge = village.Badge; // "!" when crops are ready to harvest
         }
 
         // ------------------------------------------------------------------ bottom tabs
@@ -441,6 +442,7 @@ namespace NinjaVillage.UI.MainMenu
                 if (present) button.Badge.SetActive(ScreenBadges.Has(screenId));
             }
             _seasonBadge.SetActive(ScreenBadges.Has(ScreenIds.BattlePass));
+            _villageBadge.SetActive(NinjaVillage.Systems.Farm.FarmService.RipeCount() > 0);
         }
 
         private void RefreshHero(ProfileSaveData profile)

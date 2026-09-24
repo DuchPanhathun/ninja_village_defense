@@ -43,6 +43,8 @@ namespace NinjaVillage.Systems.Save
         public LiveOpsSaveData LiveOps = new();
         public StoreSaveData Store = new();
         public ChapterSaveData Chapters = new();
+        public FarmSaveData Farm = new();
+        public GoodsSaveData Goods = new();
 
         /// <summary>
         /// Fills sections that are null (JsonUtility leaves a class field null only when
@@ -65,6 +67,10 @@ namespace NinjaVillage.Systems.Save
             LiveOps ??= new LiveOpsSaveData();
             LiveOps.BattlePass ??= new BattlePassSaveData();
             Store ??= new StoreSaveData();
+            Farm ??= new FarmSaveData();
+            Farm.Plots ??= new System.Collections.Generic.List<FarmPlotState>();
+            Goods ??= new GoodsSaveData();
+            Goods.Items ??= new System.Collections.Generic.List<IdLevelEntry>();
             Chapters ??= new ChapterSaveData();
             Chapters.BestWaves ??= new System.Collections.Generic.List<IdLevelEntry>();
 

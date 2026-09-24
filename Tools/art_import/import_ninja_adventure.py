@@ -916,6 +916,51 @@ def import_decor():
     record("Village", "decorations (shop items)", "`TilesetElement.png`, `tileset_camp.png`, `TilesetNature.png`, `TilesetHouse.png` cut-outs", out)
 
 
+# Village goods: crops (farm), then kitchen/fishing items for later phases. Saved as UI icons (item_*)
+# and, for crops, as world sprites standing in a tilled bed (Environment/Farm).
+CROPS = [("rice", "Items/Food/SeedLargeWhite.png"), ("radish", "Items/Food/SeedBig2.png"), ("carrot", "Items/Food/SeedBig1.png"),
+         ("beet", "Items/Food/SeedBig3.png"), ("herbs", "Items/Resource/Grass.png"), ("tea", "Items/Food/TeaLeaf.png")]
+FOODS = [("onigiri", "Onigiri"), ("sushi", "Sushi"), ("sushi_roll", "Sushi2"), ("noodle", "Noodle"), ("yakitori", "Yakitori"),
+         ("fish", "Fish"), ("shrimp", "Shrimp"), ("calamari", "Calamari"), ("octopus", "Octopus"), ("honey", "Honey"),
+         ("meat", "Meat"), ("fortune_cookie", "FortuneCookie"), ("nut", "Nut")]
+TOOLS = ["Hoe", "WateringCan", "Sickle", "Pickaxe", "Axe", "Shovel"]
+
+
+def earth(img):
+    """Recolours the field tileset's orange bed to tilled brown soil (outline kept)."""
+    out = img.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if not a:
+                continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            if v < 0.2:
+                continue
+            nr, ng, nb = colorsys.hsv_to_rgb(0.07, min(1, s * 1.05), v * 0.62)
+            px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
+    return out
+
+
+def import_farm():
+    U, W = "UI/Icons", "Environment/Farm"
+    field = load("Backgrounds/Tilesets/TilesetField.png")
+    soil = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    for (sx, sy), (dx, dy) in [((0, 0), (0, 0)), ((32, 0), (16, 0)), ((0, 32), (0, 16)), ((32, 32), (16, 16))]:
+        soil.paste(field.crop((sx, sy, sx + 16, sy + 16)), (dx, dy))           # the orange bed's four corners
+    out = [save(earth(soil), W, "farm_soil")]
+    out += [save(trim(load(f"Items/Food/Seed{i}.png")), W, f"farm_seed_{i - 1}") for i in (1, 2, 3)]
+    out.append(save(trim(load("Items/Resource/Grass.png")), W, "farm_growing"))
+    for name, rel in CROPS:
+        art = trim(load(rel))
+        out += [save(art, W, f"farm_crop_{name}"), save(art, U, f"item_{name}")]
+    record("Village", "farm: soil, seeds, crops (+ item icons)", "`TilesetField.png` bed corners (recoloured), `Items/Food`, `Items/Resource`", out)
+    out = [save(trim(load(f"Items/Food/{src}.png")), U, f"item_{name}") for name, src in FOODS]
+    out += [save(trim(load(f"Items/Tool/{tool}.png")), U, "tool_" + re.sub(r"(?<!^)([A-Z])", r"_\1", tool).lower()) for tool in TOOLS]
+    record("Village", "kitchen & fishing goods, tools", "`Items/Food`, `Items/Tool`", out)
+
+
 GROUNDS = [("grass", (0, 12)), ("grass_dark", (11, 12)), ("dirt", (11, 19)), ("sand", (0, 5)), ("snow", (0, 19))]
 
 
@@ -1111,6 +1156,7 @@ def main():
     import_village()
     import_villagers()
     import_decor()
+    import_farm()
     import_backgrounds()
     export_store_graphics()
 

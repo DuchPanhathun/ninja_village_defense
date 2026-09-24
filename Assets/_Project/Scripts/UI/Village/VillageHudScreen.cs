@@ -2,6 +2,7 @@ using NinjaVillage.Core.Audio;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Village;
 using NinjaVillage.Systems.Economy;
+using NinjaVillage.Systems.Farm;
 using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
@@ -17,7 +18,9 @@ namespace NinjaVillage.UI.Village
     /// bar (village name, castle stage, coins/gems, Home), Decorate and Visit (neighbours) buttons, and a
     /// bottom bar with Heroes, Pets, BATTLE, Gear and Talents. Tapping a building opens its <see cref="BuildingScreen"/>; tapping a
     /// hero, pet, the Armory or the Talent Tree opens that screen; tapping a decoration offers Move / Sell;
-    /// while a decoration is being placed a bar offers Flip / Cancel / Place. Visiting someone else's village
+    /// while a decoration is being placed a bar offers Flip / Cancel / Place. The Farm button glides the view
+    /// to the field ("!" when something is ripe); tapping a bed opens the seed picker or its status (Water,
+    /// Dig up). Visiting someone else's village
     /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -29,12 +32,19 @@ namespace NinjaVillage.UI.Village
         private const float TabBarHeight = 210f;
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
-        private GameObject _decorate, _visit, _tabBar;
+        private GameObject _decorate, _visit, _farm, _farmBadge, _tabBar;
         private RectTransform _placeBar, _decoBar;
         private Image _placeIcon;
         private TextMeshProUGUI _placeName, _placeHint, _decoName;
         private Button _placeConfirm, _decoSell;
         private int _selectedUid;
+
+        private RectTransform _farmBar, _farmSeeds, _farmActions;
+        private Image _farmIcon;
+        private TextMeshProUGUI _farmTitle, _farmHint;
+        private Button _farmWater;
+        private int _selectedPlot = -1;
+        private float _nextFarmRefresh;
 
         protected override void Build(RectTransform body)
         {
@@ -47,6 +57,7 @@ namespace NinjaVillage.UI.Village
             BuildTabBar(safe);
             BuildPlacementBar(safe);
             BuildDecorationBar(safe);
+            BuildFarmBar(safe);
         }
 
         // ------------------------------------------------------------------ layout
@@ -104,6 +115,142 @@ namespace NinjaVillage.UI.Village
             var visit = UIStyle.Icon(parent, "menu_leaderboard", "Visit", () => Open(ScreenIds.Neighbours), 140f);
             UIStyle.Place(visit.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -380f), visit.Root.sizeDelta);
             _visit = visit.Root.gameObject;
+
+            var farm = UIStyle.Icon(parent, "item_carrot", "Farm", FocusFarm, 140f);
+            UIStyle.Place(farm.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -580f), farm.Root.sizeDelta);
+            _farm = farm.Root.gameObject;
+            _farmBadge = farm.Badge;
+        }
+
+        private static void FocusFarm()
+        {
+            Sfx.Play(AudioCueIds.UiClick);
+            var cam = UnityEngine.Camera.main;
+            var controller = cam != null ? cam.GetComponent<VillageCameraController>() : null;
+            if (controller != null) controller.FocusOn(VillageLayout.FarmCenter);
+        }
+
+        /// <summary>Plot status (Water / Dig up / Storehouse / Close) or, on an empty plot, the seed picker.</summary>
+        private void BuildFarmBar(RectTransform parent)
+        {
+            _farmBar = Bar(parent, "FarmBar", out _farmIcon, out _farmTitle, out _farmHint);
+            _farmBar.sizeDelta = new Vector2(1060f, 400f);
+
+            _farmActions = UIBuilder.Rect(_farmBar, "Actions");
+            UIStyle.Place(_farmActions, new Vector2(0f, 0f), new Vector2(0f, 0f), Vector2.zero, new Vector2(1060f, 140f));
+            SmallButton(_farmActions, "Close", new Vector2(-750f, 0f), UITheme.ButtonSecondary, () => SelectPlot(-1));
+            SmallButton(_farmActions, "Storehouse", new Vector2(-510f, 0f), UITheme.ButtonSecondary, () => Open(ScreenIds.Storehouse));
+            SmallButton(_farmActions, "Dig up", new Vector2(-270f, 0f), new Color(0.75f, 0.3f, 0.28f), DigUp);
+            _farmWater = SmallButton(_farmActions, "Water", new Vector2(-30f, 0f), new Color(0.35f, 0.6f, 0.95f), WaterPlot);
+
+            _farmSeeds = UIBuilder.Rect(_farmBar, "Seeds");
+            UIStyle.Place(_farmSeeds, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 18f), new Vector2(1030f, 250f));
+            var crops = FarmService.GetCrops();
+            float width = 1030f / Mathf.Max(1, crops.Count);
+            for (int i = 0; i < crops.Count; i++)
+            {
+                var crop = crops[i];
+                var button = UIStyle.Frame(_farmSeeds, crop.Id, "panel_wood_panel", () => PlantSelected(crop), new Color(0.3f, 0.22f, 0.15f));
+                UIStyle.Place((RectTransform)button.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(i * width + 4f, 0f),
+                    new Vector2(width - 8f, 240f));
+                var icon = UIBuilder.Image(button.transform, "Icon", Color.white, crop.Icon);
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                UIStyle.Place(icon.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(90f, 90f));
+                var name = UIStyle.Label(button.transform, crop.NameOrId, 26f);
+                UIStyle.Place(name.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 64f), new Vector2(width, 34f));
+                var info = UIStyle.Label(button.transform, "", 21f, UIStyle.Cream, TextAlignmentOptions.Center, 0.2f);
+                info.name = "Info";
+                UIStyle.Place(info.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(width, 48f));
+            }
+            _farmBar.gameObject.SetActive(false);
+        }
+
+        private void SelectPlot(int plot)
+        {
+            _selectedPlot = plot;
+            if (plot >= 0) SelectDecoration(0);
+            RefreshFarmBar();
+        }
+
+        private void RefreshFarmBar()
+        {
+            bool show = _selectedPlot >= 0 && !DecorationPlacer.IsActive;
+            _farmBar.gameObject.SetActive(show);
+            if (!show) return;
+
+            var state = FarmService.GetPlot(_selectedPlot);
+            var crop = state != null ? FarmService.GetCrop(state.CropId) : null;
+            bool empty = state == null;
+            _farmSeeds.gameObject.SetActive(empty);
+            _farmActions.gameObject.SetActive(!empty);
+            _farmBar.sizeDelta = new Vector2(1060f, empty ? 400f : 280f);
+
+            if (empty)
+            {
+                _farmIcon.sprite = UIArt.Get("tool_hoe");
+                _farmTitle.text = $"Plot {_selectedPlot + 1} · choose a seed";
+                _farmHint.text = "Crops keep growing while you're away.";
+                foreach (var crop2 in FarmService.GetCrops())
+                {
+                    var button = _farmSeeds.Find(crop2.Id);
+                    if (button == null) continue;
+                    bool unlocked = FarmService.IsCropUnlocked(crop2);
+                    bool afford = CurrencyService.CanAfford(new Price(CurrencyType.Coins, crop2.SeedCost));
+                    var info = button.Find("Info")?.GetComponent<TextMeshProUGUI>();
+                    if (info != null)
+                        info.text = unlocked
+                            ? $"{FarmRules.Format(System.TimeSpan.FromSeconds(crop2.GrowSeconds))}\n<color=#FFD24D>{crop2.SeedCost} coins</color>"
+                            : $"<color=#F2A0A0>Castle Lv {crop2.RequiredCastleLevel}</color>";
+                    UIBuilder.SetEnabled(button.GetComponent<Button>(), unlocked && afford);
+                }
+                return;
+            }
+
+            _farmIcon.sprite = crop != null ? crop.Icon : null;
+            var stage = FarmService.Stage(_selectedPlot);
+            string name = crop != null ? crop.NameOrId : "Crop";
+            _farmTitle.text = stage == CropStage.Ripe ? $"{name} · ready!" : $"{name} · {FarmRules.Format(FarmService.TimeLeft(_selectedPlot))} left";
+            _farmHint.text = stage == CropStage.Ripe
+                ? "Tap the plot to harvest."
+                : state.Watered ? "Watered — growing faster." : $"Water it once to grow {Mathf.RoundToInt(FarmRules.WaterSpeedUp * 100f)}% faster.";
+            UIBuilder.SetEnabled(_farmWater, !state.Watered && stage != CropStage.Ripe);
+            UIBuilder.SetLabel(_farmWater, state.Watered ? "Watered" : "Water");
+        }
+
+        private void PlantSelected(CropDefinition crop)
+        {
+            var result = FarmService.Plant(_selectedPlot, crop);
+            if (result == FarmResult.Success)
+            {
+                Sfx.Play(AudioCueIds.UiPurchase);
+                RefreshFarmBar();
+            }
+            else
+            {
+                Sfx.Play(AudioCueIds.UiError);
+                UIScreenNavigator.Instance.Toast(FarmService.Describe(result, crop));
+            }
+        }
+
+        private void WaterPlot()
+        {
+            if (FarmService.Water(_selectedPlot) == FarmResult.Success) Sfx.Play(AudioCueIds.UiUpgrade);
+            RefreshFarmBar();
+        }
+
+        private void DigUp()
+        {
+            if (FarmService.Clear(_selectedPlot)) Sfx.Play(AudioCueIds.UiBack);
+            RefreshFarmBar();
+        }
+
+        private void Update()
+        {
+            if (Time.unscaledTime < _nextFarmRefresh || _farmBadge == null) return;
+            _nextFarmRefresh = Time.unscaledTime + 0.5f;
+            _farmBadge.SetActive(!VillageVisit.IsVisiting && FarmService.RipeCount() > 0);
+            if (_selectedPlot >= 0) RefreshFarmBar(); // live countdown
         }
 
         private void BuildTabBar(RectTransform parent)
@@ -228,6 +375,8 @@ namespace NinjaVillage.UI.Village
             EventBus<VillageDisplayTappedEvent>.Subscribe(OnDisplayTapped);
             EventBus<DecorationTappedEvent>.Subscribe(OnDecorationTapped);
             EventBus<DecorationPlacementEvent>.Subscribe(OnPlacement);
+            EventBus<FarmPlotTappedEvent>.Subscribe(OnPlotTapped);
+            EventBus<FarmChangedEvent>.Subscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Subscribe(OnCurrencyChanged);
         }
 
@@ -237,6 +386,8 @@ namespace NinjaVillage.UI.Village
             EventBus<VillageDisplayTappedEvent>.Unsubscribe(OnDisplayTapped);
             EventBus<DecorationTappedEvent>.Unsubscribe(OnDecorationTapped);
             EventBus<DecorationPlacementEvent>.Unsubscribe(OnPlacement);
+            EventBus<FarmPlotTappedEvent>.Unsubscribe(OnPlotTapped);
+            EventBus<FarmChangedEvent>.Unsubscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Unsubscribe(OnCurrencyChanged);
         }
 
@@ -247,19 +398,40 @@ namespace NinjaVillage.UI.Village
             // Only react while the map is actually what the player is looking at.
             if (!IsCurrent || DecorationPlacer.IsActive) return;
             SelectDecoration(0);
+            SelectPlot(-1);
             BuildingScreen.Open(evt.BuildingId);
+        }
+
+        private void OnPlotTapped(FarmPlotTappedEvent evt)
+        {
+            if (!IsCurrent || DecorationPlacer.IsActive) return;
+            if (!FarmService.IsUnlocked(evt.Plot))
+            {
+                Sfx.Play(AudioCueIds.UiError);
+                UIScreenNavigator.Instance.Toast($"This plot opens at Castle Lv {FarmRules.CastleLevelForPlot(evt.Plot)}.");
+                return;
+            }
+            Sfx.Play(AudioCueIds.UiClick);
+            SelectPlot(evt.Plot);
+        }
+
+        private void OnFarmChanged(FarmChangedEvent evt)
+        {
+            if (evt.Plot == _selectedPlot) RefreshFarmBar();
         }
 
         private void OnDisplayTapped(VillageDisplayTappedEvent evt)
         {
             if (!IsCurrent) return;
             SelectDecoration(0);
+            SelectPlot(-1);
             Open(evt.Kind switch
             {
                 VillageDisplayKind.Heroes => ScreenIds.Heroes,
                 VillageDisplayKind.Pets => ScreenIds.Pets,
                 VillageDisplayKind.Gear => ScreenIds.Inventory,
                 VillageDisplayKind.Profile => ScreenIds.Profile,
+                VillageDisplayKind.Storehouse => ScreenIds.Storehouse,
                 _ => ScreenIds.Talents,
             });
         }
@@ -273,6 +445,11 @@ namespace NinjaVillage.UI.Village
         private void SelectDecoration(int uid)
         {
             _selectedUid = uid;
+            if (uid != 0 && _selectedPlot >= 0)
+            {
+                _selectedPlot = -1;
+                RefreshFarmBar();
+            }
             var placed = uid != 0 ? DecorationService.Find(uid) : null;
             var definition = placed != null ? DecorationService.Get(placed.Id) : null;
             _decoBar.gameObject.SetActive(definition != null);
@@ -319,6 +496,7 @@ namespace NinjaVillage.UI.Village
             var placer = DecorationPlacer.Instance;
             bool active = evt.Active && placer != null && placer.Definition != null;
             _placeBar.gameObject.SetActive(active);
+            if (active && _selectedPlot >= 0) SelectPlot(-1);
             _tabBar.SetActive(!active);
             _decorate.SetActive(!active && !VillageVisit.IsVisiting);
             _visit.SetActive(!active);

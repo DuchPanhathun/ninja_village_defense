@@ -36,6 +36,7 @@ namespace NinjaVillage.Gameplay.Village
         Gear,
         Talents,
         Profile,
+        Storehouse,
     }
 
     /// <summary>A hero, pet, the Armory rack or the Talent Tree was tapped.</summary>
@@ -50,6 +51,13 @@ namespace NinjaVillage.Gameplay.Village
     {
         public readonly int Uid;
         public DecorationTappedEvent(int uid) => Uid = uid;
+    }
+
+    /// <summary>A farm plot that isn't ripe was tapped (own village): the HUD shows its seed picker or status.</summary>
+    public readonly struct FarmPlotTappedEvent : IGameEvent
+    {
+        public readonly int Plot;
+        public FarmPlotTappedEvent(int plot) => Plot = plot;
     }
 
     /// <summary>Placement started, moved to a new validity, or ended — the HUD's placement bar follows it.</summary>

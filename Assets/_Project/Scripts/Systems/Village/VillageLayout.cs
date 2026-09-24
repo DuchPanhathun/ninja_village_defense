@@ -33,6 +33,13 @@ namespace NinjaVillage.Systems.Village
         public static readonly Vector2 ProfileBoard = new(3.8f, 1.1f);
         public static readonly Vector2 TalentTree = new(-11.6f, -5f);
         public static readonly Rect HeroYard = new(-12.5f, -3.2f, 8.5f, 1.7f);
+
+        /// <summary>The farm field, top-left beside the Dojo: 2 columns × 3 rows of beds, the sign below.</summary>
+        public static readonly Rect FarmField = new(-15f, 0.7f, 4.9f, 9.9f);
+        public static readonly Vector2 FarmSign = new(-12.55f, 0.9f);
+        public static Vector2 FarmCenter => FarmField.center;
+
+        public static Vector2 FarmPlot(int plot) => new(-13.8f + (plot % 2) * 2.5f, 4.4f + (plot / 2) * 2.4f);
         public static readonly Rect PetMeadow = new(4.8f, -9.6f, 7.6f, 2.4f);
 
         /// <summary>Round spots decorations can't cover: the displays.</summary>

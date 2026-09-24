@@ -3899,8 +3899,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06f862b82c5da447fa2e2c3b08c9d6e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageShakeDuration: 0.15
-  damageShakeMagnitude: 0.1
 --- !u!114 &961739755
 MonoBehaviour:
   m_ObjectHideFlags: 0

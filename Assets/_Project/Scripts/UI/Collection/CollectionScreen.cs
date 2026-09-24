@@ -30,7 +30,7 @@ namespace NinjaVillage.UI.Collection
             if (catalog == null || catalog.All.Count == 0)
             {
                 InfoText.text = string.Empty;
-                UIBuilder.Text(content, "No evolutions found. Run Ninja Village → Generate Default Content.", UITheme.BodySize);
+                UIBuilder.Text(content, "No evolutions found. Run Ninja Village > Generate Default Content.", UITheme.BodySize);
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace NinjaVillage.UI.Collection
                 parts.Add(string.IsNullOrEmpty(recipe.RequiredWeapon.DisplayName) ? recipe.RequiredWeapon.Id : recipe.RequiredWeapon.DisplayName);
 
             string result = recipe.ResultSkill != null ? recipe.ResultSkill.DisplayName : recipe.DisplayName;
-            string body = $"{string.Join(" + ", parts)}  →  <b>{result}</b>";
+            string body = $"{string.Join(" + ", parts)}  =  <b>{result}</b>"; // (the font has no arrow glyph)
             if (recipe.ResultSkill != null && !string.IsNullOrEmpty(recipe.ResultSkill.Description))
                 body += "\n" + recipe.ResultSkill.Description;
 

@@ -28,6 +28,8 @@ namespace NinjaVillage.Gameplay.Village
         [SerializeField] private Sprite talentTree;
         [SerializeField] private Sprite pedestal;
         [SerializeField] private Sprite noticeBoard;
+        [SerializeField] private Sprite farmSoil;
+        [SerializeField] private Sprite farmSign;
 
         public Sprite Ground => ground;
         public Sprite Path => path;
@@ -41,6 +43,8 @@ namespace NinjaVillage.Gameplay.Village
         public Sprite TalentTree => talentTree;
         public Sprite Pedestal => pedestal;
         public Sprite NoticeBoard => noticeBoard;
+        public Sprite FarmSoil => farmSoil;
+        public Sprite FarmSign => farmSign;
 
         public Sprite BuildingSprite(string buildingId, int level)
         {

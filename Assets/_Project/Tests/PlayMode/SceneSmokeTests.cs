@@ -108,7 +108,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
@@ -197,6 +197,55 @@ namespace NinjaVillage.Tests
             NinjaVillage.Systems.GameFlow.SceneLoader.LoadMainMenu();
             yield return null;
             Assert.IsFalse(NinjaVillage.Systems.Village.VillageVisit.IsVisiting, "leaving ends the visit");
+        }
+
+        [UnityTest]
+        public IEnumerator Village_FarmPlantWaterHarvestAndSell()
+        {
+            var now = new System.DateTime(2026, 9, 24, 12, 0, 0, System.DateTimeKind.Utc);
+            NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = () => now;
+            try
+            {
+                yield return LoadScene(SceneNames.Village);
+                yield return null;
+                Assert.AreEqual(NinjaVillage.Systems.Farm.FarmRules.MaxPlots, Object.FindObjectsByType<NinjaVillage.Gameplay.Village.FarmPlotView>(FindObjectsSortMode.None).Length);
+
+                var rice = NinjaVillage.Systems.Farm.FarmService.GetCrop("rice");
+                Assert.IsNotNull(rice, "crop catalog missing — run the content generator");
+                Assert.AreEqual(NinjaVillage.Systems.Farm.FarmResult.PlotLocked, NinjaVillage.Systems.Farm.FarmService.Plant(5, rice), "plot 6 needs a bigger castle");
+
+                int coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                Assert.AreEqual(NinjaVillage.Systems.Farm.FarmResult.Success, NinjaVillage.Systems.Farm.FarmService.Plant(0, rice));
+                Assert.AreEqual(coins - rice.SeedCost, SaveService.Data.Wallet.Get(CurrencyType.Coins), "seeds cost coins");
+                Assert.AreEqual(NinjaVillage.Systems.Farm.FarmResult.NotRipe, NinjaVillage.Systems.Farm.FarmService.Harvest(0, out _, out _));
+
+                var before = NinjaVillage.Systems.Farm.FarmService.TimeLeft(0);
+                Assert.AreEqual(NinjaVillage.Systems.Farm.FarmResult.Success, NinjaVillage.Systems.Farm.FarmService.Water(0));
+                Assert.Less(NinjaVillage.Systems.Farm.FarmService.TimeLeft(0), before, "watering speeds it up");
+
+                now = now.AddSeconds(rice.GrowSeconds); // ...time passes
+                yield return null;
+                Assert.AreEqual(NinjaVillage.Systems.Farm.CropStage.Ripe, NinjaVillage.Systems.Farm.FarmService.Stage(0));
+                Assert.AreEqual(1, NinjaVillage.Systems.Farm.FarmService.RipeCount());
+
+                GameObject.Find("FarmPlot_0").GetComponent<NinjaVillage.Gameplay.Village.FarmPlotView>().OnTapped(); // tap to harvest
+                Assert.AreEqual(rice.HarvestAmount, NinjaVillage.Systems.Farm.GoodsService.Count("rice"));
+                Assert.AreEqual(NinjaVillage.Systems.Farm.CropStage.Empty, NinjaVillage.Systems.Farm.FarmService.Stage(0));
+
+                coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                int earned = NinjaVillage.Systems.Farm.GoodsService.Sell(rice.Harvest, int.MaxValue);
+                Assert.AreEqual(rice.HarvestAmount * rice.Harvest.SellPrice, earned);
+                Assert.AreEqual(coins + earned, SaveService.Data.Wallet.Get(CurrencyType.Coins));
+                Assert.AreEqual(0, NinjaVillage.Systems.Farm.GoodsService.Count("rice"));
+
+                NinjaVillage.Systems.Farm.FarmService.Plant(1, rice);
+                Assert.AreEqual(1, NinjaVillage.Systems.Village.VillageSnapshot.FromSave(SaveService.Data).Farm.Count, "visitors see what grows");
+                yield return new WaitForSecondsRealtime(0.3f);
+            }
+            finally
+            {
+                NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
         }
 
         [UnityTest]

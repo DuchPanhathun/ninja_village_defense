@@ -60,6 +60,9 @@ namespace NinjaVillage.Core.Events
         public const string BlessingUnlocked = "blessing_unlocked";
         public const string MarketPurchase = "market_purchase";
 
+        // Village activities (EPIC 24)
+        public const string CropsHarvested = "crops_harvested";    // Amount = goods harvested
+
         // Engagement / monetization
         public const string DailyLoginClaimed = "daily_login_claimed";
         public const string QuestCompleted = "quest_completed";

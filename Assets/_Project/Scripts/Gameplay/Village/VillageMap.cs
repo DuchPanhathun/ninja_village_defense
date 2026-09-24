@@ -114,6 +114,7 @@ namespace NinjaVillage.Gameplay.Village
             _profileBoard = new GameObject("ProfileBoard").AddComponent<ProfileBoardDisplay>();
             _profileBoard.transform.SetParent(transform, false);
             _profileBoard.transform.position = VillageLayout.ProfileBoard;
+            BuildFarm();
 
             _decorationRoot = new GameObject("Decorations").transform;
             _decorationRoot.SetParent(transform, false);
@@ -208,10 +209,16 @@ namespace NinjaVillage.Gameplay.Village
             var rng = new System.Random(4242);
             var b = VillageLayout.Bounds;
 
+            // Keep the forest off the farm field so it never hides a bed.
+            var keepClear = new Rect(VillageLayout.FarmField.xMin - 0.3f, VillageLayout.FarmField.yMin - 0.5f,
+                VillageLayout.FarmField.width + 0.6f, VillageLayout.FarmField.height + 1f);
+
             void Plant(Vector2 feet, Sprite[] pool)
             {
                 if (pool.Length == 0) return;
                 var sprite = pool[rng.Next(pool.Length)];
+                Vector2 size = sprite.bounds.size;
+                if (keepClear.Overlaps(new Rect(feet.x - size.x * 0.5f, feet.y, size.x, size.y))) return;
                 var r = GeneratedSprites.CreateRenderer(root, "Tree", sprite, Color.white, VillageSorting.Order(feet.y),
                     feet + new Vector2(0f, sprite.bounds.extents.y));
                 r.flipX = rng.NextDouble() < 0.5;
@@ -261,6 +268,24 @@ namespace NinjaVillage.Gameplay.Village
             // Start looking at the castle and the plaza, with room for the HUD bars above and below.
             cam.transform.position = new Vector3(0f, 2f, cam.transform.position.z);
             cam.orthographicSize = Mathf.Max(cam.orthographicSize, 9.5f);
+        }
+
+        // ------------------------------------------------------------------ farm
+
+        private void BuildFarm()
+        {
+            var farm = new GameObject("Farm").transform;
+            farm.SetParent(transform, false);
+            for (int plot = 0; plot < NinjaVillage.Systems.Farm.FarmRules.MaxPlots; plot++)
+            {
+                var view = new GameObject().AddComponent<FarmPlotView>();
+                view.transform.SetParent(farm, false);
+                view.Initialize(plot, _art, IsOwnVillage ? null : Snapshot);
+            }
+            var sign = new GameObject("FarmSign").AddComponent<FarmSignDisplay>();
+            sign.transform.SetParent(farm, false);
+            sign.transform.position = VillageLayout.FarmSign;
+            sign.Build(_art);
         }
 
         // ------------------------------------------------------------------ decorations
@@ -325,7 +350,7 @@ namespace NinjaVillage.Gameplay.Village
                     .OnTap(() => TappedDisplay(VillageDisplayKind.Heroes));
                 if (hero.Id == Snapshot.SelectedHeroId)
                 {
-                    resident.WithTag($"★ {name}", new Color(1f, 0.85f, 0.3f));
+                    resident.WithTag(name, new Color(1f, 0.85f, 0.3f)); // gold name = your selected hero
                     leader = resident.transform;
                 }
             }

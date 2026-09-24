@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0999832affee06446a5b0acfd6959a31, type: 3}
+  m_Name: Crop_carrot
+  m_EditorClassIdentifier: 
+  id: carrot
+  displayName: Carrot
+  description: Sweet and orange.
+  icon: {fileID: 21300000, guid: a145369a672523b85b1eff3105e7ecce, type: 3}
+  harvest: {fileID: 11400000, guid: 55e48d6c98e272c2ca27f0adb35299d8, type: 2}
+  harvestAmount: 4
+  seedCost: 60
+  growSeconds: 3600
+  requiredCastleLevel: 2
+  seedSprite: {fileID: 21300000, guid: f4affd2908de02c7c86cb277af4ec567, type: 3}
+  growingSprite: {fileID: 21300000, guid: 315e4f3ab75d97ee78355e5d3b17564d, type: 3}
+  ripeSprite: {fileID: 21300000, guid: dd26a8617c0325edcb41ae6d802a67ac, type: 3}

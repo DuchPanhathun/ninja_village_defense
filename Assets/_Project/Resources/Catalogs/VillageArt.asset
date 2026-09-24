@@ -75,3 +75,5 @@ MonoBehaviour:
   talentTree: {fileID: 21300000, guid: 5296a42fc5038cee38ab0217049bae87, type: 3}
   pedestal: {fileID: 0}
   noticeBoard: {fileID: 21300000, guid: 8bf475bf6062ac0398ee74aa97506b70, type: 3}
+  farmSoil: {fileID: 21300000, guid: cf56c3b16f7cb006d927d39443437d8d, type: 3}
+  farmSign: {fileID: 21300000, guid: 758088ad61a2f2572b7d1283bb695d22, type: 3}

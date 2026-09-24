@@ -87,6 +87,7 @@ namespace NinjaVillage.Systems.Village
             foreach (var (center, size) in VillageLayout.Paths)
                 yield return new Rect(center - size * 0.5f, size);
             yield return new Rect(VillageLayout.Plaza - VillageLayout.PlazaSize * 0.5f, VillageLayout.PlazaSize);
+            yield return VillageLayout.FarmField;
         }
 
         /// <summary>Pays for and places a new decoration. Fails (and charges nothing) if the spot is blocked or it's unaffordable.</summary>

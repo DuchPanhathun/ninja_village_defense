@@ -29,7 +29,7 @@
     <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-firestore-unity/13.13.0/firebase-firestore-unity-13.13.0.pom</file>
   </files>
   <settings>
-    <setting name="androidAbis" value="arm64-v8a,x86_64" />
+    <setting name="androidAbis" value="arm64-v8a" />
     <setting name="bundleId" value="com.thun.ninjavillagedefense" />
     <setting name="explodeAars" value="True" />
     <setting name="gradleBuildEnabled" value="True" />

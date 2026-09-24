@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0999832affee06446a5b0acfd6959a31, type: 3}
+  m_Name: Crop_herbs
+  m_EditorClassIdentifier: 
+  id: herbs
+  displayName: Herbs
+  description: Fragrant mountain herbs.
+  icon: {fileID: 21300000, guid: e6c3a2caf86223f8b847933bf3226bcf, type: 3}
+  harvest: {fileID: 11400000, guid: 7e96fd553ba80497bbe651e3f38fc315, type: 2}
+  harvestAmount: 5
+  seedCost: 200
+  growSeconds: 14400
+  requiredCastleLevel: 4
+  seedSprite: {fileID: 21300000, guid: ef4bb0ec08415b64ca4452129c210e10, type: 3}
+  growingSprite: {fileID: 21300000, guid: 315e4f3ab75d97ee78355e5d3b17564d, type: 3}
+  ripeSprite: {fileID: 21300000, guid: 11dafaf8b206430c5a7c9f640db40e93, type: 3}
