@@ -267,9 +267,9 @@ namespace NinjaVillage.UI.Village
 
             var tabs = new (string icon, string label, string screenId, bool tile)[]
             {
-                ("menu_heroes", "Heroes", ScreenIds.Heroes, true), ("menu_pets", "Pets", ScreenIds.Pets, true),
+                ("menu_gear", "Equipment", ScreenIds.Equipment, false), ("menu_talents", "Talents", ScreenIds.Talents, false),
                 ("menu_play", "BATTLE", null, false),
-                ("menu_gear", "Gear", ScreenIds.Inventory, false), ("menu_talents", "Talents", ScreenIds.Talents, false),
+                ("pickup_chest_0", "Storehouse", ScreenIds.Storehouse, true), ("menu_profile", "Profile", ScreenIds.Profile, true),
             };
             for (int i = 0; i < tabs.Length; i++)
             {
@@ -425,6 +425,14 @@ namespace NinjaVillage.UI.Village
             if (!IsCurrent) return;
             SelectDecoration(0);
             SelectPlot(-1);
+            // Heroes, pets and the Armory all live on the Equipment screen now.
+            if (evt.Kind is VillageDisplayKind.Heroes or VillageDisplayKind.Pets or VillageDisplayKind.Gear)
+            {
+                Sfx.Play(AudioCueIds.UiClick);
+                Equipment.EquipmentScreen.Open(evt.Kind == VillageDisplayKind.Heroes ? Equipment.EquipmentScreen.Tab.Heroes
+                    : evt.Kind == VillageDisplayKind.Pets ? Equipment.EquipmentScreen.Tab.Pets : Equipment.EquipmentScreen.Tab.Gear);
+                return;
+            }
             Open(evt.Kind switch
             {
                 VillageDisplayKind.Heroes => ScreenIds.Heroes,

@@ -33,6 +33,8 @@ namespace NinjaVillage.UI.MainMenu
         private const float Side = 190f;          // width reserved for each icon column
         private const float TabBarHeight = 210f;
         private const float ActionRowHeight = 190f;
+        /// <summary>Not a screen: the Village tab loads the Village scene.</summary>
+        private const string VillageTab = "@village";
 
         private static readonly (string icon, string label, string screenId, bool tile)[] LeftColumn =
         {
@@ -53,10 +55,10 @@ namespace NinjaVillage.UI.MainMenu
         private static readonly (string icon, string label, string screenId, bool tile)[] Tabs =
         {
             ("menu_shop", "Shop", ScreenIds.Store, true),
-            ("menu_gear", "Gear", ScreenIds.Inventory, false),
+            ("menu_gear", "Equipment", ScreenIds.Equipment, false),
             ("menu_play", "Battle", null, false),
             ("menu_talents", "Talents", ScreenIds.Talents, false),
-            ("menu_pets", "Pets", ScreenIds.Pets, true),
+            ("menu_village", "Village", VillageTab, false),
         };
 
         private readonly List<(UIStyle.IconButton button, string screenId)> _links = new();
@@ -351,7 +353,7 @@ namespace NinjaVillage.UI.MainMenu
             var startText = UIStyle.Label(start.transform, "START", 92f, Color.white, TextAlignmentOptions.Center, 0.28f);
             UIBuilder.Stretch(startText.rectTransform);
 
-            var heroes = UIStyle.Icon(row, "menu_heroes", "Heroes", () => Open(ScreenIds.Heroes), 150f);
+            var heroes = UIStyle.Icon(row, "menu_heroes", "Heroes", () => Equipment.EquipmentScreen.Open(Equipment.EquipmentScreen.Tab.Heroes), 150f);
             UIStyle.Place(heroes.Root, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(40f, 0f), heroes.Root.sizeDelta);
             _heroesBadge = heroes.Badge;
             _links.Add((heroes, ScreenIds.Heroes));
@@ -387,9 +389,11 @@ namespace NinjaVillage.UI.MainMenu
                 }
 
                 string id = screenId;
-                var button = UIStyle.Icon(rt, icon, label, home ? null : () => Open(id), home ? 150f : 118f, tile);
+                bool village = id == VillageTab;
+                UnityEngine.Events.UnityAction onClick = home ? null : village ? () => SceneLoader.LoadVillage() : () => Open(id);
+                var button = UIStyle.Icon(rt, icon, label, onClick, home ? 150f : 118f, tile);
                 UIStyle.Place(button.Root, new Vector2(x, 0f), new Vector2(0.5f, 0f), new Vector2(0f, home ? 30f : 22f), button.Root.sizeDelta);
-                if (!home) _links.Add((button, id));
+                if (!home && !village) _links.Add((button, id));
             }
         }
 

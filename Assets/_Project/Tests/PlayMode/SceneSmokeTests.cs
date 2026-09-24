@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using System.Linq;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Player;
 using NinjaVillage.Systems.Economy;
@@ -83,8 +84,46 @@ namespace NinjaVillage.Tests
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,
                 ScreenIds.DailyLogin, ScreenIds.Quests, ScreenIds.Achievements, ScreenIds.BattlePass, ScreenIds.Events,
-                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, "leaderboard");
+                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, "leaderboard");
             yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        [UnityTest]
+        public IEnumerator MainMenu_EquipmentShowsTheLoadoutAndActsOnIt()
+        {
+            yield return LoadScene(SceneNames.MainMenu);
+            NinjaVillage.Systems.Heroes.HeroService.EnsureDefaults();
+            var inv = NinjaVillage.Systems.Inventory.InventoryService.Data;
+            var before = NinjaVillage.Systems.Inventory.LoadoutPower.Compute(SaveService.Data);
+
+            // Gear adds attack; so does levelling the weapon.
+            NinjaVillage.Systems.Inventory.InventoryService.AddEquipment("iron_ring");
+            Assert.AreEqual(NinjaVillage.Systems.Inventory.EquipResult.Ok, NinjaVillage.Systems.Inventory.InventoryService.EquipEquipment("iron_ring"));
+            var withRing = NinjaVillage.Systems.Inventory.LoadoutPower.Compute(SaveService.Data);
+            Assert.Greater(withRing.Attack, before.Attack, "equipped gear raises ATK");
+            Assert.Greater(withRing.Health, 0);
+
+            NinjaVillage.UI.Equipment.EquipmentScreen.Open(NinjaVillage.UI.Equipment.EquipmentScreen.Tab.Gear);
+            yield return null;
+            var screen = UIScreenNavigator.Instance.Current;
+            Assert.AreEqual(ScreenIds.Equipment, screen.ScreenId);
+            var root = screen.Root;
+            Assert.Greater(root.GetComponentsInChildren<UnityEngine.UI.Button>(true).Length, 10, "slots, tabs and tiles are built");
+
+            // Tapping a tile opens its card.
+            var weaponTile = root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.name == "Tile");
+            Assert.IsNotNull(weaponTile, "the weapon grid has tiles");
+            weaponTile.onClick.Invoke();
+            yield return null;
+            Assert.IsTrue(root.Find("Popup").gameObject.activeSelf, "a card opens");
+
+            // Heroes tab: selecting through the card works.
+            NinjaVillage.UI.Equipment.EquipmentScreen.Open(NinjaVillage.UI.Equipment.EquipmentScreen.Tab.Heroes);
+            yield return null;
+            Assert.IsFalse(root.Find("Popup").gameObject.activeSelf, "reopening starts without a card");
+            int heroes = NinjaVillage.Systems.Heroes.HeroService.GetSortedHeroes().Count;
+            Assert.AreEqual(heroes, root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().Count(b => b.name == "Tile"));
+            yield return new WaitForSecondsRealtime(0.3f);
         }
 
         [UnityTest]
@@ -108,7 +147,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
