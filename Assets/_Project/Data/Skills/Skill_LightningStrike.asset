@@ -15,10 +15,12 @@ MonoBehaviour:
   id: Skill_LightningStrike
   displayName: Lightning Strike
   description: Periodically zaps a nearby enemy
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: d4875c9be60658a9f92bab5583ff364f, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   baseDamage: 15
   damagePerLevel: 10
   baseInterval: 3

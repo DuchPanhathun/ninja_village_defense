@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_ThunderKunai
   displayName: Thunder Kunai
   description: Faster throws, and chain lightning that leaps between demons.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 370addd8a434acc35b0d2fe82e4ed244, type: 3}
   category: 0
   rarity: 3
   maxLevel: 1

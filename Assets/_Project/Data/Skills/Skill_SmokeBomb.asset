@@ -15,10 +15,11 @@ MonoBehaviour:
   id: Skill_SmokeBomb
   displayName: Smoke Bomb
   description: "Periodically vanish in smoke \u2014 enemies lose track of you."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 407723760c79ead8fb2c28252e867d29, type: 3}
   category: 1
   rarity: 1
   maxLevel: 5
   element: 6
+  isEvolution: 0
   activeDurationPerLevel: 1.5
   cycleDuration: 6

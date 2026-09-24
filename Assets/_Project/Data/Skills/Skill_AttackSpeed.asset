@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_AttackSpeed
   displayName: Attack Speed
   description: +20% attack speed per level
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 49ce89166112e8f1c8497d589af7eb07, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   bonusPerLevel: 0.2

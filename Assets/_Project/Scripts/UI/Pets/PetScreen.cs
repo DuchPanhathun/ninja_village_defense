@@ -66,7 +66,7 @@ namespace NinjaVillage.UI.Pets
             var gear = PetService.GetEquippedItem(pet);
             if (unlocked) body += "\nGear: " + (gear != null ? RarityColors.Colorize(gear.NameOrId, gear.Rarity) : "none");
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, pet.PlaceholderColor, UIIcons.Pet(pet.Id));
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out var bodyText, pet.PlaceholderColor, UIIcons.Pet(pet.Id));
 
             if (!unlocked)
             {
@@ -76,8 +76,9 @@ namespace NinjaVillage.UI.Pets
                 if (check != PetActionResult.Success)
                 {
                     UIBuilder.SetEnabled(unlock, false);
+                    // The reason goes on its own line in the card, not squeezed next to the button.
                     if (check != PetActionResult.NotEnoughCurrency)
-                        UIBuilder.Text(actions.transform, PetService.Describe(check, pet), UITheme.SmallSize, TextAlignmentOptions.Right, UITheme.Negative);
+                        bodyText.text += $"\n<color=#F25A5A>{PetService.Describe(check, pet)}</color>";
                 }
                 return;
             }

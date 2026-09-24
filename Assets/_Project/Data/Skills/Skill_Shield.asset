@@ -15,10 +15,12 @@ MonoBehaviour:
   id: Skill_Shield
   displayName: Shield
   description: Periodically grants a shield that absorbs damage
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 2631600f67ea67567bc32b8488a9bef1, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   shieldPerTickPerLevel: 5
   shieldCapPerLevel: 15
   interval: 4

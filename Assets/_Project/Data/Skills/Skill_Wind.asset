@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_Wind
   displayName: Gale Step
   description: 'Ride the wind: move and attack faster.'
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 9e6f6f6694c61c7d4a01d675ecfbc1cb, type: 3}
   category: 2
   rarity: 0
   maxLevel: 5

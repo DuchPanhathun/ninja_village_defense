@@ -48,7 +48,7 @@ namespace NinjaVillage.UI.Heroes
                           hero.GetStatsAtLevel(Mathf.Max(1, level)).Describe(" · ");
             if (hero.SignatureWeapon != null) body += $"\nWeapon: {hero.SignatureWeapon.DisplayName}";
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, hero.ThemeColor, UIIcons.Hero(hero.Id));
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out var bodyText, hero.ThemeColor, UIIcons.Hero(hero.Id));
 
             if (!unlocked)
             {
@@ -61,7 +61,7 @@ namespace NinjaVillage.UI.Heroes
                 });
                 if (check != HeroActionResult.Success) UIBuilder.SetEnabled(unlock, false);
                 if (check == HeroActionResult.DojoLevelTooLow)
-                    UIBuilder.Text(actions.transform, HeroService.Describe(check, hero), UITheme.SmallSize, TMPro.TextAlignmentOptions.Right, UITheme.Negative);
+                    bodyText.text += $"\n<color=#F25A5A>{HeroService.Describe(check, hero)}</color>";
                 return;
             }
 

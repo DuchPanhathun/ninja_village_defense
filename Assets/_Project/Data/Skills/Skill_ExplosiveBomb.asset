@@ -15,10 +15,12 @@ MonoBehaviour:
   id: Skill_ExplosiveBomb
   displayName: Explosive Bomb
   description: Periodically drops a bomb that explodes nearby enemies
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b17167af8800e3de18111c56f961a194, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   baseDamage: 25
   damagePerLevel: 15
   baseInterval: 5

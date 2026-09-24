@@ -69,6 +69,43 @@ namespace NinjaVillage.EditorTools.Generators
             BuildVfxArt();
             ConfigureUiImporters();
             BuildUiArt();
+            AssignIcons();
+        }
+
+        // Skill / ultimate id -> icon (pack spell icons, generated skill icons, evolution icons).
+        private static readonly Dictionary<string, string> SkillIcons = new()
+        {
+            ["Skill_AttackSpeed"] = "icon_skill_attack_speed", ["Skill_GoldBonus"] = "icon_item_money",
+            ["Skill_GiantShuriken"] = "icon_item_shuriken", ["Skill_Shield"] = "icon_spell_defense_upgrade",
+            ["Skill_DodgeChance"] = "icon_skill_dodge_chance", ["Skill_LuckyDrop"] = "icon_spell_luck_upgrade",
+            ["Skill_FireBlade"] = "icon_spell_magic_weapon", ["Skill_ExplosiveBomb"] = "icon_spell_explosion",
+            ["Skill_Clone"] = "icon_spell_necromancy", ["Skill_LightningStrike"] = "icon_spell_book_thunder",
+            ["Skill_AutoHeal"] = "icon_spell_heal", ["Skill_TripleThrow"] = "icon_skill_triple_throw",
+            ["Skill_Teleport"] = "icon_spell_permutation", ["Skill_XpMagnet"] = "icon_skill_xp_magnet",
+            ["Skill_Wind"] = "icon_spell_book_wind", ["Skill_SmokeBomb"] = "icon_spell_mist",
+            ["Skill_PoisonKunai"] = "icon_skill_poison_kunai", ["Skill_MovementSpeed"] = "icon_item_boot",
+            ["Skill_InvisibleAssassin"] = "icon_evolution_invisible_assassin", ["Skill_Firestorm"] = "icon_evolution_firestorm",
+            ["Skill_ShadowArmy"] = "icon_evolution_shadow_army", ["Skill_ThunderKunai"] = "icon_evolution_thunder_kunai",
+            ["dragon_slash"] = "icon_ultimate_dragon_slash", ["heavenly_storm"] = "icon_ultimate_heavenly_storm",
+            ["shadow_clone_army"] = "icon_ultimate_shadow_clone_army",
+        };
+
+        /// <summary>Fills the (so far empty) Icon field of skills and ultimates so any UI can show them.</summary>
+        private static void AssignIcons()
+        {
+            int assigned = 0;
+            var assets = ContentGen.FindAll<ScriptableObject>($"{ContentGen.DataRoot}/Skills")
+                .Concat(ContentGen.FindAll<ScriptableObject>($"{ContentGen.DataRoot}/Ultimates"));
+            foreach (var asset in assets)
+            {
+                if (asset is not NinjaVillage.Core.ScriptableObjects.DescriptiveScriptableObject definition) continue;
+                if (string.IsNullOrEmpty(definition.Id) || !SkillIcons.TryGetValue(definition.Id, out var iconName)) continue;
+                var icon = Load("UI/Icons", iconName);
+                if (icon == null || definition.Icon == icon) continue;
+                ContentGen.Set(definition, ("icon", icon));
+                assigned++;
+            }
+            Debug.Log($"[ArtHookup] Icons assigned to {assigned} skill/ultimate definition(s).");
         }
 
         // ------------------------------------------------------------------ import settings
@@ -365,7 +402,7 @@ namespace NinjaVillage.EditorTools.Generators
             FillParent(Find(scene, "BossBarFill"), 8f);
             Place(Find(scene, "BossBarRoot"), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(760f, 56f));
 
-            var wave = Find(scene, "WaveText");
+            var wave = Find(scene, "WaveText", parent: "Canvas"); // the game-over panel has its own WaveText
             Place(wave, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(300f, 76f));
             StyleText(wave, 52f, Color.white, TextAlignmentOptions.Center);
             var coins = Find(scene, "CoinText");
@@ -393,6 +430,8 @@ namespace NinjaVillage.EditorTools.Generators
                 StyleText(ultimate, 40f, Color.white, TextAlignmentOptions.Center);
             }
 
+            LayOutPauseAndGameOver(scene);
+
             var panel = Find(scene, "SkillChoicePanel");
             if (panel != null)
             {
@@ -402,19 +441,21 @@ namespace NinjaVillage.EditorTools.Generators
                 panel.sizeDelta = Vector2.zero;
                 EditorUtility.SetDirty(panel);
             }
+            var icons = new Image[3];
             for (int i = 1; i <= 3; i++)
             {
                 var card = Find(scene, $"SkillCard{i}");
                 Place(card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2((i - 2) * 345f, 0f), new Vector2(320f, 560f));
                 SetSprite(card, "UI/Panels", "panel_map");
+                icons[i - 1] = EnsureCardIcon(card, i);
                 var name = Find(scene, $"SkillCard{i}_Name");
                 if (name != null)
                 {
                     name.anchorMin = new Vector2(0f, 1f);
                     name.anchorMax = new Vector2(1f, 1f);
                     name.pivot = new Vector2(0.5f, 1f);
-                    name.anchoredPosition = new Vector2(0f, -40f);
-                    name.sizeDelta = new Vector2(-40f, 130f);
+                    name.anchoredPosition = new Vector2(0f, -236f);
+                    name.sizeDelta = new Vector2(-40f, 110f);
                     StyleText(name, 38f, new Color(0.3f, 0.17f, 0.1f), TextAlignmentOptions.Center);
                 }
                 var description = Find(scene, $"SkillCard{i}_Description");
@@ -423,19 +464,104 @@ namespace NinjaVillage.EditorTools.Generators
                     description.anchorMin = Vector2.zero;
                     description.anchorMax = Vector2.one;
                     description.pivot = new Vector2(0.5f, 0.5f);
-                    description.offsetMin = new Vector2(30f, 40f);
-                    description.offsetMax = new Vector2(-30f, -190f);
+                    description.offsetMin = new Vector2(30f, 36f);
+                    description.offsetMax = new Vector2(-30f, -350f);
                     StyleText(description, 28f, new Color(0.25f, 0.18f, 0.14f), TextAlignmentOptions.Top);
                 }
             }
+            var choicePanel = Object.FindAnyObjectByType<SkillChoicePanel>(FindObjectsInactive.Include);
+            if (choicePanel != null && icons.All(i => i != null)) ContentGen.Set(choicePanel, ("iconImages", icons));
         }
 
-        private static RectTransform Find(Scene scene, string name)
+        /// <summary>A dark wood tile with the skill icon at the top of a level-up card (created once, reused).</summary>
+        private static Image EnsureCardIcon(RectTransform card, int index)
+        {
+            if (card == null) return null;
+            string tileName = $"SkillCard{index}_IconTile";
+            var tileRt = card.Find(tileName) as RectTransform;
+            if (tileRt == null)
+            {
+                tileRt = new GameObject(tileName, typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+                tileRt.SetParent(card, false);
+                var icon = new GameObject($"SkillCard{index}_Icon", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+                icon.SetParent(tileRt, false);
+            }
+            Place(tileRt, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -34f), new Vector2(190f, 190f));
+            var tile = tileRt.GetComponent<Image>();
+            tile.raycastTarget = false;
+            SetSprite(tileRt, "UI/Panels", "panel_tint");
+            tile.color = new Color(0.25f, 0.16f, 0.11f, 1f);
+
+            var iconRt = (RectTransform)tileRt.GetChild(0);
+            iconRt.anchorMin = Vector2.zero;
+            iconRt.anchorMax = Vector2.one;
+            iconRt.offsetMin = new Vector2(22f, 22f);
+            iconRt.offsetMax = new Vector2(-22f, -22f);
+            var image = iconRt.GetComponent<Image>();
+            image.raycastTarget = false;
+            image.preserveAspect = true;
+            EditorUtility.SetDirty(image);
+            return image;
+        }
+
+        private static RectTransform Find(Scene scene, string name, string parent = null)
         {
             foreach (var root in scene.GetRootGameObjects())
                 foreach (var t in root.GetComponentsInChildren<RectTransform>(true))
-                    if (t.name.Trim() == name) return t;
+                    if (t.name.Trim() == name && (parent == null || (t.parent != null && t.parent.name.Trim() == parent)))
+                        return t;
             return null;
+        }
+
+        /// <summary>Pause and game-over panels: dimmed backdrop, big wood buttons, readable titles.</summary>
+        private static void LayOutPauseAndGameOver(Scene scene)
+        {
+            var pause = Find(scene, "PausePanel");
+            if (pause != null)
+            {
+                Dim(pause);
+                var stray = Find(scene, "Button", parent: "PausePanel"); // unused placeholder that said "Button"
+                if (stray != null) { stray.gameObject.SetActive(false); EditorUtility.SetDirty(stray.gameObject); }
+                var resume = Find(scene, "ResumeButton", parent: "PausePanel");
+                Place(resume, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(600f, 150f));
+                WoodButton(resume, UITheme.Button, 56f);
+            }
+
+            var gameOver = Find(scene, "GameOverPanel");
+            if (gameOver != null)
+            {
+                Dim(gameOver);
+                var title = Find(scene, "TitleText", parent: "GameOverPanel");
+                Place(title, new Vector2(0.5f, 0.66f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(960f, 170f));
+                StyleText(title, 100f, UITheme.Gold, TextAlignmentOptions.Center);
+                var wave = Find(scene, "WaveText", parent: "GameOverPanel");
+                Place(wave, new Vector2(0.5f, 0.58f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(860f, 90f));
+                StyleText(wave, 52f, Color.white, TextAlignmentOptions.Center);
+                var retry = Find(scene, "RetryButton", parent: "GameOverPanel");
+                Place(retry, new Vector2(0.5f, 0.345f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600f, 130f));
+                WoodButton(retry, UITheme.Button, 52f);
+            }
+        }
+
+        private static void Dim(RectTransform panel)
+        {
+            if (!panel.TryGetComponent<Image>(out var image)) image = panel.gameObject.AddComponent<Image>();
+            image.sprite = null;
+            image.color = new Color(0.04f, 0.03f, 0.02f, 0.72f);
+            EditorUtility.SetDirty(image);
+        }
+
+        private static void WoodButton(RectTransform button, Color tint, float fontSize)
+        {
+            if (button == null) return;
+            SetSprite(button, "UI/Buttons", "button_tint");
+            if (button.TryGetComponent<Image>(out var image))
+            {
+                image.color = tint;
+                EditorUtility.SetDirty(image);
+            }
+            foreach (var label in button.GetComponentsInChildren<TMP_Text>(true))
+                StyleText(label.rectTransform, fontSize, Color.white, TextAlignmentOptions.Center);
         }
 
         private static void Place(RectTransform rt, Vector2 anchor, Vector2 pivot, Vector2 position, Vector2 size)

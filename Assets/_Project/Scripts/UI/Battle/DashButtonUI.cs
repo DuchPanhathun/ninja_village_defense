@@ -59,6 +59,11 @@ namespace NinjaVillage.UI.Battle
                 Destroy(gameObject);
                 return;
             }
+            // This canvas sits above the HUD, so hide the button while the game is paused (pause menu,
+            // level-up cards, revive prompt) instead of drawing it over those panels.
+            bool paused = Time.timeScale <= 0f;
+            if (_button.gameObject.activeSelf == paused) _button.gameObject.SetActive(!paused);
+            if (paused) return;
             _cooldownFill.fillAmount = _dash.CooldownNormalized;
             _button.interactable = _dash.IsReady;
         }

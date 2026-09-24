@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_MovementSpeed
   displayName: Movement Speed
   description: +10% movement speed per level
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 9728938e23a6388b9b5f88fb09a8d53c, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   bonusPerLevel: 0.1

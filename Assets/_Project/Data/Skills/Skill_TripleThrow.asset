@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_TripleThrow
   displayName: Triple Throw
   description: Fires an additional projectile per level
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 94148d7b0cb5608eab5aa2b9e84e02d6, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   extraProjectilesPerLevel: 1

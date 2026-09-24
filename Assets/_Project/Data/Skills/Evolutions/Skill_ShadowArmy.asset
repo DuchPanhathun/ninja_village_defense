@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_ShadowArmy
   displayName: Shadow Army
   description: Shadow samurai circle you and cut down anything close.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c1c4b9a26d4e086b8bedf7c4978f6dd7, type: 3}
   category: 0
   rarity: 3
   maxLevel: 1

@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_AutoHeal
   displayName: Auto Heal
   description: Slowly heals HP over time
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: db1523914b1387cc6bce7c66fbd3c1fe, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   healPerSecondPerLevel: 0.5

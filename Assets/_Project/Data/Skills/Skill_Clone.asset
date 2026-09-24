@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_Clone
   displayName: Shadow Clone
   description: A shadow clone fights beside you. +1 clone per level.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: be7a9a6696c204f9486979bdc656e22f, type: 3}
   category: 0
   rarity: 1
   maxLevel: 3

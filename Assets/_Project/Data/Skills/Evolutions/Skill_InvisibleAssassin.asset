@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_InvisibleAssassin
   displayName: Invisible Assassin
   description: Stay unseen most of the fight; strikes from the shadows crit far more.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 746de6653b2b21907919986b9ff776a0, type: 3}
   category: 1
   rarity: 3
   maxLevel: 1

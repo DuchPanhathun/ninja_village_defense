@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_Teleport
   displayName: Blink
   description: When hit, vanish and reappear away from danger.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 69081bf985c7c490cbc24cb75c0e022b, type: 3}
   category: 1
   rarity: 1
   maxLevel: 5

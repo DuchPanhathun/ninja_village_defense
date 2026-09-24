@@ -15,10 +15,11 @@ MonoBehaviour:
   id: Skill_GiantShuriken
   displayName: Giant Shuriken
   description: Bigger projectiles that hit harder.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 57c3157425a30d46180a6bc4579967ec, type: 3}
   category: 0
   rarity: 1
   maxLevel: 5
   element: 0
+  isEvolution: 0
   sizePerLevel: 0.35
   damagePerLevel: 0.25

@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_LuckyDrop
   displayName: Lucky Drop
   description: Chance to double coin drops
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 856282468fe40d968a9bf2037db80de3, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   bonusPerLevel: 0.1

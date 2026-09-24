@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_DodgeChance
   displayName: Dodge Chance
   description: +5% chance to dodge incoming attacks
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 661c4e6dd3ccc08b4885241827c32820, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   bonusPerLevel: 0.05

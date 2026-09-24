@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_GoldBonus
   displayName: Gold Bonus
   description: +15% coins earned per level
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 85d9b8f7e52362d8faa56c7f74e71765, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   bonusPerLevel: 0.15

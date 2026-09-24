@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Skill_Firestorm
   displayName: Firestorm
   description: A ring of wind-fed fire erupts around you, burning every demon near.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: dcf7829b47de8481086041f1512024ca, type: 3}
   category: 0
   rarity: 3
   maxLevel: 1

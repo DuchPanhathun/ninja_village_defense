@@ -15,7 +15,7 @@ MonoBehaviour:
   id: shadow_clone_army
   displayName: Shadow Clone Army
   description: Summon 8 shadow clones that fight beside you for 15 seconds.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 6fe2b0802ab155dc5acc2d5e0bf25f7f, type: 3}
   cooldownSeconds: 90
   cloneCount: 8
   cloneDuration: 15

@@ -15,8 +15,10 @@ MonoBehaviour:
   id: Skill_XpMagnet
   displayName: XP Magnet
   description: Increases the pull radius for XP orbs
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: a62378811e2b582ceb8dc4c0de942266, type: 3}
   category: 0
   rarity: 0
   maxLevel: 5
+  element: 0
+  isEvolution: 0
   bonusPerLevel: 0.5

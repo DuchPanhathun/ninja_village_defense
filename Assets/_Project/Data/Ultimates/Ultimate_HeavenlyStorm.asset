@@ -15,7 +15,7 @@ MonoBehaviour:
   id: heavenly_storm
   displayName: Heavenly Storm
   description: A rain of shuriken strikes all around you for 5 seconds.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: fa0a7108aff7466ec8103a03522e4253, type: 3}
   cooldownSeconds: 90
   burstCount: 50
   damagePerBurst: 20

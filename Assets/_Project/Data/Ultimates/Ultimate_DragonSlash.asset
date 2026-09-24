@@ -15,7 +15,7 @@ MonoBehaviour:
   id: dragon_slash
   displayName: Dragon Slash
   description: A huge dragon crosses the battlefield, cutting down everything.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 230dac63d82b18b698b3fcfaad7bc30e, type: 3}
   cooldownSeconds: 90
   damage: 500
   radius: 20

@@ -19,6 +19,8 @@ namespace NinjaVillage.UI.Battle
         [SerializeField] private Button[] choiceButtons;
         [SerializeField] private TMP_Text[] nameTexts;
         [SerializeField] private TMP_Text[] descriptionTexts;
+        [Tooltip("Optional: the skill's icon on each card (hidden when a skill has none).")]
+        [SerializeField] private Image[] iconImages = System.Array.Empty<Image>();
 
         private readonly Queue<SkillDefinition[]> _pendingChoices = new();
         private SkillDefinition[] _currentChoices;
@@ -73,6 +75,12 @@ namespace NinjaVillage.UI.Battle
                     nameTexts[i].text = _currentChoices[i].DisplayName;
                 if (i < descriptionTexts.Length && descriptionTexts[i] != null)
                     descriptionTexts[i].text = _currentChoices[i].Description;
+                if (i < iconImages.Length && iconImages[i] != null)
+                {
+                    var icon = _currentChoices[i].Icon;
+                    iconImages[i].sprite = icon;
+                    iconImages[i].enabled = icon != null;
+                }
             }
         }
 
