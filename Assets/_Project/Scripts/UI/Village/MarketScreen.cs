@@ -40,7 +40,8 @@ namespace NinjaVillage.UI.Village
                 if (offer == null) continue;
                 shown++;
 
-                var actions = UIBuilder.ActionCard(content, offer.NameOrId, offer.DescribeReward(), out _, out _);
+                var actions = UIBuilder.ActionCard(content, offer.NameOrId, offer.DescribeReward(), out _, out _, null,
+                    UIIcons.MarketOffer(offer), state.Purchased ? new Color(0.45f, 0.42f, 0.4f, 0.8f) : Color.white);
                 if (state.Purchased)
                 {
                     UIBuilder.Text(actions.transform, "Sold out", UITheme.SmallSize, TextAlignmentOptions.Right, UITheme.TextMuted);

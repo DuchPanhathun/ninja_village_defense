@@ -44,6 +44,13 @@ namespace NinjaVillage.Systems.Settings
             Commit(immediate: true);
         }
 
+        public static void SetScreenShake(bool enabled)
+        {
+            Current.ScreenShake = enabled;
+            NinjaVillage.Gameplay.Camera.CameraShake.Enabled = enabled;
+            Commit(immediate: true);
+        }
+
         /// <summary>true = 30 FPS battery saver, false = 60 FPS.</summary>
         public static void SetBatterySaver(bool enabled)
         {
@@ -99,6 +106,7 @@ namespace NinjaVillage.Systems.Settings
             settings.Sanitize(QualitySettings.names.Length);
             ApplyQuality(settings);
             ApplyFrameRate(settings);
+            NinjaVillage.Gameplay.Camera.CameraShake.Enabled = settings.ScreenShake;
             EventBus<SettingsChangedEvent>.Raise(new SettingsChangedEvent(settings));
         }
 

@@ -156,7 +156,9 @@ namespace NinjaVillage.UI.Village
                 string state = VillageService.CastleLevel < building.RequiredCastleLevel
                     ? $"<color=#F25A5A>Unlocks at Castle Lv {building.RequiredCastleLevel}</color>"
                     : $"Lv {level} — Castle allows up to Lv {cap} of {building.MaxLevel}";
-                UIBuilder.ActionCard(_extra, building.NameOrId, state, out _, out _);
+                bool locked = VillageService.CastleLevel < building.RequiredCastleLevel;
+                UIBuilder.ActionCard(_extra, building.NameOrId, state, out _, out _, null, UIIcons.Building(building.Id, level),
+                    level > 0 ? Color.white : locked ? new Color(0.1f, 0.1f, 0.12f, 0.6f) : new Color(0.5f, 0.5f, 0.5f, 0.8f));
             }
         }
     }

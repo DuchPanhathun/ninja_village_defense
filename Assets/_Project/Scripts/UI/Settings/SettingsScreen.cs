@@ -14,7 +14,7 @@ namespace NinjaVillage.UI.Settings
     /// <summary>
     /// Settings (EPIC 17 "Settings" + EPIC 22 "Account"), in one scrolling list: the account (online status,
     /// guest or linked email, last cloud backup, "Sync now", and linking an email so progress survives a
-    /// reinstall), volume sliders applied live, vibration, damage numbers, 30 FPS battery saver, graphics
+    /// reinstall), volume sliders applied live, vibration, damage numbers, screen shake, 30 FPS battery saver, graphics
     /// quality, the analytics opt-out, and "reset progress" behind a two-tap confirmation. Game settings go
     /// through <see cref="SettingsService"/>, which validates, applies and persists them.
     /// </summary>
@@ -25,7 +25,7 @@ namespace NinjaVillage.UI.Settings
         protected override string Title => "Settings";
 
         private Slider _master, _music, _sfx;
-        private Button _vibration, _battery, _damageNumbers, _quality, _analytics, _reset;
+        private Button _vibration, _battery, _damageNumbers, _screenShake, _quality, _analytics, _reset;
         private TextMeshProUGUI _accountStatus, _linkHint;
         private TMP_InputField _email, _password;
         private GameObject _linkForm;
@@ -56,6 +56,11 @@ namespace NinjaVillage.UI.Settings
             _damageNumbers = UIBuilder.Button(list, "", () =>
             {
                 SettingsService.SetShowDamageNumbers(!SettingsService.Current.ShowDamageNumbers);
+                Click();
+            }, UITheme.ButtonSecondary, 100f);
+            _screenShake = UIBuilder.Button(list, "", () =>
+            {
+                SettingsService.SetScreenShake(!SettingsService.Current.ScreenShake);
                 Click();
             }, UITheme.ButtonSecondary, 100f);
 
@@ -124,6 +129,7 @@ namespace NinjaVillage.UI.Settings
             _sfx.SetValueWithoutNotify(s.SfxVolume);
             UIBuilder.SetLabel(_vibration, $"Vibration: {(s.Vibration ? "On" : "Off")}");
             UIBuilder.SetLabel(_damageNumbers, $"Damage numbers: {(s.ShowDamageNumbers ? "On" : "Off")}");
+            UIBuilder.SetLabel(_screenShake, $"Screen shake: {(s.ScreenShake ? "On" : "Off")}");
             UIBuilder.SetLabel(_battery, s.BatterySaver ? "Battery saver: On (30 FPS)" : "Battery saver: Off (60 FPS)");
 
             var names = QualitySettings.names;

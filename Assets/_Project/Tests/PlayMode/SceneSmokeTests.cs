@@ -404,6 +404,37 @@ namespace NinjaVillage.Tests
 #endif
 
         [UnityTest]
+        public IEnumerator Battle_GettingHitKeepsTheCameraOnThePlayer()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var player = PlayerReference.Instance.gameObject;
+            player.GetComponent<PlayerController>().enabled = false;
+            var body = player.GetComponent<Rigidbody2D>();
+            var health = player.GetComponent<NinjaVillage.Core.Combat.Health>();
+            var cam = Camera.main;
+
+            // Far from where the battle (and the camera) started.
+            body.position = new Vector2(25f, -15f);
+            player.transform.position = body.position;
+            for (float t = 0f; t < 1.5f; t += Time.deltaTime) { Time.timeScale = 1f; yield return null; }
+
+            Vector2 before = body.position;
+            float worst = 0f;
+            for (int hit = 0; hit < 6; hit++)
+            {
+                health.TakeDamage(new NinjaVillage.Core.Combat.DamageInfo(1f, false, Vector2.left, 3f, null));
+                for (float t = 0f; t < 0.2f; t += Time.deltaTime)
+                {
+                    Time.timeScale = 1f;
+                    yield return null;
+                    worst = Mathf.Max(worst, Vector2.Distance(cam.transform.position, player.transform.position));
+                }
+            }
+            Assert.Less(worst, 1f, "the camera stays on the player while they take hits");
+            Assert.Less(Vector2.Distance(before, body.position), 0.5f, "hits barely push the player");
+        }
+
+        [UnityTest]
         public IEnumerator Battle_DeathOffersReviveThenRecordsTheRun()
         {
             yield return LoadScene(SceneNames.Battle);

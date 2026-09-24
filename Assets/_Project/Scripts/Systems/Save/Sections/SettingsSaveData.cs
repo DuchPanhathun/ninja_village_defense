@@ -23,6 +23,8 @@ namespace NinjaVillage.Systems.Save
         /// <summary>30 saves battery on mid-range Android (EPIC 23); 60 for smoother play.</summary>
         public int TargetFrameRate = 60;
         public bool ShowDamageNumbers = true;
+        /// <summary>Camera shake on big moments (boss slams, ultimates).</summary>
+        public bool ScreenShake = true;
         public string Language = "en";
 
         public bool BatterySaver => TargetFrameRate == BatterySaverFrameRate;

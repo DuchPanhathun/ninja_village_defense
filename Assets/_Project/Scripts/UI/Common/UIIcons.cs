@@ -52,6 +52,33 @@ namespace NinjaVillage.UI.Common
             return set != null ? set.DefaultSprite : null;
         }
 
+        public static Sprite Blessing(string blessingId) => Named("icon_blessing_", blessingId);
+
+        /// <summary>A Market offer: the item itself, the crate for random gear, gems, or coins (a chest for big piles).</summary>
+        public static Sprite MarketOffer(NinjaVillage.Systems.Village.MarketOfferDefinition offer)
+        {
+            if (offer == null) return null;
+            switch (offer.RewardType)
+            {
+                case NinjaVillage.Systems.Village.MarketRewardType.Equipment:
+                    return offer.Equipment == null ? null : offer.Equipment.Icon != null ? offer.Equipment.Icon : Equipment(offer.Equipment.Id);
+                case NinjaVillage.Systems.Village.MarketRewardType.RandomEquipment:
+                    string rarity = offer.RandomRarity.ToString().ToLowerInvariant();
+                    return UIArt.Get("icon_crate_" + rarity) ?? UIArt.Get("icon_crate_epic");
+                case NinjaVillage.Systems.Village.MarketRewardType.Gems:
+                    return UIArt.Get(offer.RewardAmount >= 500 ? "store_gems_550" : "store_gems_100");
+                default:
+                    return UIArt.Get(offer.RewardAmount >= 2000 ? "pickup_bigchest_0" : "icon_item_money");
+            }
+        }
+
+        /// <summary>A village building as it looks at <paramref name="level"/> (the Castle changes with its stage).</summary>
+        public static Sprite Building(string buildingId, int level)
+        {
+            var art = NinjaVillage.Gameplay.Village.VillageArt.Load();
+            return art != null ? art.BuildingSprite(buildingId, Mathf.Max(1, level)) : null;
+        }
+
         private static Sprite Named(string prefix, string id) => string.IsNullOrEmpty(id) ? null : UIArt.Get(prefix + id);
     }
 }

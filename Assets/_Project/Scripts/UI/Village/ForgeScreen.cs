@@ -61,7 +61,7 @@ namespace NinjaVillage.UI.Village
             if (nextTier != null)
                 body += $"\nNext tier <b>{nextTier.Name}</b>: {nextTier.CoinCost} coins + {nextTier.MaterialCount} spare {nextTier.MaterialMinRarity}+ gear, needs Lv {nextTier.RequiredWeaponLevel} & Forge Lv {nextTier.RequiredForgeLevel}";
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, RarityColors.For(weapon.Rarity));
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, RarityColors.For(weapon.Rarity), WeaponIcon(weapon));
 
             if (equipped)
                 UIBuilder.Text(actions.transform, "Equipped", UITheme.SmallSize, TextAlignmentOptions.Right, UITheme.Positive);
@@ -94,7 +94,8 @@ namespace NinjaVillage.UI.Village
         {
             string body = string.IsNullOrEmpty(weapon.Description) ? $"Range {weapon.Range:0.#}" : weapon.Description;
             body += $"\nRequires Forge Lv {ForgeService.CraftForgeLevel(weapon)}";
-            var actions = UIBuilder.ActionCard(content, DefinitionNames.Of(weapon), body, out _, out _, RarityColors.For(weapon.Rarity));
+            var actions = UIBuilder.ActionCard(content, DefinitionNames.Of(weapon), body, out _, out _, RarityColors.For(weapon.Rarity),
+                WeaponIcon(weapon), new Color(0.55f, 0.5f, 0.45f)); // not owned yet: shown dimmed
 
             var blocker = ForgeService.CheckCraft(weapon);
             var craft = UIBuilder.SmallButton(actions.transform, $"Craft {ForgeService.CraftPrice(weapon)}",
@@ -112,5 +113,8 @@ namespace NinjaVillage.UI.Village
             }
             Refresh();
         }
+
+        private static Sprite WeaponIcon(Gameplay.Weapons.WeaponDefinition weapon) =>
+            weapon.Icon != null ? weapon.Icon : UIIcons.Weapon(weapon.Id);
     }
 }

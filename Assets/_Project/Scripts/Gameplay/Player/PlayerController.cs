@@ -49,6 +49,9 @@ namespace NinjaVillage.Gameplay.Player
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+            // Heavy, so enemy hits (knockback) and crowds bumping into you barely push you off your line;
+            // movement is MovePosition-driven, so mass doesn't slow the player down.
+            _rigidbody.mass = Mathf.Max(_rigidbody.mass, 25f);
             _health = GetComponent<Health>();
             _stats = GetComponent<PlayerStats>();
             _moveInput = moveInputSource as IMoveInputProvider;

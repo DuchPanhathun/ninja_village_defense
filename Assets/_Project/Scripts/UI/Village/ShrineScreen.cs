@@ -44,7 +44,7 @@ namespace NinjaVillage.UI.Village
             if (rank < blessing.MaxRank) body += $" · Next: {blessing.FormatValue(blessing.ValueAt(rank + 1))}";
             if (cap < blessing.MaxRank) body += $"\n<color=#AAAAB5>Shrine level allows rank {cap}</color>";
 
-            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, blessing.Color);
+            var actions = UIBuilder.ActionCard(content, title, body, out _, out _, blessing.Color, UIIcons.Blessing(blessing.Id));
             var blocker = ShrineService.Check(blessing);
             if (blocker == BlessingBlocker.MaxRank)
             {
