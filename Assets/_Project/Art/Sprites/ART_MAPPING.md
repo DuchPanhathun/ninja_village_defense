@@ -284,7 +284,7 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | farm: soil, seeds, crops (+ item icons) | `TilesetField.png` bed corners (recoloured), `Items/Food`, `Items/Resource` | `farm_soil`, `farm_seed_0..2`, `farm_growing`, `farm_crop_rice`, `item_rice`, `farm_crop_radish`, `item_radish`, `farm_crop_carrot`, `item_carrot`, `farm_crop_beet`, `item_beet`, `farm_crop_herbs`, `item_herbs`, `farm_crop_tea`, `item_tea` |
 | kitchen & fishing goods, tools | `Items/Food`, `Items/Tool` | `item_onigiri`, `item_sushi`, `item_sushi_roll`, `item_noodle`, `item_yakitori`, `item_fish`, `item_shrimp`, `item_calamari`, `item_octopus`, `item_honey`, `item_meat`, `item_fortune_cookie`, `item_nut`, `tool_hoe`, `tool_watering_can`, `tool_sickle`, `tool_pickaxe`, `tool_axe`, `tool_shovel` |
 | fishing pond + mine pieces | `TilesetWater.png` cut-outs, `Water Ripples` (background keyed out), `Actor/Animal/Fish`, `Vehicles` | `pond_water`, `pond_dock`, `pond_lily`, `pond_boat`, `pond_ripple_0..3`, `fish_red`, `fish_white`, `fish_yellow`, `pond_net_full`, `mine_crane` |
-| koi pond decoration, metal bars, fishing rod, golden koi icons | pond + `Fish/SpriteSheetYellow`, `Items/Resource/Bar*`, `Items/Weapons/Fishing Rod` | `deco_koi_pond`, `item_iron_bar`, `item_gold_bar`, `item_mithril_bar`, `tool_fishing_rod`, `item_golden_koi` |
+| koi pond decoration, Best Village trophy (gilded monk statue), metal bars, fishing rod, golden koi icons | pond + `Fish/SpriteSheetYellow`, `Items/Resource/Bar*`, `Items/Weapons/Fishing Rod` | `deco_koi_pond`, `item_iron_bar`, `item_gold_bar`, `item_mithril_bar`, `tool_fishing_rod`, `item_golden_koi`, `deco_trophy_gold` |
 
 ## Villagers
 

@@ -35,20 +35,37 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
     }
 
-    // Public villages (for visiting): everyone signed in can read; each player publishes only their own,
-    // with the expected fields, a bounded snapshot and the server's timestamp.
+    // Public villages (for visiting and the weekly Best Village ranking): everyone signed in can read; each
+    // player publishes only their own, with the expected fields, a bounded snapshot and the server's timestamp.
     match /villages/{uid} {
       allow read: if signedIn();
       allow write: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['displayName', 'castleLevel', 'highestWave', 'chaptersCleared',
-                                                 'achievementTiers', 'snapshot', 'updatedAt'])
+                                                 'achievementTiers', 'snapshot', 'likes', 'likesWeek', 'rankKey', 'updatedAt'])
         && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 16
         && request.resource.data.castleLevel is int && request.resource.data.castleLevel >= 0 && request.resource.data.castleLevel <= 100
         && request.resource.data.highestWave is int && request.resource.data.highestWave >= 0
         && request.resource.data.chaptersCleared is int && request.resource.data.chaptersCleared >= 0
         && request.resource.data.achievementTiers is int && request.resource.data.achievementTiers >= 0
         && request.resource.data.snapshot is string && request.resource.data.snapshot.size() < 200000
+        && (!('likes' in request.resource.data) || (request.resource.data.likes is int && request.resource.data.likes >= 0 && request.resource.data.likes < 1000000))
+        && (!('likesWeek' in request.resource.data) || request.resource.data.likesWeek is int)
+        && (!('rankKey' in request.resource.data) || request.resource.data.rankKey is int)
         && request.resource.data.updatedAt == request.time;
+
+      // Visitors' book: one record per visitor (likes, gifts, help with the crops). Only that visitor writes it,
+      // never on their own village; the village's owner reads them all (and may clear them).
+      match /visits/{visitorId} {
+        allow read: if isOwner(uid) || isOwner(visitorId);
+        allow delete: if isOwner(uid);
+        allow create, update: if isOwner(visitorId) && visitorId != uid
+          && request.resource.data.keys().hasOnly(['name', 'visitDay', 'likedWeek', 'giftDay', 'waterDay', 'waterTicks', 'at'])
+          && request.resource.data.name is string && request.resource.data.name.size() <= 16
+          && request.resource.data.visitDay is int && request.resource.data.likedWeek is int
+          && request.resource.data.giftDay is int && request.resource.data.waterDay is int
+          && request.resource.data.waterTicks is int
+          && request.resource.data.at == request.time;
+      }
     }
   }
 }

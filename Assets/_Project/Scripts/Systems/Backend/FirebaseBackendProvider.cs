@@ -22,8 +22,10 @@ namespace NinjaVillage.Systems.Backend
     /// Firestore layout (see firebase/firestore.rules):
     /// <c>users/{uid}</c> { save, lastSavedTicks, version, updatedAt, progress fields, displayName }
     /// <c>leaderboard/{uid}</c> { displayName, bestWave, bestKills, updatedAt }
-    /// <c>villages/{uid}</c> { displayName, castleLevel, highestWave, chaptersCleared, achievementTiers, snapshot, updatedAt }
-    ///   — readable by every signed-in player, for visiting
+    /// <c>villages/{uid}</c> { displayName, castleLevel, highestWave, chaptersCleared, achievementTiers, snapshot,
+    ///   likes, likesWeek, rankKey, updatedAt } — readable by every signed-in player, for visiting and the weekly ranking
+    /// <c>villages/{uid}/visits/{visitorUid}</c> { name, visitDay, likedWeek, giftDay, waterDay, waterTicks, at }
+    ///   — written by that visitor, read by the village's owner (likes, gifts, help with the crops)
     /// <c>server_time/{uid}</c> { t } — written with a server timestamp and read back for trusted time.
     /// </summary>
     public sealed class FirebaseBackendProvider : IBackendProvider
@@ -303,6 +305,9 @@ namespace NinjaVillage.Systems.Backend
                     { "chaptersCleared", village.ChaptersCleared },
                     { "achievementTiers", village.AchievementTiers },
                     { "snapshot", village.SnapshotJson ?? string.Empty },
+                    { "likes", village.Likes },
+                    { "likesWeek", village.LikesWeek },
+                    { "rankKey", village.RankKey },
                     { "updatedAt", FieldValue.ServerTimestamp },
                 };
                 await _db.Collection("villages").Document(village.UserId).SetAsync(data);
@@ -355,11 +360,90 @@ namespace NinjaVillage.Systems.Backend
             doc.TryGetValue("achievementTiers", out long tiers);
             doc.TryGetValue("snapshot", out string snapshot);
             DateTime? updated = doc.TryGetValue("updatedAt", out Timestamp t) ? t.ToDateTime() : null;
+            long likes = doc.TryGetValue("likes", out long l) ? l : 0;
+            long likesWeek = doc.TryGetValue("likesWeek", out long w) ? w : -1;
+            long rankKey = doc.TryGetValue("rankKey", out long r) ? r : 0;
             return new PublicVillage
             {
                 UserId = doc.Id, DisplayName = name, CastleLevel = (int)castle, HighestWave = (int)wave,
                 ChaptersCleared = (int)chapters, AchievementTiers = (int)tiers, SnapshotJson = snapshot, UpdatedUtc = updated,
+                Likes = (int)likes, LikesWeek = (int)likesWeek, RankKey = rankKey,
             };
+        }
+
+        public async Task<List<PublicVillage>> ListTopVillagesAsync(int week, int count)
+        {
+            var list = new List<PublicVillage>();
+            if (!_ready) return list;
+            try
+            {
+                // One range on one field, ordered by it: needs only Firestore's automatic single-field index.
+                long from = Social.SocialRules.RankKey(week, 0), to = Social.SocialRules.RankKey(week + 1, 0);
+                var query = await _db.Collection("villages").WhereGreaterThan("rankKey", from).WhereLessThan("rankKey", to)
+                    .OrderByDescending("rankKey").Limit(count).GetSnapshotAsync();
+                foreach (var doc in query.Documents) list.Add(ReadVillage(doc));
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Firebase] Best villages failed: {e.Message}");
+            }
+            return list;
+        }
+
+        // ---------------------------------------------------------------- visits (likes, gifts, help)
+
+        public async Task<bool> WriteVisitAsync(VisitRecord visit)
+        {
+            if (!_ready || visit == null || string.IsNullOrEmpty(visit.VillageId) || string.IsNullOrEmpty(visit.VisitorId)) return false;
+            try
+            {
+                var data = new Dictionary<string, object>
+                {
+                    { "name", visit.VisitorName ?? "Ninja" },
+                    { "visitDay", visit.VisitDay },
+                    { "likedWeek", visit.LikedWeek },
+                    { "giftDay", visit.GiftDay },
+                    { "waterDay", visit.WaterDay },
+                    { "waterTicks", visit.WaterTicks },
+                    { "at", FieldValue.ServerTimestamp },
+                };
+                await _db.Collection("villages").Document(visit.VillageId).Collection("visits").Document(visit.VisitorId).SetAsync(data);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Firebase] Visit write failed: {e.Message}");
+                return false;
+            }
+        }
+
+        public async Task<List<VisitRecord>> ListVisitsAsync(string villageId)
+        {
+            var list = new List<VisitRecord>();
+            if (!_ready || string.IsNullOrEmpty(villageId)) return list;
+            try
+            {
+                var query = await _db.Collection("villages").Document(villageId).Collection("visits")
+                    .OrderByDescending("at").Limit(200).GetSnapshotAsync();
+                foreach (var doc in query.Documents)
+                {
+                    doc.TryGetValue("name", out string name);
+                    list.Add(new VisitRecord
+                    {
+                        VillageId = villageId, VisitorId = doc.Id, VisitorName = name,
+                        VisitDay = doc.TryGetValue("visitDay", out long d) ? (int)d : -1,
+                        LikedWeek = doc.TryGetValue("likedWeek", out long lw) ? (int)lw : -1,
+                        GiftDay = doc.TryGetValue("giftDay", out long g) ? (int)g : -1,
+                        WaterDay = doc.TryGetValue("waterDay", out long wd) ? (int)wd : -1,
+                        WaterTicks = doc.TryGetValue("waterTicks", out long wt) ? wt : 0,
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Firebase] Visits read failed: {e.Message}");
+            }
+            return list;
         }
 
         public async Task<List<LeaderboardEntry>> FetchLeaderboardAsync(int count)

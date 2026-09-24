@@ -545,9 +545,9 @@ into battles. Order = build order; each phase ends with a phone playtest and a c
 
 ## Phase 6 — Social (builds on Visit + Firebase)
 
-- [ ]  Likes & gifts   <!-- visitors leave a like or a small gift; "3 ninjas visited today" on return; Firestore subcollection + rules -->
-- [ ]  Help a neighbour   <!-- visitors can water your crops (once a day per village) -->
-- [ ]  Weekly "Best Village"   <!-- ranking by likes; trophy decoration for the top villages -->
+- [x]  Likes & gifts   <!-- villages/{owner}/visits/{visitor} (one record per visitor, rules: only that visitor writes, owner reads); visitor bar while visiting: Like (weekly), Gift (daily → +30 coins for the owner); coming home: "3 ninjas visited today · 1 gift (+30 coins) · Kenji watered your crops"; likes shown in the village top bar -->
+- [x]  Help a neighbour   <!-- Water (daily per village, +10 coins for the helper); the owner's crops growing at that moment get the watering speed-up when they come home -->
+- [x]  Weekly "Best Village"   <!-- owner publishes likes + rankKey (week*1e6+likes, single-field index); Neighbours: "Best villages this week" (#, likes, Visit); last week's top 3 get the gift-only Best Village Trophy (gilded statue); SocialTests + Village_VisitorsLikeGiftAndWater_AndTheOwnerGetsIt; NEW RULES must be published in the console -->
 
 ## Phase 7 — Atmosphere & pets
 

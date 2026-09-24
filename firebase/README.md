@@ -41,11 +41,17 @@ crash reports and the global leaderboard.
   `chaptersCleared`, `achievementTiers`, `snapshot` (VillageSnapshot JSON: buildings, decorations, heroes,
   pets, gear, talents), `updatedAt`. Readable by every signed-in player; published on connect and after
   each cloud-save upload when the village changed. Listed newest first (single-field index, automatic).
+  Also `likes` / `likesWeek` (this week's likes, counted by the owner from the visits below) and `rankKey`
+  (`week × 1,000,000 + likes`) for the weekly Best Village ranking — one range + order on one field, so
+  the automatic single-field index is enough.
+- `villages/{uid}/visits/{visitorUid}` — the visitors' book: `name`, `visitDay`, `likedWeek`, `giftDay`,
+  `waterDay`, `waterTicks`, `at`. Written only by that visitor (never on their own village), read by the
+  owner, who turns new gifts into coins, applies waterings to the farm and counts likes.
 - `leaderboard/{uid}` — `displayName`, `bestWave`, `bestKills`, `updatedAt`
 - `server_time/{uid}` — scratch document used to read trusted server time
 
 ## Hardening later
-Leaderboard scores are client-reported (validated for type/range only). For a competitive launch,
+Leaderboard scores and village likes are client-reported (validated for type/range only). For a competitive launch,
 move submission into a Cloud Function that checks run records, or add App Check.
 
 ## Firebase in the Editor (optional)

@@ -483,6 +483,7 @@ Environment/Decor/deco_stone_pillar.png
 Environment/Decor/deco_stump_table.png
 Environment/Decor/deco_sunflower.png
 Environment/Decor/deco_tent.png
+Environment/Decor/deco_trophy_gold.png
 Environment/Decor/deco_vase.png
 Environment/Decor/deco_weapon_rack.png
 Environment/Decor/deco_well.png

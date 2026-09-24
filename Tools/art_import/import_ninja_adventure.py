@@ -964,6 +964,23 @@ def import_farm():
     record("Village", "kitchen & fishing goods, tools", "`Items/Food`, `Items/Tool`", out)
 
 
+def gilded(img):
+    """Recolours a stone statue in gold (dark outline kept): the weekly Best Village trophy."""
+    out = img.copy()
+    px = out.load()
+    ramp = [(122, 72, 22), (184, 120, 30), (232, 176, 48), (252, 222, 110), (255, 246, 196)]
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if not a:
+                continue
+            v = (0.3 * r + 0.59 * g + 0.11 * b) / 255
+            if v < 0.2:
+                continue                                   # outline
+            px[x, y] = ramp[min(len(ramp) - 1, int((v - 0.2) / 0.8 * len(ramp)))] + (a,)
+    return out
+
+
 def import_pond_and_mine():
     """EPIC 24 Phase 5: the fishing pond (9-slice pond, dock, lily pad, boat, ripples, fish), the mine's crane,
     the Golden Koi pond decoration and the metal-bar / fishing-rod icons."""
@@ -993,7 +1010,8 @@ def import_pond_and_mine():
     out += [save(trim(load(f"Items/Resource/Bar{metal}.png")), U, f"item_{metal.lower()}_bar") for metal in ("Iron", "Gold", "Mithril")]
     out += [save(trim(load("Items/Weapons/Fishing Rod/Sprite.png")), U, "tool_fishing_rod"),
             save(fish, U, "item_golden_koi")]
-    record("Village", "koi pond decoration, metal bars, fishing rod, golden koi icons", "pond + `Fish/SpriteSheetYellow`, `Items/Resource/Bar*`, `Items/Weapons/Fishing Rod`", out)
+    out.append(save(gilded(trim(load("Backgrounds/Tilesets/TilesetHouse.png").crop((80, 240, 112, 272)))), "Environment/Decor", "deco_trophy_gold"))
+    record("Village", "koi pond decoration, Best Village trophy (gilded monk statue), metal bars, fishing rod, golden koi icons", "pond + `Fish/SpriteSheetYellow`, `Items/Resource/Bar*`, `Items/Weapons/Fishing Rod`", out)
 
 
 GROUNDS = [("grass", (0, 12)), ("grass_dark", (11, 12)), ("dirt", (11, 19)), ("sand", (0, 5)), ("snow", (0, 19))]

@@ -6,6 +6,7 @@ using NinjaVillage.Systems.Farm;
 using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Kitchen;
 using NinjaVillage.Systems.Requests;
+using NinjaVillage.Systems.Social;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
 using NinjaVillage.UI.Common;
@@ -24,7 +25,8 @@ namespace NinjaVillage.UI.Village
     /// to the field ("!" when something is ripe); tapping a bed opens the seed picker or its status (Water,
     /// Dig up). The Kitchen button glides to the Kitchen and opens it ("!" when a meal is done); Requests (or tapping
     /// a villager with a "!") opens today's villager requests; tapping a house plot opens its <see cref="HouseScreen"/>;
-    /// Fish (left) or tapping the pond opens the fishing mini-game; tapping the mine collects its bars.
+    /// Fish (left) or tapping the pond opens the fishing mini-game; tapping the mine collects its bars. Coming home
+    /// shows what visitors left (likes, gifts, watered crops); visiting someone shows Like / Gift / Water.
     /// Visiting someone else's village
     /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
@@ -38,7 +40,10 @@ namespace NinjaVillage.UI.Village
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
         private GameObject _decorate, _decorateBadge, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _requests, _requestsBadge, _fish, _fishBadge, _tabBar;
-        private RectTransform _placeBar, _decoBar;
+        private RectTransform _placeBar, _decoBar, _visitorBar;
+        private Button _like, _gift, _water;
+        private TextMeshProUGUI _visitorTitle;
+        private static VisitSummary _shownNews;
         private Image _placeIcon;
         private TextMeshProUGUI _placeName, _placeHint, _decoName;
         private Button _placeConfirm, _decoSell;
@@ -63,6 +68,7 @@ namespace NinjaVillage.UI.Village
             BuildPlacementBar(safe);
             BuildDecorationBar(safe);
             BuildFarmBar(safe);
+            BuildVisitorBar(safe);
         }
 
         // ------------------------------------------------------------------ layout
@@ -353,6 +359,74 @@ namespace NinjaVillage.UI.Village
             _placeBar.gameObject.SetActive(false);
         }
 
+        /// <summary>Visiting someone: Like (weekly), Gift (daily) and Water their crops (daily, pays the helper).</summary>
+        private void BuildVisitorBar(RectTransform parent)
+        {
+            _visitorBar = Bar(parent, "VisitorBar", out var icon, out _visitorTitle, out var hint);
+            _visitorBar.anchoredPosition = new Vector2(0f, 16f); // the tab bar is hidden while visiting
+            icon.sprite = UIArt.Get("bar_heart_icon");
+            hint.text = $"Like it, leave a gift, or water their crops (+{SocialRules.HelperCoins} coins for helping).";
+            _water = SmallButton(_visitorBar, "Water", new Vector2(-470f, 0f), WaterColor, () => VisitorAction(SocialService.WaterAsync, "You watered their crops. Thanks for helping!"));
+            _gift = SmallButton(_visitorBar, "Gift", new Vector2(-250f, 0f), GiftColor, () => VisitorAction(SocialService.GiftAsync, "Gift left! They'll find it when they come home."));
+            _like = SmallButton(_visitorBar, "Like", new Vector2(-30f, 0f), LikeColor, () => VisitorAction(SocialService.LikeAsync, "You liked this village!"));
+            _visitorBar.gameObject.SetActive(false);
+        }
+
+        private bool _visitorBusy;
+
+        private async void VisitorAction(System.Func<string, System.Threading.Tasks.Task<bool>> action, string done)
+        {
+            var target = VillageVisit.Target;
+            if (target == null || _visitorBusy) return;
+            _visitorBusy = true;
+            try
+            {
+                bool ok = await action(target.PlayerId);
+                Sfx.Play(ok ? AudioCueIds.RewardClaim : AudioCueIds.UiError);
+                UIScreenNavigator.Instance.Toast(ok ? done : "Couldn't reach their village. Check your connection.");
+            }
+            finally
+            {
+                _visitorBusy = false;
+                RefreshVisitorBar();
+            }
+        }
+
+        private void RefreshVisitorBar()
+        {
+            var target = VillageVisit.Target;
+            bool show = target != null && !string.IsNullOrEmpty(target.PlayerId);
+            if (_visitorBar == null) return;
+            _visitorBar.gameObject.SetActive(show);
+            if (!show) return;
+            string owner = string.IsNullOrEmpty(target.DisplayName) ? "this ninja" : target.DisplayName;
+            _visitorTitle.text = $"Visiting {owner}'s village";
+            SetVisitorButton(_like, SocialService.CanLike(target.PlayerId), "Like", "Liked", LikeColor);
+            SetVisitorButton(_gift, SocialService.CanGift(target.PlayerId), "Gift", "Sent", GiftColor);
+            SetVisitorButton(_water, SocialService.CanWater(target.PlayerId), "Water", "Watered", WaterColor);
+        }
+
+        private static readonly Color LikeColor = new(0.85f, 0.3f, 0.4f), WaterColor = new(0.3f, 0.55f, 0.85f), GiftColor = new(0.8f, 0.5f, 0.12f);
+
+        private static void SetVisitorButton(Button button, bool available, string label, string doneLabel, Color color)
+        {
+            button.interactable = available;
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text != null) text.text = available ? label : doneLabel;
+            button.image.color = available ? color : new Color(0.35f, 0.33f, 0.32f, 1f);
+        }
+
+        /// <summary>Coming home: what the visitors left since last time ("3 ninjas visited today · a gift (+30 coins)").</summary>
+        private async void RefreshVisitorsAsync()
+        {
+            var summary = await SocialService.RefreshAsync();
+            if (this == null || VillageVisit.IsVisiting || summary == null || summary == _shownNews) return;
+            if (summary.VisitorsToday.Count == 0 && !summary.HasNews) return;
+            _shownNews = summary;
+            UIScreenNavigator.Instance.Toast(SocialService.Describe(summary));
+            Refresh();
+        }
+
         /// <summary>Shown after tapping a placed decoration: Move / Sell / Close.</summary>
         private void BuildDecorationBar(RectTransform parent)
         {
@@ -421,6 +495,11 @@ namespace NinjaVillage.UI.Village
         {
             base.Start();
             UIScreenNavigator.Instance.ShowRoot(ScreenId);
+            if (VillageVisit.IsVisiting && !string.IsNullOrEmpty(VillageVisit.Target.PlayerId))
+                _ = SocialService.RecordVisitAsync(VillageVisit.Target.PlayerId); // signs their visitors' book
+            else
+                RefreshVisitorsAsync();
+            RefreshVisitorBar();
         }
 
         private void OnEnable()
@@ -640,11 +719,14 @@ namespace NinjaVillage.UI.Village
             _title.text = $"{owner}'s Village";
             var castle = VillageService.Get(BuildingIds.Castle);
             int level = snapshot != null ? Mathf.Max(1, snapshot.BuildingLevel(BuildingIds.Castle)) : VillageService.CastleLevel;
+            int likes = VillageVisit.IsVisiting ? 0 : SocialService.LikesThisWeek;
             _stage.text = (VillageVisit.IsVisiting ? "Visiting  ·  " : "") +
-                          (castle != null ? $"{castle.StageName(level)}  ·  Castle Lv {level}" : $"Castle Lv {level}");
+                          (castle != null ? $"{castle.StageName(level)}  ·  Castle Lv {level}" : $"Castle Lv {level}") +
+                          (likes > 0 ? $"  ·  <color=#FF9AAE>{likes} like{(likes == 1 ? "" : "s")}</color>" : "");
             RefreshCurrencies();
 
             bool visiting = VillageVisit.IsVisiting;
+            RefreshVisitorBar();
             _decorate.SetActive(!visiting && !DecorationPlacer.IsActive);
             _kitchen.SetActive(!visiting && !DecorationPlacer.IsActive);
             _requests.SetActive(!visiting && !DecorationPlacer.IsActive);

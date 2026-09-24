@@ -540,6 +540,90 @@ namespace NinjaVillage.Tests
             }
         }
 
+        /// <summary>
+        /// Phase 6 on the in-memory backend: visiting a neighbour you can like (weekly), leave a gift and water their
+        /// crops (daily); back home, your visitors' records turn into coins, watered crops, this week's likes and —
+        /// having topped last week's ranking — a trophy decoration.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Village_VisitorsLikeGiftAndWater_AndTheOwnerGetsIt()
+        {
+            var now = new System.DateTime(2026, 9, 24, 12, 0, 0, System.DateTimeKind.Utc);
+            NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = () => now;
+            try
+            {
+                var provider = NinjaVillage.Systems.Backend.BackendService.Provider;
+                Assert.IsNotNull(provider, "backend not started");
+                int today = NinjaVillage.Core.Utilities.GameClock.Today, week = NinjaVillage.Core.Utilities.GameClock.ThisWeek;
+                string me = NinjaVillage.Systems.Social.SocialService.MyId;
+
+                // --- visiting Aiko
+                var friend = new VillageSnapshot { PlayerId = "friend_aiko", DisplayName = "Aiko" };
+                friend.Buildings.Add(new IdLevelEntry(BuildingIds.Castle, 2));
+                VillageVisit.Visit(friend);
+                yield return LoadScene(SceneNames.Village);
+                yield return null;
+                UnityEngine.UI.Button Labelled(string text) => Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.GetComponentInChildren<TMPro.TMP_Text>()?.text == text);
+                Assert.IsNotNull(Labelled("Like"), "the visitor bar is up");
+
+                int coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                Labelled("Like").onClick.Invoke();
+                Labelled("Gift").onClick.Invoke();
+                Labelled("Water").onClick.Invoke();
+                yield return null;
+                var mine = provider.ListVisitsAsync("friend_aiko").Result.FirstOrDefault(v => v.VisitorId == me);
+                Assert.IsNotNull(mine, "our visit is in their visitors' book");
+                Assert.AreEqual(week, mine.LikedWeek);
+                Assert.AreEqual(today, mine.GiftDay);
+                Assert.AreEqual(today, mine.WaterDay);
+                Assert.AreEqual(coins + NinjaVillage.Systems.Social.SocialRules.HelperCoins, SaveService.Data.Wallet.Get(CurrencyType.Coins), "helping pays");
+                Assert.IsNotNull(Labelled("Liked"), "a like a week");
+                Assert.IsFalse(Labelled("Liked").interactable);
+                VillageVisit.ReturnHome();
+
+                // --- back home: two neighbours came by
+                SaveService.Data.Wallet.Add(CurrencyType.Coins, 100);
+                NinjaVillage.Systems.Farm.FarmService.Plant(0, NinjaVillage.Systems.Farm.FarmService.GetCrop("radish"));
+                provider.WriteVisitAsync(new NinjaVillage.Systems.Backend.VisitRecord
+                {
+                    VillageId = me, VisitorId = "friend_kenji", VisitorName = "Kenji", VisitDay = today, LikedWeek = week,
+                    GiftDay = today, WaterDay = today, WaterTicks = now.AddMinutes(1).Ticks,
+                });
+                provider.WriteVisitAsync(new NinjaVillage.Systems.Backend.VisitRecord
+                {
+                    VillageId = me, VisitorId = "friend_jin", VisitorName = "Jin", VisitDay = today, LikedWeek = week,
+                });
+                provider.WriteVillageAsync(new NinjaVillage.Systems.Backend.PublicVillage { UserId = me, DisplayName = "Me", Likes = 9, LikesWeek = week - 1 });
+                SaveService.Data.Social.TrophyCheckedWeek = -1;
+                now = now.AddMinutes(2);
+
+                coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                var refresh = NinjaVillage.Systems.Social.SocialService.RefreshAsync(force: true);
+                while (!refresh.IsCompleted) yield return null;
+                var news = refresh.Result;
+                Assert.AreEqual(2, news.VisitorsToday.Count);
+                Assert.AreEqual(2, NinjaVillage.Systems.Social.SocialService.LikesThisWeek);
+                Assert.AreEqual(coins + NinjaVillage.Systems.Social.SocialRules.GiftCoins, SaveService.Data.Wallet.Get(CurrencyType.Coins), "Kenji's gift");
+                Assert.IsTrue(NinjaVillage.Systems.Farm.FarmService.GetPlot(0).Watered, "Kenji watered the radishes");
+                Assert.AreEqual(1, news.TrophyRank, "most liked last week");
+                Assert.AreEqual(1, DecorationService.GiftCount(DecorationService.Get(NinjaVillage.Systems.Social.SocialRules.TrophyDecorationId)));
+                StringAssert.Contains("2 ninjas visited today", NinjaVillage.Systems.Social.SocialService.Describe(news));
+
+                coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                refresh = NinjaVillage.Systems.Social.SocialService.RefreshAsync(force: true);
+                while (!refresh.IsCompleted) yield return null;
+                Assert.AreEqual(coins, SaveService.Data.Wallet.Get(CurrencyType.Coins), "a gift pays out once");
+                Assert.AreEqual(0, refresh.Result.TrophyRank, "one trophy a week");
+                yield return new WaitForSecondsRealtime(0.2f);
+            }
+            finally
+            {
+                VillageVisit.ReturnHome();
+                NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
+        }
+
         [UnityTest]
         public IEnumerator Battle_PlaysForAWhileWithoutErrors()
         {

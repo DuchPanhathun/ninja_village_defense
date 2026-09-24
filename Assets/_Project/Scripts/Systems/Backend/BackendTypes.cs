@@ -99,6 +99,28 @@ namespace NinjaVillage.Systems.Backend
         public int AchievementTiers;
         public string SnapshotJson;
         public DateTime? UpdatedUtc;
+        /// <summary>Likes this village got in week <see cref="LikesWeek"/> (counted and published by its owner).</summary>
+        public int Likes;
+        public int LikesWeek = -1;
+        /// <summary>Sort key for the weekly Best Village ranking: week × 1,000,000 + likes.</summary>
+        public long RankKey;
+    }
+
+    /// <summary>
+    /// One visitor's mark on a village (<c>villages/{owner}/visits/{visitor}</c>): when they last came by, and the
+    /// day / week of their latest like, gift and watering. One record per visitor, rewritten on every visit.
+    /// </summary>
+    public sealed class VisitRecord
+    {
+        public string VillageId;
+        public string VisitorId;
+        public string VisitorName;
+        public int VisitDay = -1;
+        public int LikedWeek = -1;
+        public int GiftDay = -1;
+        public int WaterDay = -1;
+        /// <summary>When they watered (UTC ticks, their GameClock) — crops growing then get the speed-up.</summary>
+        public long WaterTicks;
     }
 
     /// <summary>One analytics parameter; value is long, double or string.</summary>
@@ -153,5 +175,12 @@ namespace NinjaVillage.Systems.Backend
         Task<PublicVillage> LoadVillageAsync(string userId);
         /// <summary>Most recently active villages, newest first.</summary>
         Task<List<PublicVillage>> ListVillagesAsync(int count);
+        /// <summary>The most liked villages of GameClock week <paramref name="week"/>, most likes first.</summary>
+        Task<List<PublicVillage>> ListTopVillagesAsync(int week, int count);
+
+        /// <summary>Leaves (or updates) the current player's visit record on someone's village.</summary>
+        Task<bool> WriteVisitAsync(VisitRecord visit);
+        /// <summary>Every visitor's record on <paramref name="villageId"/> (the owner reads their own).</summary>
+        Task<List<VisitRecord>> ListVisitsAsync(string villageId);
     }
 }

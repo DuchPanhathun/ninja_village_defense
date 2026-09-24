@@ -10,7 +10,8 @@ namespace NinjaVillage.Systems.Backend
     /// Backend used in the Editor and whenever Firebase is unavailable: the local save is the only copy,
     /// the device clock is "server time", Remote Config returns its defaults, analytics are printed
     /// (when verbose) instead of sent, and the leaderboard shows only the local player's own best run.
-    /// Published villages are kept in memory for the session, so visiting can be tried in the Editor.
+    /// Published villages and visits (likes, gifts, waterings) are kept in memory for the session, so visiting
+    /// and the social features can be tried in the Editor.
     /// The game stays fully playable; screens show an "Offline" state.
     /// </summary>
     public sealed class OfflineBackendProvider : IBackendProvider
@@ -18,6 +19,7 @@ namespace NinjaVillage.Systems.Backend
         public bool VerboseAnalytics;
 
         private readonly Dictionary<string, PublicVillage> _villages = new();
+        private readonly Dictionary<string, Dictionary<string, VisitRecord>> _visits = new();
 
         public string Name => "Offline";
         public bool IsOnline => false;
@@ -74,6 +76,29 @@ namespace NinjaVillage.Systems.Backend
 
         public Task<PublicVillage> LoadVillageAsync(string userId) =>
             Task.FromResult(userId != null && _villages.TryGetValue(userId, out var village) ? village : null);
+
+        public Task<List<PublicVillage>> ListTopVillagesAsync(int week, int count)
+        {
+            var list = new List<PublicVillage>();
+            foreach (var village in _villages.Values)
+                if (village.LikesWeek == week && village.Likes > 0) list.Add(village);
+            list.Sort((a, b) => b.Likes.CompareTo(a.Likes));
+            if (list.Count > count) list.RemoveRange(count, list.Count - count);
+            return Task.FromResult(list);
+        }
+
+        public Task<bool> WriteVisitAsync(VisitRecord visit)
+        {
+            if (visit == null || string.IsNullOrEmpty(visit.VillageId) || string.IsNullOrEmpty(visit.VisitorId) || visit.VillageId == visit.VisitorId)
+                return Task.FromResult(false);
+            if (!_visits.TryGetValue(visit.VillageId, out var byVisitor)) _visits[visit.VillageId] = byVisitor = new Dictionary<string, VisitRecord>();
+            byVisitor[visit.VisitorId] = visit;
+            return Task.FromResult(true);
+        }
+
+        public Task<List<VisitRecord>> ListVisitsAsync(string villageId) =>
+            Task.FromResult(villageId != null && _visits.TryGetValue(villageId, out var byVisitor)
+                ? new List<VisitRecord>(byVisitor.Values) : new List<VisitRecord>());
 
         public Task<List<PublicVillage>> ListVillagesAsync(int count)
         {

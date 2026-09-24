@@ -40,6 +40,9 @@ namespace NinjaVillage.Systems.Backend
                 ChaptersCleared = snapshot.ChaptersCleared,
                 AchievementTiers = snapshot.AchievementTiers,
                 SnapshotJson = UnityEngine.JsonUtility.ToJson(snapshot),
+                Likes = save.Social != null ? save.Social.Likes : 0,
+                LikesWeek = save.Social != null ? save.Social.LikesWeek : -1,
+                RankKey = save.Social != null && save.Social.LikesWeek >= 0 ? Social.SocialRules.RankKey(save.Social.LikesWeek, save.Social.Likes) : 0,
             };
         }
 

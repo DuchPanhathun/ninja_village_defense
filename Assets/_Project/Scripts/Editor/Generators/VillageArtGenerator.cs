@@ -201,6 +201,20 @@ namespace NinjaVillage.EditorTools.Generators
             }
             else Debug.LogWarning("[VillageArt] Missing sprite Decor/deco_koi_pond.");
 
+            // The weekly Best Village trophy (EPIC 24 Phase 6): never sold, only won.
+            var trophy = Sprite("Decor/deco_trophy_gold");
+            if (trophy != null)
+            {
+                var definition = ContentGen.CreateOrLoad<DecorationDefinition>($"{DecorFolder}/Decoration_best_village_trophy.asset");
+                ContentGen.Set(definition,
+                    ("id", "best_village_trophy"), ("displayName", "Best Village Trophy"),
+                    ("description", "A golden statue for one of the week's three most liked villages. Show it off!"),
+                    ("icon", trophy), ("category", (int)DecorationCategory.Statues), ("frames", new List<object> { trophy }), ("fps", 6f),
+                    ("currency", (int)CurrencyType.Coins), ("price", 1000), ("radius", 0.9f), ("giftOnly", true));
+                definitions.Add(definition);
+            }
+            else Debug.LogWarning("[VillageArt] Missing sprite Decor/deco_trophy_gold.");
+
             var catalog = ContentGen.CreateOrLoad<DecorationCatalog>($"{ContentGen.CatalogRoot}/DecorationCatalog.asset");
             catalog.EditorSetItems(definitions);
             Debug.Log($"[VillageArt] {definitions.Count} decorations.");

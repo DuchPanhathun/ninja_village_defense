@@ -103,6 +103,7 @@ namespace NinjaVillage.Systems.Backend
                 var save = SaveService.Data;
                 await Provider.WritePublicProfileAsync(user.UserId, save.Profile.DisplayName, BackendRules.Summarize(save));
                 await PublishVillageAsync(user.UserId);
+                _ = Social.SocialService.RefreshAsync(force: true); // visitors' likes, gifts and help since last time
 
                 SetStatus(Provider.IsOnline ? BackendStatus.Online : BackendStatus.Offline,
                     Provider.IsOnline ? "Online — progress backed up" : "Offline — progress is saved on this device");
@@ -189,10 +190,21 @@ namespace NinjaVillage.Systems.Backend
         {
             if (string.IsNullOrEmpty(userId)) return;
             var village = BackendRules.BuildPublicVillage(SaveService.Data, userId);
-            string key = village.DisplayName + "|" + village.SnapshotJson;
+            string key = $"{village.DisplayName}|{village.Likes}|{village.LikesWeek}|{village.SnapshotJson}";
             if (key == _publishedVillage) return;
             if (await Provider.WriteVillageAsync(village)) _publishedVillage = key;
         }
+
+        /// <summary>Republishes this player's village now (e.g. when its weekly likes changed).</summary>
+        public static Task PublishVillageNowAsync()
+        {
+            var user = Provider?.CurrentUser;
+            return Instance != null && user != null ? Instance.PublishVillageAsync(user.UserId) : Task.CompletedTask;
+        }
+
+        /// <summary>This week's most liked villages (the Best Village ranking).</summary>
+        public static Task<List<PublicVillage>> ListTopVillagesAsync(int count) =>
+            Provider != null ? Provider.ListTopVillagesAsync(GameClock.ThisWeek, count) : Task.FromResult(new List<PublicVillage>());
 
         /// <summary>Someone's published village (null when offline, unknown, or not published yet).</summary>
         public static Task<PublicVillage> LoadVillageAsync(string userId) =>
