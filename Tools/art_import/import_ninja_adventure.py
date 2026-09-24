@@ -249,41 +249,91 @@ def monster_right(rel):
     return dict(idle=walk[:1], walk=walk)
 
 
-def import_heroes():
-    F = "Characters/Heroes"
+def hero_frames():
+    """hero id -> (state -> frames, source note). Shared by the heroes and their skins."""
+    heroes = OrderedDict()
     for hero, char, sheet, tint in [("assassin", "NinjaDark", "SpriteSheet.png", purple),
                                     ("samurai", "SamuraiRed", "redsamurai.png", None),
                                     ("monk", "Monk2", "SpriteSheet.png", None)]:
         s = std_right(char, sheet)
-        hurt = ai_frames(f"heroes/hero_{hero}_hurt", first=1)       # frame 0 is the pack's idle pose
         fix = tint or (lambda im: im)
-        out = []
-        out += save_frames([fix(f) for f in s["idle"]], F, f"hero_{hero}_idle")
-        out += save_frames([fix(f) for f in s["walk"]], F, f"hero_{hero}_run")
-        out += save_frames([fix(f) for f in s["attack"]], F, f"hero_{hero}_attack")
-        out += save_frames([fix(f) for f in hurt], F, f"hero_{hero}_hurt")
-        out += save_frames([fix(f) for f in s["dead"]], F, f"hero_{hero}_death")
+        states = OrderedDict(idle=s["idle"], run=s["walk"], attack=s["attack"],
+                             hurt=ai_frames(f"heroes/hero_{hero}_hurt", first=1),   # frame 0 is the pack's idle pose
+                             death=s["dead"])
+        states = OrderedDict((k, [fix(f) for f in v]) for k, v in states.items())
         note = " (recoloured purple)" if tint else ""
-        record("Heroes", f"{hero.title()}", f"`Actor/Character/{char}`{note}; hurt: AI (PixelLab, animated from the pack sprite)", out)
+        heroes[hero] = (states, f"`Actor/Character/{char}`{note}; hurt: AI (PixelLab, animated from the pack sprite)")
 
     # Beast Ninja: the pack's only fully animated character, 32x32 cells, column 3 faces right.
     base = "Actor/CharacterAnimated/NinjaGreen/Separate"
-    out = []
-    out += save_frames(column(load(f"{base}/Idle.png"), 3, 32, 32), F, "hero_beastninja_idle")
-    out += save_frames(column(load(f"{base}/Walk.png"), 3, 32, 32), F, "hero_beastninja_run")
-    out += save_frames(column(load(f"{base}/Attack.png"), 3, 32, 32), F, "hero_beastninja_attack")
-    out += save_frames(column(load(f"{base}/Hit.png"), 3, 32, 32), F, "hero_beastninja_hurt")
-    out += save_frames(column(load(f"{base}/Dead.png"), 0, 32, 32), F, "hero_beastninja_death")
-    record("Heroes", "Beast Ninja", f"`{base}` (32x32 cells, so frames are 256 px)", out)
+    heroes["beastninja"] = (OrderedDict(
+        idle=column(load(f"{base}/Idle.png"), 3, 32, 32), run=column(load(f"{base}/Walk.png"), 3, 32, 32),
+        attack=column(load(f"{base}/Attack.png"), 3, 32, 32), hurt=column(load(f"{base}/Hit.png"), 3, 32, 32),
+        death=column(load(f"{base}/Dead.png"), 0, 32, 32)), f"`{base}` (32x32 cells, so frames are 256 px)")
 
     # Mage Ninja: AI (PixelLab); frame 0 of each animation is the base pose.
-    out = []
-    out += save_frames(ai_frames("heroes/hero_mageninja_idle"), F, "hero_mageninja_idle")
-    out += save_frames(ai_frames("heroes/hero_mageninja_walk"), F, "hero_mageninja_run")
-    out += save_frames(ai_frames("heroes/hero_mageninja_attack"), F, "hero_mageninja_attack")
-    out += save_frames(ai_frames("heroes/hero_mageninja_hurt", first=1), F, "hero_mageninja_hurt")
-    out += save_frames(ai_frames("heroes/hero_mageninja_death"), F, "hero_mageninja_death")
-    record("Heroes", "Mage Ninja", "AI (PixelLab): `hero_mageninja_*`", out)
+    heroes["mageninja"] = (OrderedDict(
+        idle=ai_frames("heroes/hero_mageninja_idle"), run=ai_frames("heroes/hero_mageninja_walk"),
+        attack=ai_frames("heroes/hero_mageninja_attack"), hurt=ai_frames("heroes/hero_mageninja_hurt", first=1),
+        death=ai_frames("heroes/hero_mageninja_death")), "AI (PixelLab): `hero_mageninja_*`")
+    return heroes
+
+
+def import_heroes():
+    F = "Characters/Heroes"
+    heroes = hero_frames()
+    for hero, (states, source) in heroes.items():
+        out = []
+        for state, frames in states.items():
+            out += save_frames(frames, F, f"hero_{hero}_{state}")
+        record("Heroes", {"beastninja": "Beast Ninja", "mageninja": "Mage Ninja"}.get(hero, hero.title()), source, out)
+    import_skins(heroes)
+
+
+# Skins recolour a hero's costume (one hue band) toward the tint on the skin's asset in Data/Store/Skins.
+# band = source hues in degrees (wraps past 360), hue = target hue, sat/val = multipliers.
+SKINS = [("skin_assassin_crimson", "assassin", (240, 320), 355, 1.15, 1.0),
+         ("skin_assassin_sakura", "assassin", (240, 320), 330, 0.55, 1.4),
+         ("skin_samurai_oni", "samurai", (330, 15), 355, 1.0, 0.6),
+         ("skin_samurai_gold", "samurai", (330, 15), 45, 1.0, 1.2),
+         ("skin_monk_jade", "monk", (330, 15), 145, 0.9, 0.95),
+         ("skin_beast_shadow", "beastninja", (50, 160), 265, 0.6, 0.65),
+         ("skin_mage_frost", "mageninja", (180, 260), 195, 0.55, 1.3)]
+
+
+def recolour(img, band, hue, sat, val):
+    lo, hi = band
+    out = img.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if not a:
+                continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            deg = h * 360
+            inside = lo <= deg <= hi if lo < hi else (deg >= lo or deg <= hi)
+            if v < 0.16 or s < 0.2 or not inside:
+                continue                                     # outline, greys, skin and eyes keep their colour
+            nr, ng, nb = colorsys.hsv_to_rgb(hue / 360, min(1, s * sat), min(1, v * val))
+            px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
+    return out
+
+
+EXTRA_PASSES = {"skin_samurai_oni": ((30, 60), 350, 0.5, 0.45)}   # oni: the straw hat turns charcoal red too
+
+
+def import_skins(heroes):
+    F = "Characters/Heroes"
+    for skin, hero, band, hue, sat, val in SKINS:
+        states, _ = heroes[hero]
+        out = []
+        for state, frames in states.items():
+            frames = [recolour(f, band, hue, sat, val) for f in frames]
+            if skin in EXTRA_PASSES:
+                frames = [recolour(f, *EXTRA_PASSES[skin]) for f in frames]
+            out += save_frames(frames, F, f"{skin}_{state}")
+        record("Skins (recolours, no AI)", skin, f"hero `{hero}` recoloured toward the tint in `Data/Store/Skins/Skin_{skin}.asset`", out)
 
 
 def import_enemies():
@@ -403,7 +453,8 @@ def import_icons():
                   talent="talents", blessing="shrine blessings (6)", petgear="pet gear", crate="loot crates (3)")
     for kind, out in groups.items():
         record("AI icons", labels.get(kind, kind), "AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md)", out)
-    missing.append(("AI icons", "talent scholar", "not generated yet"))
+    if "icon_talent_scholar" not in groups.get("talent", []):
+        missing.append(("AI icons", "talent scholar", "not generated yet"))
 
     # Logo emblem for the title screen.
     out = [save(load_ai("store/logo_emblem.png"), F, "logo_emblem")]
@@ -427,7 +478,166 @@ def import_menu_icons():
         record("Menu icons", name, ai_src or f"`{rel}` (reused)", out)
     daily = strip(load("Items/Treasure/LittleTreasureChest.png"), 16, 16)[0]
     record("Menu icons", "daily", "`Items/Treasure/LittleTreasureChest.png` frame 0 (reused)", [save(daily, F, "menu_daily")])
-    missing.append(("Menu icons", "village", "no house icon in the pack; generate `menu_village` (prompt in AI_ASSET_PROMPTS.md)"))
+    if os.path.exists(os.path.join(AI, "icons", "menu_village.png")):
+        record("Menu icons", "village", "AI (PixelLab)", [save(load_ai("icons/menu_village.png"), F, "menu_village")])
+    else:
+        missing.append(("Menu icons", "village", "no house icon in the pack; generate `menu_village` (prompt in AI_ASSET_PROMPTS.md)"))
+
+
+# --------------------------------------------------------------------------------------------------
+# Composites built from pack art (no AI): achievement badges and store items, 32x32
+# --------------------------------------------------------------------------------------------------
+OUTLINE = (20, 27, 27, 255)            # #141b1b, the pack's outline colour
+
+
+def hexc(h):
+    return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5)) + (255,)
+
+
+def place(canvas, img, cx, cy):
+    """Paste img (trimmed) centred on (cx, cy)."""
+    img = trim(img)
+    canvas.alpha_composite(img, (cx - img.width // 2, cy - img.height // 2))
+
+
+def hue_shift(img, hue, sat=1.0, val=1.0):
+    return recolour(img, (0, 360), hue, sat, val)
+
+
+def medal(inner=hexc("#3b3643")):
+    """32x32 gold medal on a red ribbon, drawn pixel by pixel in the pack's palette."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    px = img.load()
+    red, red_dark = hexc("#e0394c"), hexc("#8f3e56")
+    for y in range(20, 32):                            # two ribbon tails with a notched end
+        for side, x0 in ((-1, 9), (1, 17)):
+            for x in range(x0, x0 + 6):
+                notch = y >= 29 and abs(x - (x0 + 2.5)) < (y - 28)
+                if not notch:
+                    px[x, y] = red if (x - x0) in (1, 2, 3, 4) else red_dark
+    for y in range(20, 32):                            # ribbon outline
+        for x in range(32):
+            if px[x, y][3] and any(not (0 <= x + dx < 32 and 0 <= y + dy < 32) or not px[x + dx, y + dy][3]
+                                   for dx, dy in ((1, 0), (-1, 0), (0, 1))):
+                px[x, y] = OUTLINE
+    cx, cy = 15.5, 13.5
+    rim_light, rim, rim_dark = hexc("#ffe18d"), hexc("#f1c471"), hexc("#d78b4a")
+    for y in range(28):
+        for x in range(32):
+            d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+            if d <= 13.4:
+                if d > 12.3:
+                    px[x, y] = OUTLINE
+                elif d > 10.2:
+                    px[x, y] = rim_light if (x + y) < 26 else rim_dark if (x + y) > 34 else rim
+                elif d > 9.3:
+                    px[x, y] = OUTLINE
+                else:
+                    px[x, y] = inner
+    return img
+
+
+ACHIEVEMENTS = [("survivor", "Items/Object/Hourglass.png"), ("smith", "Items/Tool/Anvil.png"),
+                ("veteran", "Items/Weapons/Katana/Sprite.png"), ("treasure", ("Items/Treasure/LittleTreasureChest.png", 1)),
+                ("sensei", "Items/Object/Book.png"), ("champion", "Items/Treasure/GoldCup.png"),
+                ("collector", "Items/Resource/GemRed.png"), ("boss_hunter", "Items/Weapons/Bone/Sprite.png"),
+                ("wave_breaker", "Items/Resource/Water.png"), ("demon_slayer", "Items/Weapons/BigSword/Sprite.png"),
+                ("diligent", "Items/Other/Stamp.png"), ("scholar", "Items/Scroll/Scroll.png"),
+                ("architect", "Items/Tool/Hammer.png"), ("loyal", "Items/Potion/Heart.png"), ("beast_friend", "Items/Food/Meat.png")]
+
+
+def item(src):
+    if isinstance(src, tuple):                       # (strip, frame index) for 2-frame items like the chest
+        rel, i = src
+        return strip(load(rel), 16, 16)[i]
+    return load(src)
+
+
+def import_achievements():
+    out = []
+    for name, src in ACHIEVEMENTS:
+        badge = medal()
+        place(badge, item(src), 16, 14)
+        out.append(save(badge, "UI/Icons", f"icon_achievement_{name}"))
+    record("Achievement badges (composites, no AI)", "15 achievements",
+           "gold medal drawn in the pack palette + a pack item: " + ", ".join(
+               f"{n}={s if isinstance(s, str) else s[0]}".replace("Items/", "") for n, s in ACHIEVEMENTS), out)
+
+
+def text_ad():
+    """'AD' in a 3x5 pixel font, drawn 2x: for the remove-ads icon."""
+    glyphs = {"A": [".#.", "#.#", "###", "#.#", "#.#"], "D": ["##.", "#.#", "#.#", "#.#", "##."]}
+    img = Image.new("RGBA", (14, 10), (0, 0, 0, 0))
+    for gi, ch in enumerate("AD"):
+        for y, row in enumerate(glyphs[ch]):
+            for x, c in enumerate(row):
+                if c == "#":
+                    for dx in range(2):
+                        for dy in range(2):
+                            img.putpixel((gi * 8 + x * 2 + dx, y * 2 + dy), (255, 255, 255, 255))
+    return img
+
+
+def import_store_items():
+    F = "UI/Icons"
+    gem = hue_shift(load("Items/Resource/GemRed.png"), 200, 1.0, 1.05)         # faceted gem in light blue, like "Gems" in the UI
+    coin = load("Items/Treasure/GoldCoin.png")
+    chest_open = strip(load("Items/Treasure/LittleTreasureChest.png"), 16, 16)[1]
+    sparkle = strip(load("FX/Particle/Spark.png"), 10, 8)[0]
+    petals = strip(load("FX/Particle/LeafPink.png"), 12, 7)
+    leaves = [hue_shift(f, 25, 1.1, 1.0) for f in strip(load("FX/Particle/Leaf.png"), 12, 7)]
+
+    def canvas():
+        return Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+
+    items = OrderedDict()
+    c = canvas(); place(c, gem, 11, 18); place(c, gem, 20, 15); items["gems_100"] = c
+    c = canvas()
+    for x, y in [(8, 22), (16, 22), (24, 22), (12, 15), (20, 15), (16, 8)]:
+        place(c, gem, x, y)
+    items["gems_550"] = c
+    c = canvas(); place(c, chest_open, 16, 21)
+    for x, y in [(10, 11), (16, 8), (22, 11)]:
+        place(c, gem, x, y)
+    place(c, sparkle, 27, 5); items["gems_1200"] = c
+    c = canvas(); place(c, load("Items/Object/Bag.png"), 14, 17); place(c, coin, 25, 24); place(c, coin, 21, 27)
+    place(c, gem, 25, 11); items["starter_pack"] = c
+    c = canvas()
+    screen = Image.new("RGBA", (24, 18), OUTLINE)
+    screen.paste(hexc("#4a5270"), (1, 1, 23, 17))
+    place(c, screen, 16, 16)
+    px = c.load()
+    for y in range(32):                                  # red "no" circle with a slash, drawn under the letters
+        for x in range(32):
+            d = ((x - 15.5) ** 2 + (y - 15.5) ** 2) ** 0.5
+            if 12.2 < d <= 14.8 or (d <= 13 and abs((x - 15.5) - (y - 15.5)) <= 1.2):
+                px[x, y] = hexc("#e0394c")
+    c.alpha_composite(text_ad(), (9, 11))
+    items["remove_ads"] = c
+    c = canvas(); place(c, hue_shift(load("Items/Scroll/ScrollEmpty.png"), 45, 1.2, 1.1), 16, 17)
+    place(c, sparkle, 6, 6); place(c, sparkle, 26, 9); place(c, load("Items/Treasure/GoldKey.png"), 22, 25)
+    items["battle_pass_premium"] = c
+    c = canvas(); place(c, hue_shift(load("Items/Object/MoneyBag.png"), 330, 0.6, 1.25), 14, 16); place(c, coin, 25, 25)
+    place(c, coin, 21, 28); place(c, petals[0], 25, 7); place(c, petals[2], 6, 26); items["offer_blossom_coins"] = c
+    c = canvas(); place(c, hue_shift(load("Items/Object/Bag.png"), 330, 0.6, 1.25), 16, 18)
+    for (x, y), p in zip([(6, 6), (25, 8), (27, 25), (5, 24)], petals):
+        place(c, p, x, y)
+    items["offer_sakura_bundle"] = c
+    c = canvas(); oni = load("Actor/Character/DemonRed/SpriteSheet.png").crop((0, 0, 16, 16))
+    place(c, oni, 12, 12); place(c, load("Items/Weapons/Katana/Sprite.png"), 25, 16); place(c, load("Items/Potion/LifePot.png"), 10, 25)
+    items["offer_oni_kit"] = c
+    c = canvas(); place(c, load("Items/Object/CrateEmpty.png"), 16, 19)
+    for (x, y), lf in zip([(7, 7), (25, 6), (27, 27), (5, 26)], leaves):
+        place(c, lf, x, y)
+    items["offer_autumn_training"] = c
+    c = canvas(); lantern = load("Actor/Monster/LanternRed/SpriteSheet.png").crop((0, 0, 16, 16))
+    draw = ImageDraw.Draw(c); draw.line([(2, 6), (16, 9), (30, 6)], fill=hexc("#816855"))
+    place(c, lantern, 8, 17); place(c, lantern, 24, 17); place(c, sparkle, 16, 25)
+    items["offer_lantern_pack"] = c
+
+    out = [save(img, F, f"store_{name}") for name, img in items.items()]
+    record("Store items (composites, no AI)", "gem packs, starter pack, remove ads, battle pass, 5 offers",
+           "pack items combined (gems recoloured light blue; pink/gold/orange recolours for the themed offers)", out)
 
 
 def import_projectiles():
@@ -703,8 +913,8 @@ def write_docs():
         lines.append("")
     lines += ["## MISSING", "", "| Area | Item | Note |", "|---|---|---|"]
     lines += [f"| {a} | {i} | {n} |" for a, i, n in missing]
-    lines += ["", "Also still to make (prompts in `Tools/art_import/AI_ASSET_PROMPTS.md`): 15 achievement badges,",
-              "11 store items, 5 event/season banners.", ""]
+    lines += ["", "Also still to make with AI (prompts in `Tools/art_import/AI_ASSET_PROMPTS.md`): 5 event/season banners.",
+              "The achievement badges and store items are composites of pack art; AI versions are optional.", ""]
     with open(os.path.join(OUT, "ART_MAPPING.md"), "w") as f:
         f.write("\n".join(lines))
 
@@ -719,14 +929,15 @@ Created by [Pixel-boy](https://pixel-boy.itch.io/) and [AAA](https://www.instagr
 Released under Creative Commons Zero (CC0 1.0): free for any use, including commercial; attribution is
 not required but appreciated. Support the author: https://www.patreon.com/pixelarchipel
 
-Used for: characters, monsters, bosses, animals, items, UI, effects, tilesets and village props.
+Used for: characters, monsters, bosses, animals, items, UI, effects, tilesets and village props. The hero
+skins, achievement badges and store items are recolours and composites of pack art.
 
 ## AI-generated art
 
 Some sprites were generated for this game, in the pack's style, with:
 - [PixelLab](https://www.pixellab.ai): Spider Queen and Nine-Tailed Fox bosses, wolf enemy, Mage Ninja,
   fox and hawk pets, hero hurt frames, castle, chain sickle and three equipment icons, app icon, logo,
-  main menu background, store feature graphic.
+  main menu background, store feature graphic, village menu icon, Scholar talent icon.
 - [Retro Diffusion](https://www.retrodiffusion.ai): equipment, skill, ultimate and evolution icons.
 - [Ludo.ai](https://ludo.ai): talent, blessing, pet gear, crate, evolution and menu icons.
 
@@ -799,6 +1010,8 @@ def main():
     import_portraits()
     import_icons()
     import_menu_icons()
+    import_achievements()
+    import_store_items()
     import_projectiles()
     import_pickups()
     import_ui()

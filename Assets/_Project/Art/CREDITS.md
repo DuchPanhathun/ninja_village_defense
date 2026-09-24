@@ -9,14 +9,15 @@ Created by [Pixel-boy](https://pixel-boy.itch.io/) and [AAA](https://www.instagr
 Released under Creative Commons Zero (CC0 1.0): free for any use, including commercial; attribution is
 not required but appreciated. Support the author: https://www.patreon.com/pixelarchipel
 
-Used for: characters, monsters, bosses, animals, items, UI, effects, tilesets and village props.
+Used for: characters, monsters, bosses, animals, items, UI, effects, tilesets and village props. The hero
+skins, achievement badges and store items are recolours and composites of pack art.
 
 ## AI-generated art
 
 Some sprites were generated for this game, in the pack's style, with:
 - [PixelLab](https://www.pixellab.ai): Spider Queen and Nine-Tailed Fox bosses, wolf enemy, Mage Ninja,
   fox and hawk pets, hero hurt frames, castle, chain sickle and three equipment icons, app icon, logo,
-  main menu background, store feature graphic.
+  main menu background, store feature graphic, village menu icon, Scholar talent icon.
 - [Retro Diffusion](https://www.retrodiffusion.ai): equipment, skill, ultimate and evolution icons.
 - [Ludo.ai](https://ludo.ai): talent, blessing, pet gear, crate, evolution and menu icons.
 

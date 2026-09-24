@@ -15,6 +15,18 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | Beast Ninja | `Actor/CharacterAnimated/NinjaGreen/Separate` (32x32 cells, so frames are 256 px) | `hero_beastninja_idle_0..3`, `hero_beastninja_run_0..3`, `hero_beastninja_attack_0..3`, `hero_beastninja_hurt_0..1`, `hero_beastninja_death_0..1` |
 | Mage Ninja | AI (PixelLab): `hero_mageninja_*` | `hero_mageninja_idle_0..4`, `hero_mageninja_run_0..4`, `hero_mageninja_attack_0..4`, `hero_mageninja_hurt_0..3`, `hero_mageninja_death_0..4` |
 
+## Skins (recolours, no AI)
+
+| Item | Source | Output files |
+|---|---|---|
+| skin_assassin_crimson | hero `assassin` recoloured toward the tint in `Data/Store/Skins/Skin_skin_assassin_crimson.asset` | `skin_assassin_crimson_idle_0`, `skin_assassin_crimson_run_0..3`, `skin_assassin_crimson_attack_0`, `skin_assassin_crimson_hurt_0..3`, `skin_assassin_crimson_death_0` |
+| skin_assassin_sakura | hero `assassin` recoloured toward the tint in `Data/Store/Skins/Skin_skin_assassin_sakura.asset` | `skin_assassin_sakura_idle_0`, `skin_assassin_sakura_run_0..3`, `skin_assassin_sakura_attack_0`, `skin_assassin_sakura_hurt_0..3`, `skin_assassin_sakura_death_0` |
+| skin_samurai_oni | hero `samurai` recoloured toward the tint in `Data/Store/Skins/Skin_skin_samurai_oni.asset` | `skin_samurai_oni_idle_0`, `skin_samurai_oni_run_0..3`, `skin_samurai_oni_attack_0`, `skin_samurai_oni_hurt_0..3`, `skin_samurai_oni_death_0` |
+| skin_samurai_gold | hero `samurai` recoloured toward the tint in `Data/Store/Skins/Skin_skin_samurai_gold.asset` | `skin_samurai_gold_idle_0`, `skin_samurai_gold_run_0..3`, `skin_samurai_gold_attack_0`, `skin_samurai_gold_hurt_0..3`, `skin_samurai_gold_death_0` |
+| skin_monk_jade | hero `monk` recoloured toward the tint in `Data/Store/Skins/Skin_skin_monk_jade.asset` | `skin_monk_jade_idle_0`, `skin_monk_jade_run_0..3`, `skin_monk_jade_attack_0`, `skin_monk_jade_hurt_0..3`, `skin_monk_jade_death_0` |
+| skin_beast_shadow | hero `beastninja` recoloured toward the tint in `Data/Store/Skins/Skin_skin_beast_shadow.asset` | `skin_beast_shadow_idle_0..3`, `skin_beast_shadow_run_0..3`, `skin_beast_shadow_attack_0..3`, `skin_beast_shadow_hurt_0..1`, `skin_beast_shadow_death_0..1` |
+| skin_mage_frost | hero `mageninja` recoloured toward the tint in `Data/Store/Skins/Skin_skin_mage_frost.asset` | `skin_mage_frost_idle_0..4`, `skin_mage_frost_run_0..4`, `skin_mage_frost_attack_0..4`, `skin_mage_frost_hurt_0..3`, `skin_mage_frost_death_0..4` |
+
 ## Enemies
 
 | Item | Source | Output files |
@@ -96,7 +108,7 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | evolutions (4) | AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md) | `icon_evolution_firestorm`, `icon_evolution_invisible_assassin`, `icon_evolution_shadow_army`, `icon_evolution_thunder_kunai` |
 | pet gear | AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md) | `icon_petgear_anklet`, `icon_petgear_bell`, `icon_petgear_collar`, `icon_petgear_ember` |
 | skills the pack lacks (5) | AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md) | `icon_skill_attack_speed`, `icon_skill_dodge_chance`, `icon_skill_poison_kunai`, `icon_skill_triple_throw`, `icon_skill_xp_magnet` |
-| talents | AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md) | `icon_talent_evasion`, `icon_talent_iron_body`, `icon_talent_keen_eye`, `icon_talent_lethal_focus`, `icon_talent_lucky_star`, `icon_talent_magnetism`, `icon_talent_meditation`, `icon_talent_merchant`, `icon_talent_quick_hands`, `icon_talent_sharpened_blades`, `icon_talent_spirit_ward`, `icon_talent_stone_skin`, `icon_talent_storm_heart`, `icon_talent_swift_feet` |
+| talents | AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md) | `icon_talent_evasion`, `icon_talent_iron_body`, `icon_talent_keen_eye`, `icon_talent_lethal_focus`, `icon_talent_lucky_star`, `icon_talent_magnetism`, `icon_talent_meditation`, `icon_talent_merchant`, `icon_talent_quick_hands`, `icon_talent_scholar`, `icon_talent_sharpened_blades`, `icon_talent_spirit_ward`, `icon_talent_stone_skin`, `icon_talent_storm_heart`, `icon_talent_swift_feet` |
 | ultimates (3) | AI: Retro Diffusion / Ludo / PixelLab (see GENERATION_LOG.md) | `icon_ultimate_dragon_slash`, `icon_ultimate_heavenly_storm`, `icon_ultimate_shadow_clone_army` |
 
 ## Store and title
@@ -126,6 +138,19 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | pets | `Actor/Animal/CatOrange/Faceset.png` (reused) | `menu_pets` |
 | profile | `Actor/Character/NinjaBlue/Faceset.png` (reused) | `menu_profile` |
 | daily | `Items/Treasure/LittleTreasureChest.png` frame 0 (reused) | `menu_daily` |
+| village | AI (PixelLab) | `menu_village` |
+
+## Achievement badges (composites, no AI)
+
+| Item | Source | Output files |
+|---|---|---|
+| 15 achievements | gold medal drawn in the pack palette + a pack item: survivor=Object/Hourglass.png, smith=Tool/Anvil.png, veteran=Weapons/Katana/Sprite.png, treasure=Treasure/LittleTreasureChest.png, sensei=Object/Book.png, champion=Treasure/GoldCup.png, collector=Resource/GemRed.png, boss_hunter=Weapons/Bone/Sprite.png, wave_breaker=Resource/Water.png, demon_slayer=Weapons/BigSword/Sprite.png, diligent=Other/Stamp.png, scholar=Scroll/Scroll.png, architect=Tool/Hammer.png, loyal=Potion/Heart.png, beast_friend=Food/Meat.png | `icon_achievement_survivor`, `icon_achievement_smith`, `icon_achievement_veteran`, `icon_achievement_treasure`, `icon_achievement_sensei`, `icon_achievement_champion`, `icon_achievement_collector`, `icon_achievement_boss_hunter`, `icon_achievement_wave_breaker`, `icon_achievement_demon_slayer`, `icon_achievement_diligent`, `icon_achievement_scholar`, `icon_achievement_architect`, `icon_achievement_loyal`, `icon_achievement_beast_friend` |
+
+## Store items (composites, no AI)
+
+| Item | Source | Output files |
+|---|---|---|
+| gem packs, starter pack, remove ads, battle pass, 5 offers | pack items combined (gems recoloured light blue; pink/gold/orange recolours for the themed offers) | `store_gems_100..1200`, `store_starter_pack`, `store_remove_ads`, `store_battle_pass_premium`, `store_offer_blossom_coins`, `store_offer_sakura_bundle`, `store_offer_oni_kit`, `store_offer_autumn_training`, `store_offer_lantern_pack` |
 
 ## Projectiles
 
@@ -274,9 +299,7 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | Portraits (extra) | boss Nine-Tailed Fox | AI character, the pack has no face for it |
 | Portraits (extra) | pet fox | AI character, the pack has no face for it |
 | Portraits (extra) | pet hawk | AI character, the pack has no face for it |
-| AI icons | talent scholar | not generated yet |
-| Menu icons | village | no house icon in the pack; generate `menu_village` (prompt in AI_ASSET_PROMPTS.md) |
 | Tiles | desert, dungeon, interior, pipes, logic, bed, hole tilesets | skipped: not used by this game (add to TILESETS if needed) |
 
-Also still to make (prompts in `Tools/art_import/AI_ASSET_PROMPTS.md`): 15 achievement badges,
-11 store items, 5 event/season banners.
+Also still to make with AI (prompts in `Tools/art_import/AI_ASSET_PROMPTS.md`): 5 event/season banners.
+The achievement badges and store items are composites of pack art; AI versions are optional.

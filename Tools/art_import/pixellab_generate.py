@@ -148,6 +148,14 @@ JOBS = [
          style={"outline": "single color black outline", "shading": "basic shading", "detail": "medium detail"},
          prompt="game logo emblem: two crossed kunai behind a large shuriken with a small red torii gate in the "
                 "centre, no text. " + STYLE),
+    dict(group="last", cat="icons", name="menu_village", kind="pixen", size=(32, 32),
+         style={"outline": "single color black outline", "detail": "medium detail"},
+         prompt="game menu icon: small Japanese village house with a red torii gate beside it, on a green rounded-square "
+                "tile with small white sparkles, thick dark outline around the tile, centered. " + STYLE),
+    dict(group="last", cat="icons", name="icon_talent_scholar", kind="pixen", size=(32, 32),
+         style={"outline": "single color black outline", "detail": "medium detail"},
+         prompt="skill icon: open paper scroll with glowing golden writing, on a purple rounded-square tile with small "
+                "white sparkles, thick dark outline around the tile, centered. " + STYLE),
     dict(group="final", cat="store", name="store_feature_graphic", kind="pixflux", size=(256, 124), keep_background=True,
          style={"outline": "single color black outline", "shading": "basic shading", "detail": "medium detail"},
          prompt="wide game banner: ninja hero defending a village gate against a horde of cute demons and a giant "

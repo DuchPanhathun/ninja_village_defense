@@ -240,6 +240,20 @@ paw print with a heart <suffix>
 Order: survivor, smith, veteran, treasure, sensei, champion, collector, boss_hunter, wave_breaker,
 demon_slayer, diligent, scholar, architect, loyal, beast_friend.
 
+### Portraits for the AI characters (38×38) → `portrait_<kind>_<name>.png`
+The pack has a face portrait (`Faceset.png`, 38×38) for its own characters; these six are AI characters,
+so they have none. Upload a pack faceset (e.g. `Actor/Character/NinjaRed/Faceset.png`) as the style reference.
+Suffix: `38x38 pixel art character portrait, head and shoulders filling the square, Ninja Adventure faceset style, 1px dark outline #141b1b, flat 2-3 tone shading, solid dark background, no anti-aliasing, no text`
+```
+blue ninja mage with a pointed blue wizard hat over a ninja mask and a blue scarf, calm eyes. <suffix>
+grey wolf demon with pointed ears, glowing red eyes, bared fangs. <suffix>
+demon spider queen with a golden crown, dark purple head, six glowing red eyes, fangs. <suffix>
+white and gold nine-tailed fox demon with red markings around narrow eyes, tails behind its head. <suffix>
+small cute orange fox with a white chest, big ears, happy face. <suffix>
+small brown hawk with a white chest and yellow beak, proud look. <suffix>
+```
+Order: hero_mageninja, enemy_wolf, boss_spiderqueen, boss_ninetailedfox, pet_fox, pet_hawk.
+
 ---
 
 ## 4. Store and marketing
