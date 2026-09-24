@@ -153,7 +153,8 @@ namespace NinjaVillage.EditorTools.Generators
                 ("villagerKeys", new[] { "npc_villager", "npc_woman", "npc_oldman", "npc_boy", "npc_villager2", "npc_oldwoman", "npc_villager3", "npc_master", "npc_villager4" }.Cast<object>().ToList()),
                 ("animalKeys", new[] { "animal_chicken", "animal_cat", "animal_dog", "animal_pig", "animal_cow", "animal_frog" }.Cast<object>().ToList()),
                 ("weaponRack", Sprite("Decor/deco_weapon_rack")),
-                ("talentTree", Sprite("Village/prop_bigtree_cherry")));
+                ("talentTree", Sprite("Village/prop_bigtree_cherry")),
+                ("noticeBoard", Sprite("Decor/deco_bench")));
         }
 
         private static void BuildDecorations()

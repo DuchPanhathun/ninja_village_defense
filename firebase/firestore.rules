@@ -32,5 +32,21 @@ service cloud.firestore {
         && request.resource.data.bestKills is int && request.resource.data.bestKills >= 0
         && request.resource.data.updatedAt == request.time;
     }
+
+    // Public villages (for visiting): everyone signed in can read; each player publishes only their own,
+    // with the expected fields, a bounded snapshot and the server's timestamp.
+    match /villages/{uid} {
+      allow read: if signedIn();
+      allow write: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['displayName', 'castleLevel', 'highestWave', 'chaptersCleared',
+                                                 'achievementTiers', 'snapshot', 'updatedAt'])
+        && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 16
+        && request.resource.data.castleLevel is int && request.resource.data.castleLevel >= 0 && request.resource.data.castleLevel <= 100
+        && request.resource.data.highestWave is int && request.resource.data.highestWave >= 0
+        && request.resource.data.chaptersCleared is int && request.resource.data.chaptersCleared >= 0
+        && request.resource.data.achievementTiers is int && request.resource.data.achievementTiers >= 0
+        && request.resource.data.snapshot is string && request.resource.data.snapshot.size() < 200000
+        && request.resource.data.updatedAt == request.time;
+    }
   }
 }

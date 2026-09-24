@@ -15,8 +15,9 @@ namespace NinjaVillage.Systems.Backend
     /// builds and the offline provider everywhere else, then on startup:
     /// initialize → anonymous sign-in → trusted server time (GameClock, blocks clock-change cheating
     /// on dailies) → Remote Config into <see cref="RemoteValues"/> → cloud-save reconcile
-    /// (<see cref="BackendRules.Decide"/>) → public profile. Afterwards every local save is uploaded,
-    /// throttled, and immediately when the app is backgrounded. Created automatically; persistent.
+    /// (<see cref="BackendRules.Decide"/>) → public profile and public village. Afterwards every local save
+    /// is uploaded (and the village re-published when it changed), throttled, and immediately when the app is
+    /// backgrounded. Created automatically; persistent.
     /// </summary>
     public class BackendService : MonoBehaviour
     {
@@ -32,6 +33,7 @@ namespace NinjaVillage.Systems.Backend
         private bool _uploadPending;
         private float _lastUploadTime = float.MinValue;
         private bool _uploading;
+        private string _publishedVillage;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -100,6 +102,7 @@ namespace NinjaVillage.Systems.Backend
 
                 var save = SaveService.Data;
                 await Provider.WritePublicProfileAsync(user.UserId, save.Profile.DisplayName, BackendRules.Summarize(save));
+                await PublishVillageAsync(user.UserId);
 
                 SetStatus(Provider.IsOnline ? BackendStatus.Online : BackendStatus.Offline,
                     Provider.IsOnline ? "Online — progress backed up" : "Offline — progress is saved on this device");
@@ -173,12 +176,31 @@ namespace NinjaVillage.Systems.Backend
                 };
                 if (await Provider.WriteSaveAsync(userId, snapshot)) LastCloudSyncUtc = DateTime.UtcNow;
                 else _uploadPending = true; // retry on the next interval
+                await PublishVillageAsync(userId);
             }
             finally
             {
                 _uploading = false;
             }
         }
+
+        /// <summary>Publishes this player's village for visitors when it changed since the last publish.</summary>
+        private async Task PublishVillageAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return;
+            var village = BackendRules.BuildPublicVillage(SaveService.Data, userId);
+            string key = village.DisplayName + "|" + village.SnapshotJson;
+            if (key == _publishedVillage) return;
+            if (await Provider.WriteVillageAsync(village)) _publishedVillage = key;
+        }
+
+        /// <summary>Someone's published village (null when offline, unknown, or not published yet).</summary>
+        public static Task<PublicVillage> LoadVillageAsync(string userId) =>
+            Provider != null ? Provider.LoadVillageAsync(userId) : Task.FromResult<PublicVillage>(null);
+
+        /// <summary>Recently active villages to visit, newest first.</summary>
+        public static Task<List<PublicVillage>> ListVillagesAsync(int count) =>
+            Provider != null ? Provider.ListVillagesAsync(count) : Task.FromResult(new List<PublicVillage>());
 
         /// <summary>Account screen "Link email": keeps the same uid, so the cloud save follows the player.</summary>
         public async Task<bool> LinkEmailAsync(string email, string password)

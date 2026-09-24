@@ -132,5 +132,18 @@ namespace NinjaVillage.Systems.Village
 
         [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => Target = null;
+
+        // A visit ends as soon as you go anywhere but the Village (menu, battle), however you leave.
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Register()
+        {
+            NinjaVillage.Core.Events.EventBus<GameFlow.SceneChangingEvent>.UnsubscribePersistent(OnSceneChanging);
+            NinjaVillage.Core.Events.EventBus<GameFlow.SceneChangingEvent>.SubscribePersistent(OnSceneChanging);
+        }
+
+        private static void OnSceneChanging(GameFlow.SceneChangingEvent evt)
+        {
+            if (evt.ToScene != GameFlow.SceneNames.Village) Target = null;
+        }
     }
 }

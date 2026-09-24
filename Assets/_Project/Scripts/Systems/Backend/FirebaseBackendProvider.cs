@@ -22,6 +22,8 @@ namespace NinjaVillage.Systems.Backend
     /// Firestore layout (see firebase/firestore.rules):
     /// <c>users/{uid}</c> { save, lastSavedTicks, version, updatedAt, progress fields, displayName }
     /// <c>leaderboard/{uid}</c> { displayName, bestWave, bestKills, updatedAt }
+    /// <c>villages/{uid}</c> { displayName, castleLevel, highestWave, chaptersCleared, achievementTiers, snapshot, updatedAt }
+    ///   — readable by every signed-in player, for visiting
     /// <c>server_time/{uid}</c> { t } — written with a server timestamp and read back for trusted time.
     /// </summary>
     public sealed class FirebaseBackendProvider : IBackendProvider
@@ -284,6 +286,80 @@ namespace NinjaVillage.Systems.Backend
                 Debug.LogWarning($"[Firebase] Leaderboard submit failed: {e.Message}");
                 return false;
             }
+        }
+
+        // ---------------------------------------------------------------- public villages
+
+        public async Task<bool> WriteVillageAsync(PublicVillage village)
+        {
+            if (!_ready || village == null || string.IsNullOrEmpty(village.UserId)) return false;
+            try
+            {
+                var data = new Dictionary<string, object>
+                {
+                    { "displayName", village.DisplayName ?? "Ninja" },
+                    { "castleLevel", village.CastleLevel },
+                    { "highestWave", village.HighestWave },
+                    { "chaptersCleared", village.ChaptersCleared },
+                    { "achievementTiers", village.AchievementTiers },
+                    { "snapshot", village.SnapshotJson ?? string.Empty },
+                    { "updatedAt", FieldValue.ServerTimestamp },
+                };
+                await _db.Collection("villages").Document(village.UserId).SetAsync(data);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Firebase] Village publish failed: {e.Message}");
+                return false;
+            }
+        }
+
+        public async Task<PublicVillage> LoadVillageAsync(string userId)
+        {
+            if (!_ready || string.IsNullOrEmpty(userId)) return null;
+            try
+            {
+                var doc = await _db.Collection("villages").Document(userId).GetSnapshotAsync();
+                return doc.Exists ? ReadVillage(doc) : null;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Firebase] Village load failed: {e.Message}");
+                return null;
+            }
+        }
+
+        public async Task<List<PublicVillage>> ListVillagesAsync(int count)
+        {
+            var list = new List<PublicVillage>();
+            if (!_ready) return list;
+            try
+            {
+                var query = await _db.Collection("villages").OrderByDescending("updatedAt").Limit(count).GetSnapshotAsync();
+                foreach (var doc in query.Documents) list.Add(ReadVillage(doc));
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Firebase] Village list failed: {e.Message}");
+            }
+            return list;
+        }
+
+        private static PublicVillage ReadVillage(DocumentSnapshot doc)
+        {
+            doc.TryGetValue("displayName", out string name);
+            doc.TryGetValue("castleLevel", out long castle);
+            doc.TryGetValue("highestWave", out long wave);
+            doc.TryGetValue("chaptersCleared", out long chapters);
+            doc.TryGetValue("achievementTiers", out long tiers);
+            doc.TryGetValue("snapshot", out string snapshot);
+            DateTime? updated = doc.TryGetValue("updatedAt", out Timestamp t) ? t.ToDateTime() : null;
+            return new PublicVillage
+            {
+                UserId = doc.Id, DisplayName = name, CastleLevel = (int)castle, HighestWave = (int)wave,
+                ChaptersCleared = (int)chapters, AchievementTiers = (int)tiers, SnapshotJson = snapshot, UpdatedUtc = updated,
+            };
         }
 
         public async Task<List<LeaderboardEntry>> FetchLeaderboardAsync(int count)

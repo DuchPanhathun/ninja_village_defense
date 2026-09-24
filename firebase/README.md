@@ -37,6 +37,10 @@ crash reports and the global leaderboard.
 
 ## Data layout
 - `users/{uid}` — cloud save JSON + progress summary + display name (private to the owner)
+- `villages/{uid}` — the public village for visiting: `displayName`, `castleLevel`, `highestWave`,
+  `chaptersCleared`, `achievementTiers`, `snapshot` (VillageSnapshot JSON: buildings, decorations, heroes,
+  pets, gear, talents), `updatedAt`. Readable by every signed-in player; published on connect and after
+  each cloud-save upload when the village changed. Listed newest first (single-field index, automatic).
 - `leaderboard/{uid}` — `displayName`, `bestWave`, `bestKills`, `updatedAt`
 - `server_time/{uid}` — scratch document used to read trusted server time
 

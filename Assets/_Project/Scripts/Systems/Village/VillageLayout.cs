@@ -30,6 +30,7 @@ namespace NinjaVillage.Systems.Village
         };
 
         public static readonly Vector2 Armory = new(10.6f, 0.9f);
+        public static readonly Vector2 ProfileBoard = new(3.8f, 1.1f);
         public static readonly Vector2 TalentTree = new(-11.6f, -5f);
         public static readonly Rect HeroYard = new(-12.5f, -3.2f, 8.5f, 1.7f);
         public static readonly Rect PetMeadow = new(4.8f, -9.6f, 7.6f, 2.4f);
@@ -39,6 +40,7 @@ namespace NinjaVillage.Systems.Village
         {
             yield return (Armory, 1.4f);
             yield return (TalentTree, 2.2f);
+            yield return (ProfileBoard + new Vector2(0f, 0.6f), 1.8f);
         }
     }
 }

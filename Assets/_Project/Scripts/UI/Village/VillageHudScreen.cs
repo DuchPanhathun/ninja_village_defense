@@ -14,11 +14,11 @@ namespace NinjaVillage.UI.Village
 {
     /// <summary>
     /// The Village scene's overlay (transparent HUD over the map), styled like the home screen: a wood top
-    /// bar (village name, castle stage, coins/gems, Home), a Decorate button, and a bottom bar with Heroes,
-    /// Pets, BATTLE, Gear and Talents. Tapping a building opens its <see cref="BuildingScreen"/>; tapping a
+    /// bar (village name, castle stage, coins/gems, Home), Decorate and Visit (neighbours) buttons, and a
+    /// bottom bar with Heroes, Pets, BATTLE, Gear and Talents. Tapping a building opens its <see cref="BuildingScreen"/>; tapping a
     /// hero, pet, the Armory or the Talent Tree opens that screen; tapping a decoration offers Move / Sell;
     /// while a decoration is being placed a bar offers Flip / Cancel / Place. Visiting someone else's village
-    /// hides everything that would change it.
+    /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
     public class VillageHudScreen : UIScreen
@@ -29,7 +29,7 @@ namespace NinjaVillage.UI.Village
         private const float TabBarHeight = 210f;
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
-        private GameObject _decorate, _tabBar;
+        private GameObject _decorate, _visit, _tabBar;
         private RectTransform _placeBar, _decoBar;
         private Image _placeIcon;
         private TextMeshProUGUI _placeName, _placeHint, _decoName;
@@ -58,7 +58,7 @@ namespace NinjaVillage.UI.Village
             UIStyle.Place(bar.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -8f), new Vector2(1060f, 150f));
             var rt = bar.rectTransform;
 
-            var home = UIStyle.Frame(rt, "Home", "panel_wood_panel", () => { Sfx.Play(AudioCueIds.UiBack); GoHome(); });
+            var home = UIStyle.Frame(rt, "Home", "panel_wood_panel", () => { Sfx.Play(AudioCueIds.UiBack); GoBack(); });
             UIStyle.Place((RectTransform)home.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(112f, 112f));
             var arrow = UIBuilder.Image(home.transform, "Arrow", Color.white, UIArt.Get("arrow_left"));
             arrow.raycastTarget = false;
@@ -100,6 +100,10 @@ namespace NinjaVillage.UI.Village
             var icon = decorate.Button.transform.Find("Icon")?.GetComponent<Image>();
             if (picture != null && icon != null) icon.sprite = picture.Icon;
             _decorate = decorate.Root.gameObject;
+
+            var visit = UIStyle.Icon(parent, "menu_leaderboard", "Visit", () => Open(ScreenIds.Neighbours), 140f);
+            UIStyle.Place(visit.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -380f), visit.Root.sizeDelta);
+            _visit = visit.Root.gameObject;
         }
 
         private void BuildTabBar(RectTransform parent)
@@ -200,9 +204,15 @@ namespace NinjaVillage.UI.Village
             if (navigator.Has(screenId)) navigator.Show(screenId);
         }
 
-        private static void GoHome()
+        /// <summary>Visiting: back to your own village. At home: back to the main menu.</summary>
+        private static void GoBack()
         {
-            if (VillageVisit.IsVisiting) VillageVisit.ReturnHome();
+            if (VillageVisit.IsVisiting)
+            {
+                VillageVisit.ReturnHome();
+                SceneLoader.LoadVillage();
+                return;
+            }
             SceneLoader.LoadMainMenu();
         }
 
@@ -249,6 +259,7 @@ namespace NinjaVillage.UI.Village
                 VillageDisplayKind.Heroes => ScreenIds.Heroes,
                 VillageDisplayKind.Pets => ScreenIds.Pets,
                 VillageDisplayKind.Gear => ScreenIds.Inventory,
+                VillageDisplayKind.Profile => ScreenIds.Profile,
                 _ => ScreenIds.Talents,
             });
         }
@@ -310,6 +321,7 @@ namespace NinjaVillage.UI.Village
             _placeBar.gameObject.SetActive(active);
             _tabBar.SetActive(!active);
             _decorate.SetActive(!active && !VillageVisit.IsVisiting);
+            _visit.SetActive(!active);
             if (!active) return;
 
             var definition = placer.Definition;
@@ -339,7 +351,8 @@ namespace NinjaVillage.UI.Village
             _title.text = $"{owner}'s Village";
             var castle = VillageService.Get(BuildingIds.Castle);
             int level = snapshot != null ? Mathf.Max(1, snapshot.BuildingLevel(BuildingIds.Castle)) : VillageService.CastleLevel;
-            _stage.text = castle != null ? $"{castle.StageName(level)}  ·  Castle Lv {level}" : $"Castle Lv {level}";
+            _stage.text = (VillageVisit.IsVisiting ? "Visiting  ·  " : "") +
+                          (castle != null ? $"{castle.StageName(level)}  ·  Castle Lv {level}" : $"Castle Lv {level}");
             RefreshCurrencies();
 
             bool visiting = VillageVisit.IsVisiting;

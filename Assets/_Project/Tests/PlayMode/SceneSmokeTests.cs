@@ -107,7 +107,8 @@ namespace NinjaVillage.Tests
             }
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
-                ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations);
+                ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
+                ScreenIds.Neighbours, ScreenIds.Profile);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
@@ -168,6 +169,34 @@ namespace NinjaVillage.Tests
             yield return null;
             Assert.AreEqual(coins - well.Price.Amount + well.Price.Amount / 2, SaveService.Data.Wallet.Get(CurrencyType.Coins), "half back");
             Assert.IsNull(NinjaVillage.Gameplay.Village.VillageMap.Instance.FindDecoration(placed.Uid));
+        }
+
+        [UnityTest]
+        public IEnumerator Village_VisitingAnotherPlayersVillage_IsReadOnly()
+        {
+            var other = new NinjaVillage.Systems.Village.VillageSnapshot { DisplayName = "Kage", PlayerId = "someone-else", HighestWave = 30 };
+            other.Buildings.Add(new IdLevelEntry("castle", 8));
+            other.Heroes.Add(new NinjaVillage.Systems.Village.VillageHero { Id = "samurai", Level = 7 });
+            other.SelectedHeroId = "samurai";
+            other.Pets.Add(new IdLevelEntry("wolf", 3));
+            other.Decorations.Add(new PlacedDecoration { Uid = 1, Id = "well", X = -4f, Y = 6f });
+
+            NinjaVillage.Systems.Village.VillageVisit.Visit(other);
+            yield return LoadScene(SceneNames.Village);
+            yield return null;
+
+            var map = NinjaVillage.Gameplay.Village.VillageMap.Instance;
+            Assert.IsFalse(map.IsOwnVillage);
+            Assert.AreEqual("Kage", map.Snapshot.DisplayName);
+            Assert.IsNull(NinjaVillage.Gameplay.Village.DecorationPlacer.Instance, "visitors can't decorate");
+            Assert.IsNotNull(GameObject.Find("Hero_samurai"), "their heroes live there");
+            Assert.IsNotNull(GameObject.Find("Pet_wolf"), "and their pets");
+            Assert.IsNotNull(map.FindDecoration(1), "and their decorations");
+            Assert.AreEqual(0, SaveService.Data.Village.Decorations.Count, "nothing leaks into your own save");
+
+            NinjaVillage.Systems.GameFlow.SceneLoader.LoadMainMenu();
+            yield return null;
+            Assert.IsFalse(NinjaVillage.Systems.Village.VillageVisit.IsVisiting, "leaving ends the visit");
         }
 
         [UnityTest]

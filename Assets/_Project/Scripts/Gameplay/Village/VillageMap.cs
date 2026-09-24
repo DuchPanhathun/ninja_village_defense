@@ -69,6 +69,8 @@ namespace NinjaVillage.Gameplay.Village
         private Transform _residentRoot, _townRoot, _decorationRoot;
         private ArmoryDisplay _armory;
         private TalentTreeDisplay _talentTree;
+        private ProfileBoardDisplay _profileBoard;
+        private string _profileKey;
         private VillageArt _art;
         private string _residentsKey, _armoryKey;
         private int _talentRanks = -1;
@@ -109,6 +111,9 @@ namespace NinjaVillage.Gameplay.Village
             _talentTree = new GameObject("TalentTree").AddComponent<TalentTreeDisplay>();
             _talentTree.transform.SetParent(transform, false);
             _talentTree.transform.position = VillageLayout.TalentTree;
+            _profileBoard = new GameObject("ProfileBoard").AddComponent<ProfileBoardDisplay>();
+            _profileBoard.transform.SetParent(transform, false);
+            _profileBoard.transform.position = VillageLayout.ProfileBoard;
 
             _decorationRoot = new GameObject("Decorations").transform;
             _decorationRoot.SetParent(transform, false);
@@ -156,6 +161,12 @@ namespace NinjaVillage.Gameplay.Village
             {
                 _talentRanks = Snapshot.TalentRanks;
                 _talentTree.Show(_art, Snapshot);
+            }
+            string profile = $"{Snapshot.DisplayName}|{Snapshot.HighestWave}|{Snapshot.ChaptersCleared}|{Snapshot.AchievementTiers}|{Snapshot.TotalKills}";
+            if (profile != _profileKey)
+            {
+                _profileKey = profile;
+                _profileBoard.Show(_art, Snapshot);
             }
             SyncTownsfolk();
         }

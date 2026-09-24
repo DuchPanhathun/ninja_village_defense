@@ -74,3 +74,4 @@ MonoBehaviour:
   weaponRack: {fileID: 21300000, guid: 62d5e174137f8374f8cda098fd57ddd7, type: 3}
   talentTree: {fileID: 21300000, guid: 5296a42fc5038cee38ab0217049bae87, type: 3}
   pedestal: {fileID: 0}
+  noticeBoard: {fileID: 21300000, guid: 8bf475bf6062ac0398ee74aa97506b70, type: 3}

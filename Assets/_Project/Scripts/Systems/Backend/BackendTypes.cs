@@ -85,6 +85,22 @@ namespace NinjaVillage.Systems.Backend
         public int Rank; // 1-based when known, 0 otherwise
     }
 
+    /// <summary>
+    /// A player's village as other players see it (<c>villages/{uid}</c>): the headline numbers for lists,
+    /// plus the whole <c>VillageSnapshot</c> as JSON for drawing the village when visiting.
+    /// </summary>
+    public sealed class PublicVillage
+    {
+        public string UserId;
+        public string DisplayName;
+        public int CastleLevel;
+        public int HighestWave;
+        public int ChaptersCleared;
+        public int AchievementTiers;
+        public string SnapshotJson;
+        public DateTime? UpdatedUtc;
+    }
+
     /// <summary>One analytics parameter; value is long, double or string.</summary>
     public readonly struct AnalyticsParam
     {
@@ -131,5 +147,11 @@ namespace NinjaVillage.Systems.Backend
 
         Task<bool> SubmitLeaderboardAsync(LeaderboardEntry entry);
         Task<List<LeaderboardEntry>> FetchLeaderboardAsync(int count);
+
+        /// <summary>Publishes this player's village (readable by every signed-in player).</summary>
+        Task<bool> WriteVillageAsync(PublicVillage village);
+        Task<PublicVillage> LoadVillageAsync(string userId);
+        /// <summary>Most recently active villages, newest first.</summary>
+        Task<List<PublicVillage>> ListVillagesAsync(int count);
     }
 }

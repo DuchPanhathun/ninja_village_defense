@@ -35,6 +35,7 @@ namespace NinjaVillage.Gameplay.Village
         Pets,
         Gear,
         Talents,
+        Profile,
     }
 
     /// <summary>A hero, pet, the Armory rack or the Talent Tree was tapped.</summary>

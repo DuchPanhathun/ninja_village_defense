@@ -10,11 +10,14 @@ namespace NinjaVillage.Systems.Backend
     /// Backend used in the Editor and whenever Firebase is unavailable: the local save is the only copy,
     /// the device clock is "server time", Remote Config returns its defaults, analytics are printed
     /// (when verbose) instead of sent, and the leaderboard shows only the local player's own best run.
+    /// Published villages are kept in memory for the session, so visiting can be tried in the Editor.
     /// The game stays fully playable; screens show an "Offline" state.
     /// </summary>
     public sealed class OfflineBackendProvider : IBackendProvider
     {
         public bool VerboseAnalytics;
+
+        private readonly Dictionary<string, PublicVillage> _villages = new();
 
         public string Name => "Offline";
         public bool IsOnline => false;
@@ -60,6 +63,25 @@ namespace NinjaVillage.Systems.Backend
         public void RecordException(Exception exception) { }
 
         public Task<bool> SubmitLeaderboardAsync(LeaderboardEntry entry) => Task.FromResult(false);
+
+        public Task<bool> WriteVillageAsync(PublicVillage village)
+        {
+            if (village == null || string.IsNullOrEmpty(village.UserId)) return Task.FromResult(false);
+            village.UpdatedUtc = DateTime.UtcNow;
+            _villages[village.UserId] = village;
+            return Task.FromResult(true);
+        }
+
+        public Task<PublicVillage> LoadVillageAsync(string userId) =>
+            Task.FromResult(userId != null && _villages.TryGetValue(userId, out var village) ? village : null);
+
+        public Task<List<PublicVillage>> ListVillagesAsync(int count)
+        {
+            var list = new List<PublicVillage>(_villages.Values);
+            list.Sort((a, b) => Nullable.Compare(b.UpdatedUtc, a.UpdatedUtc));
+            if (list.Count > count) list.RemoveRange(count, list.Count - count);
+            return Task.FromResult(list);
+        }
 
         public Task<List<LeaderboardEntry>> FetchLeaderboardAsync(int count)
         {

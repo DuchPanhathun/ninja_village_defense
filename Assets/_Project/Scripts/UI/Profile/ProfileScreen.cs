@@ -12,7 +12,7 @@ namespace NinjaVillage.UI.Profile
     /// Player profile (EPIC 16 "Player profile"): editable display name (shown on leaderboards),
     /// lifetime stats and the recent run history recorded by the GameManager.
     /// </summary>
-    [SceneScreen(SceneNames.MainMenu)]
+    [SceneScreen(SceneNames.MainMenu, SceneNames.Village)]
     public class ProfileScreen : UIListScreen
     {
         public const int MaxNameLength = 16;

@@ -22,6 +22,27 @@ namespace NinjaVillage.Systems.Backend
     {
         // ---------------------------------------------------------------- cloud save
 
+        /// <summary>
+        /// What other players see of <paramref name="save"/>'s village: headline numbers plus the full
+        /// <see cref="Village.VillageSnapshot"/> JSON (buildings, decorations, heroes, pets, gear, talents).
+        /// </summary>
+        public static PublicVillage BuildPublicVillage(SaveData save, string userId)
+        {
+            var snapshot = Village.VillageSnapshot.FromSave(save);
+            snapshot.PlayerId = userId;
+            snapshot.TakenUtcTicks = 0; // the server's updatedAt says when; this keeps unchanged villages byte-identical
+            return new PublicVillage
+            {
+                UserId = userId,
+                DisplayName = snapshot.DisplayName,
+                CastleLevel = Math.Max(1, snapshot.BuildingLevel(BuildingIds.Castle)),
+                HighestWave = snapshot.HighestWave,
+                ChaptersCleared = snapshot.ChaptersCleared,
+                AchievementTiers = snapshot.AchievementTiers,
+                SnapshotJson = UnityEngine.JsonUtility.ToJson(snapshot),
+            };
+        }
+
         public static SaveProgressSummary Summarize(SaveData save)
         {
             if (save == null) return default;

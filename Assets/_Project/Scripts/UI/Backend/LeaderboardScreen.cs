@@ -9,7 +9,8 @@ namespace NinjaVillage.UI.Backend
 {
     /// <summary>
     /// Global leaderboard (EPIC 22): top 50 by best wave (kills break ties), the player's own row
-    /// highlighted. Offline (Editor / no network) it shows the player's own best with an explanation.
+    /// highlighted, and a Visit button to see anyone else's village. Offline (Editor / no network) it shows
+    /// the player's own best with an explanation.
     /// </summary>
     [SceneScreen(SceneNames.MainMenu)]
     public class LeaderboardScreen : UIListScreen
@@ -57,8 +58,13 @@ namespace NinjaVillage.UI.Backend
             foreach (var entry in _entries)
             {
                 bool mine = !string.IsNullOrEmpty(myId) && entry.UserId == myId;
-                UIBuilder.ActionCard(content, $"#{entry.Rank}  {entry.DisplayName ?? "Ninja"}{(mine ? "  (you)" : string.Empty)}",
+                var actions = UIBuilder.ActionCard(content, $"#{entry.Rank}  {entry.DisplayName ?? "Ninja"}{(mine ? "  (you)" : string.Empty)}",
                     $"Wave {entry.BestWave} · {entry.BestKills} kills", out _, out _, mine ? UITheme.Gold : UITheme.Text);
+                if (!mine && online)
+                {
+                    string uid = entry.UserId, name = entry.DisplayName;
+                    UIBuilder.SmallButton(actions.transform, "Visit village", () => VillageVisitFlow.Visit(uid, name), UITheme.ButtonSecondary, 300f);
+                }
             }
         }
     }
