@@ -7,14 +7,16 @@ namespace NinjaVillage.Gameplay.World
     /// Decorates the endless ground with a chapter's props (trees, rocks, bushes...). The world is split
     /// into cells; whether a cell holds a prop, which one and where is a pure hash of the cell, so the
     /// same spot always shows the same prop when the player comes back. Only cells near the camera exist
-    /// (pooled renderers), and props are pure decoration: no colliders, drawn under every character.
+    /// (pooled renderers). Trees, rocks, stumps and statues are solid: a collider on their base (the
+    /// <see cref="Obstacles"/> layer — the player and enemies must go around or jump over) and depth-sorted
+    /// with the characters so you can walk behind a canopy. Bushes and flowers are flat ground decoration.
     /// </summary>
     public class PropScatter : MonoBehaviour
     {
         [SerializeField] private float cellSize = 3.2f;
         [SerializeField] private float margin = 3f;
         [SerializeField] private int seed = 1234;
-        [Tooltip("Props sort between the ground (-1000) and characters.")]
+        [Tooltip("Flat props (bushes, flowers) sort between the ground (-1000) and everything else.")]
         [SerializeField] private int baseSortingOrder = -900;
         [Tooltip("Largest side of a prop in world units; the pack's 64 px boulders and big trees would fill half the view.")]
         [SerializeField] private float maxPropSize = 2.6f;
@@ -26,6 +28,11 @@ namespace NinjaVillage.Gameplay.World
         private readonly Stack<SpriteRenderer> _pool = new();
         private readonly List<Vector2Int> _toRemove = new();
         private readonly HashSet<Vector2Int> _wanted = new();
+        private readonly List<SpriteRenderer> _solid = new();
+
+        /// <summary>Flat ground cover you can walk over; everything else stands in the way.</summary>
+        public static bool IsSolid(Sprite sprite) =>
+            sprite != null && !sprite.name.Contains("bush") && !sprite.name.Contains("flower") && !sprite.name.Contains("grass");
 
         public void Configure(IReadOnlyList<Sprite> sprites, float density, Color tint, int newSeed)
         {
@@ -55,6 +62,10 @@ namespace NinjaVillage.Gameplay.World
             for (int y = min.y; y <= max.y; y++)
                 for (int x = min.x; x <= max.x; x++)
                     _wanted.Add(new Vector2Int(x, y));
+
+            // Solid props sort with the characters; the camera moves, so every frame.
+            foreach (var solid in _solid)
+                solid.sortingOrder = DepthSort.OrderFor(solid.bounds.min.y);
 
             _toRemove.Clear();
             foreach (var cell in _active.Keys)
@@ -93,8 +104,20 @@ namespace NinjaVillage.Gameplay.World
             Vector2 native = sprite.bounds.size;
             float largest = Mathf.Max(native.x, native.y);
             renderer.transform.localScale = Vector3.one * (largest > maxPropSize ? maxPropSize / largest : 1f);
-            // Lower props draw in front of higher ones, all under the characters.
-            renderer.sortingOrder = baseSortingOrder + Mathf.Clamp(Mathf.RoundToInt(-position.y * 2f) & 0x3F, 0, 63);
+
+            // Solid: a box over the base (trunk / bottom of the rock), in the sprite's own units.
+            bool solid = IsSolid(sprite) && Obstacles.Available;
+            var box = renderer.GetComponent<BoxCollider2D>();
+            box.enabled = solid;
+            renderer.gameObject.layer = solid ? Obstacles.Layer : 0;
+            if (solid)
+            {
+                box.size = new Vector2(native.x * 0.6f, native.y * 0.34f);
+                box.offset = new Vector2(0f, -native.y * 0.5f + native.y * 0.17f);
+                _solid.Add(renderer);
+            }
+            // Flat props lie on the ground under everything; solid ones are depth-sorted each frame.
+            renderer.sortingOrder = solid ? DepthSort.OrderFor(renderer.bounds.min.y) : baseSortingOrder;
             return renderer;
         }
 
@@ -102,12 +125,14 @@ namespace NinjaVillage.Gameplay.World
         {
             var go = new GameObject("Prop");
             go.transform.SetParent(transform, false);
+            go.AddComponent<BoxCollider2D>().enabled = false;
             return go.AddComponent<SpriteRenderer>();
         }
 
         private void Release(SpriteRenderer renderer)
         {
             if (renderer == null) return;
+            _solid.Remove(renderer);
             renderer.gameObject.SetActive(false);
             _pool.Push(renderer);
         }

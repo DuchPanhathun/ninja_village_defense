@@ -38,6 +38,8 @@ namespace NinjaVillage.Gameplay.Pets
 
             if (!go.TryGetComponent<PetController>(out var controller))
                 controller = go.AddComponent<PetController>();
+            // Sorts with the characters and scenery (pets walk behind trees too); pets never collide with them.
+            if (!go.TryGetComponent<NinjaVillage.Gameplay.World.DepthSort>(out _)) go.AddComponent<NinjaVillage.Gameplay.World.DepthSort>();
             controller.Initialize(owner, stats.MoveSpeed, definition.FollowDistance);
 
             if (!go.TryGetComponent<PetAbility>(out var ability))

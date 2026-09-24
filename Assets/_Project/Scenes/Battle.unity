@@ -2793,6 +2793,7 @@ GameObject:
   - component: {fileID: 670481617}
   - component: {fileID: 670481616}
   - component: {fileID: 670481619}
+  - component: {fileID: 670481620}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -3173,6 +3174,22 @@ MonoBehaviour:
   spriteSet: {fileID: 11400000, guid: c9b4958a08f696d928684271954a42fa, type: 2}
   target: {fileID: 670481612}
   movingSpeedThreshold: 0.15
+--- !u!114 &670481620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670481599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d585a9e46153aab49b105bca19f73c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.6
+  height: 1.5
+  cooldown: 1.8
+  maxHangTime: 0.5
 --- !u!1 &677148865
 GameObject:
   m_ObjectHideFlags: 0

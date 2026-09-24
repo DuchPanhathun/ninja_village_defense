@@ -54,6 +54,7 @@ namespace NinjaVillage.Gameplay.Player
             _moveInput = moveInputSource as IMoveInputProvider;
             _health.DodgeRoll = () => Random.value < _stats.DodgeChance;
             _health.IncomingDamageModifier = amount => amount * (1f - _stats.DamageReduction);
+            if (!TryGetComponent<NinjaVillage.Gameplay.World.DepthSort>(out _)) gameObject.AddComponent<NinjaVillage.Gameplay.World.DepthSort>();
 
             // No sprite clips yet → code-driven placeholder animation (EPIC 1 "Movement animation").
             if ((animator == null || animator.runtimeAnimatorController == null) && !TryGetComponent<ProceduralSpriteAnimator>(out _))

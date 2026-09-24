@@ -27,6 +27,15 @@ namespace NinjaVillage.Gameplay.Enemies
         private float _currentDamage;
         private float _attackCooldownRemaining;
         private bool _isElite;
+        private float _probeRadius = 0.45f;
+        private float _nextSteerCheck;
+        private bool _steering;
+        private Vector2 _steerDirection;
+        private int _steerSide;
+        private float _lastBlockedAt = -10f;
+
+        /// <summary>This enemy's attack damage after difficulty and elite scaling.</summary>
+        protected float CurrentDamage => _currentDamage;
         private static readonly int SpeedParam = Animator.StringToHash("Speed");
         private static readonly int AttackTrigger = Animator.StringToHash("Attack");
         private static readonly int DieTrigger = Animator.StringToHash("Die");
@@ -38,6 +47,10 @@ namespace NinjaVillage.Gameplay.Enemies
             Body = GetComponent<Rigidbody2D>();
             HealthComponent = GetComponent<Health>();
             Status = GetComponent<StatusEffectReceiver>();
+
+            if (!TryGetComponent<DepthSort>(out _)) gameObject.AddComponent<DepthSort>();
+            if (TryGetComponent<Collider2D>(out var body))
+                _probeRadius = Mathf.Clamp(Mathf.Min(body.bounds.extents.x, body.bounds.extents.y) * 0.9f, 0.2f, 1.2f);
 
             // No sprite clips yet → code-driven placeholder animation (EPIC 3 "Enemy animation").
             if ((animator == null || animator.runtimeAnimatorController == null) && !TryGetComponent<ProceduralSpriteAnimator>(out _))
@@ -110,6 +123,19 @@ namespace NinjaVillage.Gameplay.Enemies
         protected void MoveToward(Vector2 worldPosition)
         {
             Vector2 direction = (worldPosition - (Vector2)transform.position).normalized;
+
+            // Trees and rocks: slide around them instead of pushing into them (re-checked a few times a second).
+            if (Time.time >= _nextSteerCheck)
+            {
+                _nextSteerCheck = Time.time + 0.12f;
+                var steered = ObstacleAvoidance.Steer(transform.position, direction, _probeRadius, 1.1f, ref _steerSide);
+                _steering = steered != direction;
+                _steerDirection = steered;
+                if (_steering) _lastBlockedAt = Time.time;
+                else if (Time.time - _lastBlockedAt > 1.2f) _steerSide = 0; // clear for a while: free to choose again
+            }
+            if (_steering) direction = _steerDirection;
+
             float speedMultiplier = Status != null ? Status.MoveSpeedMultiplier : 1f;
             Body.linearVelocity = direction * (definition.MoveSpeed * speedMultiplier);
 

@@ -189,6 +189,15 @@ MonoBehaviour:
   phaseHealthThresholds:
   - 0.66
   - 0.33
+  canLeap: 1
+  leapCooldown: 7
+  leapDuration: 0.85
+  leapHeight: 3
+  leapMinDistance: 3
+  leapMaxDistance: 9
+  leapRadius: 2.2
+  leapDamageMultiplier: 1.5
+  stuckSeconds: 0.7
   teleportCooldown: 5
   teleportMinRange: 3
   teleportMaxRange: 6

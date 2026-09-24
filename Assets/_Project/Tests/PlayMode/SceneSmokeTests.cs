@@ -282,6 +282,98 @@ namespace NinjaVillage.Tests
             StringAssert.Contains("CLEAR", title.text);
         }
 
+#if UNITY_EDITOR
+        private static GameObject Wall(Vector2 at, Vector2 size)
+        {
+            Assert.IsTrue(NinjaVillage.Gameplay.World.Obstacles.Available, "Obstacle layer missing — run the content generator");
+            var wall = new GameObject("TestWall") { layer = NinjaVillage.Gameplay.World.Obstacles.Layer };
+            wall.transform.position = at;
+            wall.AddComponent<BoxCollider2D>().size = size;
+            return wall;
+        }
+
+        /// <summary>Holds the player still and untouchable so only the thing under test moves.</summary>
+        private static GameObject QuietPlayer()
+        {
+            var player = PlayerReference.Instance.gameObject;
+            player.GetComponent<PlayerController>().enabled = false;
+            player.GetComponent<NinjaVillage.Gameplay.Combat.AutoAttackController>().enabled = false;
+            player.GetComponent<NinjaVillage.Core.Combat.Health>().GrantInvulnerability(60f);
+            return player;
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_RocksBlockWalking_JumpingHopsOverThem()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var player = QuietPlayer();
+            var body = player.GetComponent<Rigidbody2D>();
+            Vector2 start = body.position;
+            Wall(start + new Vector2(2f, 0f), new Vector2(0.8f, 4f));
+
+            for (float t = 0f; t < 1.2f; t += Time.fixedDeltaTime)
+            {
+                yield return new WaitForFixedUpdate();
+                body.MovePosition(body.position + Vector2.right * 5f * Time.fixedDeltaTime);
+            }
+            Assert.Less(body.position.x, start.x + 1.7f, "walking into a rock stops you");
+
+            Assert.IsTrue(player.GetComponent<JumpController>().TryJump());
+            for (float t = 0f; t < 1.2f; t += Time.fixedDeltaTime)
+            {
+                Time.timeScale = 1f;
+                yield return new WaitForFixedUpdate();
+                body.MovePosition(body.position + Vector2.right * 5f * Time.fixedDeltaTime);
+            }
+            Assert.Greater(body.position.x, start.x + 2.4f, "jumping carries you over it");
+            Assert.IsFalse(player.GetComponent<JumpController>().IsJumping, "and you land again");
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_EnemiesWalkAroundRocks()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var player = QuietPlayer();
+            Vector2 p = player.transform.position;
+            Wall(p + new Vector2(-3f, 0f), new Vector2(0.8f, 3f));
+            var bandit = UnityEditor.AssetDatabase.LoadAssetAtPath<NinjaVillage.Gameplay.Enemies.EnemyDefinition>("Assets/_Project/Data/Enemies/Bandit.asset");
+            var spawner = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Waves.SpawnManager>();
+            var enemy = spawner.Spawn(bandit, p + new Vector2(-6f, 0f), 100f);
+
+            float closest = float.MaxValue;
+            for (float end = Time.realtimeSinceStartup + 10f; Time.realtimeSinceStartup < end && closest > 1.6f;)
+            {
+                Time.timeScale = 1f;
+                if (enemy == null) break;
+                closest = Mathf.Min(closest, Vector2.Distance(enemy.transform.position, player.transform.position));
+                yield return null;
+            }
+            Assert.LessOrEqual(closest, 1.6f, "the bandit found its way around the rock");
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_BossesLeapOverRocks()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var player = QuietPlayer();
+            Vector2 p = player.transform.position;
+            Wall(p + new Vector2(3f, 0f), new Vector2(0.8f, 5f));
+            var oni = UnityEditor.AssetDatabase.LoadAssetAtPath<NinjaVillage.Gameplay.Enemies.EnemyDefinition>("Assets/_Project/Data/Enemies/GiantOni.asset");
+            var spawner = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Waves.SpawnManager>();
+            var boss = (NinjaVillage.Gameplay.Bosses.BossController)spawner.Spawn(oni, p + new Vector2(6.5f, 0f), 50f);
+
+            bool leapt = false;
+            for (float end = Time.realtimeSinceStartup + 8f; Time.realtimeSinceStartup < end && !(leapt && !boss.IsLeaping);)
+            {
+                Time.timeScale = 1f;
+                leapt |= boss.IsLeaping;
+                yield return null;
+            }
+            Assert.IsTrue(leapt, "the boss leapt");
+            Assert.Less(Vector2.Distance(boss.transform.position, player.transform.position), 3.5f, "and landed next to the player, past the rock");
+        }
+#endif
+
         [UnityTest]
         public IEnumerator Battle_DeathOffersReviveThenRecordsTheRun()
         {
