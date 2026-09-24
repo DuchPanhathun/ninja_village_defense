@@ -1,3 +1,4 @@
+using NinjaVillage.Core.Data;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Combat;
 using NinjaVillage.Gameplay.Player;
@@ -25,6 +26,19 @@ namespace NinjaVillage.Systems.Evolution
             _skillManager = GetComponent<SkillManager>();
             _autoAttack = GetComponent<AutoAttackController>();
             _journal = GetComponent<EvolutionJournal>();
+            if (_journal == null) _journal = gameObject.AddComponent<EvolutionJournal>();
+
+            // No recipes assigned in the scene → use every recipe in the catalog.
+            if (recipes == null || recipes.Length == 0)
+            {
+                var catalog = CatalogLoader.Load<EvolutionCatalog>();
+                if (catalog != null)
+                {
+                    var all = new System.Collections.Generic.List<EvolutionRecipe>();
+                    foreach (var recipe in catalog.All) if (recipe != null) all.Add(recipe);
+                    recipes = all.ToArray();
+                }
+            }
         }
 
         private void OnEnable() => EventBus<SkillLeveledEvent>.Subscribe(OnSkillLeveled);
@@ -39,6 +53,7 @@ namespace NinjaVillage.Systems.Evolution
             foreach (var recipe in recipes)
             {
                 if (recipe == null || recipe.ResultSkill == null) continue;
+                if (_granted.Contains(recipe)) continue;
                 if (_journal != null && _journal.IsUnlocked(recipe)) continue;
                 if (!IsRecipeSatisfied(recipe)) continue;
 
@@ -48,26 +63,27 @@ namespace NinjaVillage.Systems.Evolution
 
         private bool IsRecipeSatisfied(EvolutionRecipe recipe)
         {
-            // All required skills must be owned at level >= 1.
-            foreach (var required in recipe.RequiredSkills)
-            {
-                if (required == null) continue;
-                if (!_skillManager.Levels.TryGetValue(required, out int level) || level < 1)
-                    return false;
-            }
-
-            // If a weapon is required, the equipped weapon must match.
-            if (recipe.RequiredWeapon != null)
-            {
-                if (_autoAttack == null || _autoAttack.Weapon == null) return false;
-                if (_autoAttack.Weapon.Definition != recipe.RequiredWeapon) return false;
-            }
-
-            return true;
+            string equipped = _autoAttack != null && _autoAttack.Weapon != null ? _autoAttack.Weapon.Definition.Id : null;
+            var required = new System.Collections.Generic.List<string>();
+            foreach (var skill in recipe.RequiredSkills) if (skill != null) required.Add(skill.Id);
+            return EvolutionRules.IsSatisfied(required, SkillLevelById,
+                recipe.RequiredWeapon != null ? recipe.RequiredWeapon.Id : null, equipped);
         }
+
+        private int SkillLevelById(string skillId)
+        {
+            foreach (var pair in _skillManager.Levels)
+                if (pair.Key != null && pair.Key.Id == skillId) return pair.Value;
+            return 0;
+        }
+
+        // Marked BEFORE granting: SelectSkill raises SkillLeveledEvent, which re-runs CheckAllRecipes
+        // synchronously — without this guard the same recipe would re-fire until the stack overflowed.
+        private readonly System.Collections.Generic.HashSet<EvolutionRecipe> _granted = new();
 
         private void UnlockEvolution(EvolutionRecipe recipe)
         {
+            _granted.Add(recipe);
             _skillManager.SelectSkill(recipe.ResultSkill);
             EventBus<EvolutionUnlockedEvent>.Raise(new EvolutionUnlockedEvent(recipe));
         }

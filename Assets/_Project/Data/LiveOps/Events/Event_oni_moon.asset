@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c57b40574a4b462aad19e7401a9d77, type: 3}
+  m_Name: Event_oni_moon
+  m_EditorClassIdentifier: 
+  id: oni_moon
+  displayName: Oni Moon Night
+  description: "Under the red moon, every battle teaches more \u2014 bonus XP!"
+  icon: {fileID: 0}
+  startDate: 2026-10-25
+  durationDays: 7
+  themeColor: {r: 0.9, g: 0.25, b: 0.2, a: 1}
+  coinBonus: 0
+  xpBonus: 0.3
+  missions:
+  - id: om_bosses
+    description: Defeat 5 bosses
+    statId: bosses_killed
+    target: 5
+    rewards:
+    - type: 1
+      id: 
+      amount: 40
+  - id: om_kill
+    description: Defeat 1,000 demons
+    statId: enemies_killed
+    target: 1000
+    rewards:
+    - type: 2
+      id: blood_talisman
+      amount: 1
+  - id: om_ult
+    description: Use your ultimate 10 times
+    statId: ultimate_used
+    target: 10
+    rewards:
+    - type: 0
+      id: 
+      amount: 2000
+  - id: om_quests
+    description: Complete 6 quests
+    statId: quest_completed
+    target: 6
+    rewards:
+    - type: 5
+      id: 
+      amount: 500

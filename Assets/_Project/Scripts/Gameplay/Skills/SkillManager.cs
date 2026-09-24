@@ -34,6 +34,7 @@ namespace NinjaVillage.Gameplay.Skills
             _eligibleBuffer.Clear();
             foreach (var skill in skillPool)
             {
+                if (skill == null || skill.IsEvolution) continue;
                 int currentLevel = _levels.GetValueOrDefault(skill, 0);
                 if (currentLevel < skill.MaxLevel)
                     _eligibleBuffer.Add(skill);

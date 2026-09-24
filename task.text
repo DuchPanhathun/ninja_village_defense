@@ -10,10 +10,10 @@
 - [x]  Configure Addressables        <!-- Addressables settings initialized -->
 - [x]  Configure ScriptableObject architecture
 - [x]  Create Event Bus system
-- [ ]  Configure Dependency Injection (optional)
+- [ ]  Configure Dependency Injection (optional)   <!-- skipped by design: EventBus + static services + the RunStartModifiers registry cover it; revisit only if tests need injection -->
 - [x]  Configure Firebase            <!-- Android+iOS apps registered, google-services.json/GoogleService-Info.plist placed, SDK imported, Android Resolver succeeded -->
-- [ ]  Configure Cloud Save          <!-- Firestore package imported; actual save/load code against it not written yet (local JSON save works today, see SaveSystem.cs) -->
-- [ ]  Configure Analytics           <!-- Analytics package imported; no events instrumented yet -->
+- [x]  Configure Cloud Save   <!-- BackendService + FirebaseBackendProvider (Firestore users/{uid}, conflict policy BackendRules.Decide); offline in Editor — console setup: firebase/README.md -->
+- [x]  Configure Analytics   <!-- AnalyticsService → Firebase Analytics on device (run_start/run_end/boss/skill/evolution/stat_*/screen_view) -->
 - [x]  Configure Mobile Build (Android/iOS)   <!-- Android: switched platform, IL2CPP, ARM64-only, min API 26+. iOS platform switch deferred until closer to an iOS build, per Android-first plan -->
 
 ---
@@ -23,8 +23,8 @@
 ## Player Controller
 
 - [x]  Implement joystick movement    <!-- VirtualJoystick.cs (mobile) + KeyboardMoveInputProvider.cs (editor testing) -->
-- [ ]  Implement movement animation   <!-- Animator hooks wired (Speed/Die params); needs Editor: Animator Controller + sprite clips -->
-- [ ]  Add dash movement support (future)
+- [x]  Implement movement animation   <!-- ProceduralSpriteAnimator: code-driven walk/idle/hit/death placeholder; the Animator hooks still drive real clips once art exists -->
+- [x]  Add dash movement support (future)   <!-- DashController: Space or on-screen DASH button, i-frames, cooldown -->
 - [x]  Add movement speed modifier    <!-- PlayerStats.MoveSpeedMultiplier -->
 - [x]  Add player health              <!-- Core/Combat/Health.cs, shared with enemies -->
 - [x]  Add player death               <!-- PlayerController.HandleDeath -> PlayerDiedEvent -->
@@ -57,7 +57,7 @@
 
 ## Base Weapon Framework
 
-- [ ]  Weapon interface   <!-- covered by WeaponDefinition SO + generic AutoAttackController/Projectile instead of a formal IWeapon; revisit if melee weapons need a different code path -->
+- [x]  Weapon interface   <!-- IWeapon, implemented by WeaponDefinition (Id, Range, FireSoundId, Fire) -->
 - [x]  Weapon stats       <!-- WeaponDefinition.cs -->
 - [x]  Weapon rarity      <!-- Core/Rarity.cs, shared with skills -->
 - [x]  Weapon level       <!-- RuntimeWeapon.cs -->
@@ -81,7 +81,7 @@
 
 - [x]  Melee attack   <!-- KatanaWeaponDefinition: instant arc damage, no projectile -->
 - [x]  Arc attack     <!-- Core/Combat/MeleeArc.cs -->
-- [ ]  Slash animation   <!-- needs Editor: Animator Controller + sprite clips -->
+- [x]  Slash animation   <!-- Vfx.Slash crescent on every Katana swing (placeholder until sprite clips) -->
 
 ### Bow
 
@@ -104,7 +104,7 @@
 - [x]  Enemy attack
 - [x]  Enemy health       <!-- shared Health component -->
 - [x]  Enemy death
-- [ ]  Enemy animation    <!-- Animator hooks wired; needs Editor: Animator Controller + sprite clips -->
+- [x]  Enemy animation   <!-- ProceduralSpriteAnimator added to every enemy without an Animator Controller -->
 
 ---
 
@@ -154,7 +154,7 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 - [x]  XP collection
 - [x]  XP bar          <!-- XpBarUI script; canvas wiring done -->
 - [x]  Level up
-- [ ]  Level animation
+- [x]  Level animation   <!-- BattleBanner 'LEVEL UP!' + gold burst VFX, unscaled time -->
 
 ---
 
@@ -214,18 +214,18 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Evolution Recipes
 
-- [ ]  Fire + Wind = Firestorm   <!-- EvolutionRecipe.cs framework ready; create .asset in Editor -->
-- [ ]  Lightning + Kunai = Thunder Kunai   <!-- create .asset in Editor -->
-- [ ]  Clone + Katana = Shadow Army   <!-- create .asset in Editor -->
-- [ ]  Smoke + Teleport = Invisible Assassin   <!-- create .asset in Editor; Teleport skill not yet implemented -->
+- [x]  Fire + Wind = Firestorm   <!-- Evolution_firestorm: Fire Blade + Gale Step (new Wind skill) → FirestormSkill -->
+- [x]  Lightning + Kunai = Thunder Kunai   <!-- Evolution_thunder_kunai: Lightning Strike + Kunai equipped → ThunderKunaiSkill (chain lightning) -->
+- [x]  Clone + Katana = Shadow Army   <!-- Evolution_shadow_army: Shadow Clone (new skill) + Katana → ShadowArmySkill -->
+- [x]  Smoke + Teleport = Invisible Assassin   <!-- Evolution_invisible_assassin: Smoke Bomb + Blink (new Teleport skill) → InvisibleAssassinSkill -->
 
 ---
 
 ## Hidden Discovery System
 
 - [x]  Evolution journal   <!-- EvolutionJournal.cs; add to player GameObject in Battle.unity -->
-- [ ]  Unlock animation
-- [ ]  Collection UI
+- [x]  Unlock animation   <!-- BattleBanner 'EVOLUTION!' flash + sound on EvolutionUnlockedEvent -->
+- [x]  Collection UI   <!-- CollectionScreen: discovered recipes vs ??? hints, NEW badge; discoveries persist in EvolutionSaveData -->
 
 ---
 
@@ -299,9 +299,9 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Village Scene
 
-- [ ]  Village map
-- [ ]  Camera navigation
-- [ ]  NPC system
+- [x]  Village map   <!-- Village scene (built by SceneBuilder): VillageMap draws buildings/trees/walls/villagers from data, grows with levels -->
+- [x]  Camera navigation   <!-- VillageCameraController: drag/pinch/scroll, inertia, bounds, tap-to-open -->
+- [x]  NPC system   <!-- VillagerNpc: wandering villagers (count grows with village), tap for tips -->
 
 ---
 
@@ -309,29 +309,29 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ### Dojo
 
-- [ ]  Hero upgrade
-- [ ]  Attack bonus
+- [x]  Hero upgrade   <!-- HeroScreen upgrade button; hero level cap = Dojo level (HeroRules) -->
+- [x]  Attack bonus   <!-- VillageRunModifier: Dojo Lv1 +2% ... Lv20 +80% attack -->
 
 ### Forge
 
-- [ ]  Weapon crafting
-- [ ]  Weapon upgrading
+- [x]  Weapon crafting   <!-- ForgeService.TryCraft + ForgeScreen -->
+- [x]  Weapon upgrading   <!-- ForgeService.TryUpgrade (cap = Forge level) + reforge tiers Iron→Steel→Golden→Legendary -->
 
 ### Shrine
 
-- [ ]  Passive blessing
+- [x]  Passive blessing   <!-- ShrineService + ShrineScreen: 6 blessings, ranks capped by Shrine level -->
 
 ### Pet House
 
-- [ ]  Pet management
+- [x]  Pet management   <!-- PetScreen / PetService: unlock, level, gear, active pet; slots & caps from Pet House -->
 
 ### Market
 
-- [ ]  Daily shop
+- [x]  Daily shop   <!-- MarketService + MarketScreen: deterministic daily stock, buy once per day -->
 
 ### Castle
 
-- [ ]  Main progression
+- [x]  Main progression   <!-- Castle level gates every other building's level cap; BuildingScreen shows the progression overview -->
 
 ---
 
@@ -339,19 +339,19 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Pet Framework
 
-- [ ]  Pet follow AI
-- [ ]  Pet leveling
-- [ ]  Pet equipment
+- [x]  Pet follow AI   <!-- PetController follow/orbit; spawned by PetRunModifier -->
+- [x]  Pet leveling   <!-- PetService.TryUpgrade, PetStatMath scaling -->
+- [x]  Pet equipment   <!-- PetEquipmentDefinition + gear shop in PetScreen -->
 
 ---
 
 ## Pets
 
-- [ ]  Fox
-- [ ]  Wolf
-- [ ]  Hawk
-- [ ]  Monkey
-- [ ]  Dragon
+- [x]  Fox   <!-- XpCollector ability: pulls XP orbs + XP/pickup passive -->
+- [x]  Wolf   <!-- Bite ability -->
+- [x]  Hawk   <!-- TreasureHunter ability + luck passive -->
+- [x]  Monkey   <!-- BananaThrow ability (stun) -->
+- [x]  Dragon   <!-- FireBreath ability (burn cone), premium -->
 
 ---
 
@@ -359,27 +359,27 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Hero Framework
 
-- [ ]  Hero unlock
-- [ ]  Hero stats
-- [ ]  Hero progression
+- [x]  Hero unlock   <!-- HeroService.TryUnlock (coins or gems), starter hero granted free -->
+- [x]  Hero stats   <!-- HeroStatBlock base + per-level growth, applied by HeroRunModifier -->
+- [x]  Hero progression   <!-- HeroService.TryUpgrade, cost curve, Dojo-gated cap -->
 
 ---
 
 ## Heroes
 
-- [ ]  Assassin
-- [ ]  Samurai
-- [ ]  Monk
-- [ ]  Mage Ninja
-- [ ]  Beast Ninja
+- [x]  Assassin   <!-- fast attacks, crits, low HP; free starter -->
+- [x]  Samurai   <!-- tank, Katana, damage reduction -->
+- [x]  Monk   <!-- heal/s, starting shield, XP -->
+- [x]  Mage Ninja   <!-- starts with Fire Blade + Lightning Strike -->
+- [x]  Beast Ninja   <!-- wolf pack companions that grow with level; premium (gems / starter pack) -->
 
 ---
 
 # 🎮 EPIC 14 - Talent Tree
 
-- [ ]  Talent categories
-- [ ]  Talent unlock
-- [ ]  Talent reset
+- [x]  Talent categories   <!-- Offense / Defense / Utility (TalentDefinition.category), 15 nodes -->
+- [x]  Talent unlock   <!-- TalentService.TryRankUp: prerequisites + coin cost curve -->
+- [x]  Talent reset   <!-- TalentService.TryReset: full coin refund, first reset free then gems -->
 
 ---
 
@@ -387,17 +387,17 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 - [x]  Coins   <!-- CurrencyWallet + EconomyManager; auto-credits on EnemyKilledEvent w/ Gold Bonus skill -->
 - [x]  Gems    <!-- wallet supports both currencies uniformly; no gem-earning source hooked up yet -->
-- [ ]  Upgrade costs
-- [ ]  Reward balancing
+- [x]  Upgrade costs   <!-- CostCurve (exponential/linear/table) used by buildings, blessings, forge, heroes, pets, talents -->
+- [x]  Reward balancing   <!-- EconomyConfig + RunRewardService (wave-clear coins, boss gems, victory bonus); pacing rationale in VillageGenerator — tune after playtests -->
 
 ---
 
 # 🎮 EPIC 16 - Save System
 
 - [x]  Local save   <!-- SaveSystem.cs, JSON to Application.persistentDataPath -->
-- [ ]  Cloud save   <!-- needs Firebase Firestore, see EDITOR_SETUP.md -->
-- [ ]  Player profile
-- [ ]  Inventory save
+- [x]  Cloud save   <!-- see EPIC 22 Cloud Save -->
+- [x]  Player profile   <!-- ProfileScreen: editable name, lifetime stats, recent runs (ProfileSaveData) -->
+- [x]  Inventory save   <!-- InventorySaveData: weapons/levels/tiers + equipment; battle pickups & chests persist -->
 
 ---
 
@@ -405,10 +405,10 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Main Menu
 
-- [ ]  Home
-- [ ]  Settings
-- [ ]  Inventory
-- [ ]  Village
+- [x]  Home   <!-- HomeScreen (MainMenu scene) -->
+- [x]  Settings   <!-- SettingsScreen + SettingsService: volumes, vibration, 30/60 FPS, quality, damage numbers, reset -->
+- [x]  Inventory   <!-- InventoryScreen (MainMenu + Village) -->
+- [x]  Village   <!-- VILLAGE button → Village scene -->
 
 ---
 
@@ -425,74 +425,74 @@ Wolf and other early/mid/late enemies not listed above are fully supported by th
 
 ## Village UI
 
-- [ ]  Building menu
-- [ ]  Hero screen
-- [ ]  Weapon inventory
-- [ ]  Pet inventory
+- [x]  Building menu   <!-- BuildingScreen -->
+- [x]  Hero screen   <!-- HeroScreen -->
+- [x]  Weapon inventory   <!-- InventoryScreen + ForgeScreen -->
+- [x]  Pet inventory   <!-- PetScreen -->
 
 ---
 
 # 🎮 EPIC 18 - Audio
 
-- [ ]  Background music
-- [ ]  Battle music
-- [ ]  Boss music
-- [ ]  Attack SFX
-- [ ]  Skill SFX
-- [ ]  UI SFX
+- [x]  Background music   <!-- MusicDirector: menu/village tracks by scene; procedural placeholder loops until real clips go into AudioLibrary -->
+- [x]  Battle music   <!-- MusicDirector battle track (placeholder loop) -->
+- [x]  Boss music   <!-- MusicDirector: boss track on BossSpawned, back to battle on BossDefeated -->
+- [x]  Attack SFX   <!-- weapon FireSoundId played by AutoAttackController + hit/death via GameplaySfxBridge -->
+- [x]  Skill SFX   <!-- lightning, explosion, smoke, teleport, dash, ultimate, evolution cues -->
+- [x]  UI SFX   <!-- click/back/purchase/error/upgrade/reward cues on every screen -->
 
 ---
 
 # 🎮 EPIC 19 - Daily Content
 
-- [ ]  Daily login
-- [ ]  Daily quest
-- [ ]  Weekly quest
-- [ ]  Achievement system
+- [x]  Daily login   <!-- DailyLoginScreen: 7-day calendar, streak, never resets progress -->
+- [x]  Daily quest   <!-- QuestService: 3/day rolled deterministically, QuestTracker progress -->
+- [x]  Weekly quest   <!-- 3/week -->
+- [x]  Achievement system   <!-- 15 tiered achievements (AchievementsScreen) -->
 
 ---
 
 # 🎮 EPIC 20 - Live Ops
 
-- [ ]  Battle Pass
-- [ ]  Seasonal events
-- [ ]  Limited-time shop
-- [ ]  Event missions
+- [x]  Battle Pass   <!-- BattlePassService + BattlePassScreen: 2 seasons x 30 tiers, free/premium, retroactive premium -->
+- [x]  Seasonal events   <!-- EventDefinition windows + LiveOpsRunModifier coin/XP bonuses; Remote Config toggles -->
+- [x]  Limited-time shop   <!-- LimitedOfferDefinition + EventsScreen shop with purchase limits -->
+- [x]  Event missions   <!-- LiveOpsTracker mission progress, claim in EventsScreen -->
 
 ---
 
 # 🎮 EPIC 21 - Monetization
 
-- [ ]  Cosmetic skins
-- [ ]  Premium heroes
-- [ ]  Remove Ads purchase
-- [ ]  Revival ads
-- [ ]  Reward ads
-- [ ]  Starter packs
-- [ ]  Gem purchases
+- [x]  Cosmetic skins   <!-- SkinDefinition/SkinService, gem skins + battle pass skins; color tints until skin art exists -->
+- [x]  Premium heroes   <!-- premium heroes (Beast Ninja) bought with gems; included in the Starter Pack -->
+- [x]  Remove Ads purchase   <!-- Unity IAP 5.4.3 non-consumable; stops interstitials -->
+- [x]  Revival ads   <!-- RevivePromptUI once per run → GameManager.AcceptRevive; SIMULATED ad provider until an ad network (e.g. LevelPlay) is plugged into IAdsProvider -->
+- [x]  Reward ads   <!-- 2x run coins + free gems (5/day); simulated ads (see Revival ads) -->
+- [x]  Starter packs   <!-- starter_pack: 300 gems + 5000 coins + Beast Ninja, once -->
+- [x]  Gem purchases   <!-- gems_100/550/1200 via Unity IAP (fake store in Editor) — create the 6 product ids in Play Console / App Store Connect -->
 
 ---
 
 # 🎮 EPIC 22 - Backend (Firebase)
 
-- [ ]  Authentication
-- [ ]  Cloud Save
-- [ ]  Remote Config
-- [ ]  Analytics
-- [ ]  Crashlytics
-- [ ]  Daily rewards sync
-- [ ]  Leaderboard
-- [ ]  Player profile
+- [x]  Authentication   <!-- anonymous sign-in + email linking (AccountScreen); device-only, needs console setup (firebase/README.md) -->
+- [x]  Cloud Save   <!-- Firestore save sync, throttled uploads, newer/progress-aware conflict policy -->
+- [x]  Remote Config   <!-- defaults + fetch into RemoteValues (firebase/remote_config_defaults.json) -->
+- [x]  Analytics   <!-- AnalyticsService (opt-out on AccountScreen) -->
+- [x]  Crashlytics   <!-- CrashReporter forwards errors; uncaught exceptions fatal -->
+- [x]  Daily rewards sync   <!-- trusted server time → GameClock.SetServerTime; daily state rides the cloud save -->
+- [x]  Leaderboard   <!-- LeaderboardService + LeaderboardScreen (Firestore, composite index in firebase/) -->
+- [x]  Player profile   <!-- public profile (name + progress) written on sign-in -->
 
 ---
 
 # 🎮 EPIC 23 - Polish
 
-- [ ]  Visual effects
+- [x]  Visual effects   <!-- Vfx/VfxDirector: pooled code-driven hits, deaths, explosions, lightning, slashes, bursts -->
 - [x]  Screen shake     <!-- CameraShake: auto on player damage + CameraShakeRequestEvent for big impacts -->
 - [x]  Hit flash        <!-- HitFlash component for any Health owner -->
 - [x]  Damage numbers   <!-- DamageNumber + spawner; needs Editor: world-space TMP prefab -->
-- [ ]  Performance optimization
-- [ ]  Mobile optimization
-- [ ]  Battery optimization
-- [ ]  Asset compression
+- [x]  Performance optimization   <!-- PrefabPool (projectiles, XP orbs, coins, damage numbers), 150 live-enemy cap, allocation-free targeting -->
+- [x]  Mobile optimization   <!-- touch joystick + dash button, portrait UI scaling, pause on app background -->
+- [x]  Battery optimization   <!-- 30 FPS battery saver, screen sleeps outside battle, capped frame delta -->
+- [x]  Asset compression   <!-- TextureImportRules: ASTC 6x6 Android/iOS, no mipmaps; 'Create Sprite Atlas' menu -->

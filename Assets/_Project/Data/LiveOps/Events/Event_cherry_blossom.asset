@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c57b40574a4b462aad19e7401a9d77, type: 3}
+  m_Name: Event_cherry_blossom
+  m_EditorClassIdentifier: 
+  id: cherry_blossom
+  displayName: Cherry Blossom Festival
+  description: "Petals fall on the village \u2014 demons drop extra coins!"
+  icon: {fileID: 0}
+  startDate: 2026-09-20
+  durationDays: 14
+  themeColor: {r: 1, g: 0.7, b: 0.82, a: 1}
+  coinBonus: 0.25
+  xpBonus: 0
+  missions:
+  - id: cb_kill
+    description: Defeat 500 demons
+    statId: enemies_killed
+    target: 500
+    rewards:
+    - type: 1
+      id: 
+      amount: 20
+  - id: cb_wave
+    description: Reach wave 8
+    statId: wave_reached
+    target: 8
+    rewards:
+    - type: 2
+      id: jade_charm
+      amount: 1
+  - id: cb_wins
+    description: Win 2 battles
+    statId: run_victory
+    target: 2
+    rewards:
+    - type: 1
+      id: 
+      amount: 30
+    - type: 5
+      id: 
+      amount: 300
+  - id: cb_chests
+    description: Open 3 treasure chests
+    statId: chest_opened
+    target: 3
+    rewards:
+    - type: 0
+      id: 
+      amount: 1500
+  - id: cb_build
+    description: Upgrade buildings 3 times
+    statId: building_upgraded
+    target: 3
+    rewards:
+    - type: 1
+      id: 
+      amount: 15

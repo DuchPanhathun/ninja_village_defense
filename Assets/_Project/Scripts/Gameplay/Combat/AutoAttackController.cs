@@ -1,4 +1,6 @@
+using NinjaVillage.Core.Audio;
 using NinjaVillage.Core.Combat;
+using NinjaVillage.Core.Utilities;
 using NinjaVillage.Gameplay.Player;
 using NinjaVillage.Gameplay.Weapons;
 using UnityEngine;
@@ -18,6 +20,7 @@ namespace NinjaVillage.Gameplay.Combat
         [SerializeField] private float multiShotSpreadDegrees = 12f;
 
         private PlayerStats _stats;
+        private NinjaVillage.Gameplay.Animation.ProceduralSpriteAnimator _animator;
         private RuntimeWeapon _weapon;
         private float _cooldownRemaining;
 
@@ -31,6 +34,9 @@ namespace NinjaVillage.Gameplay.Combat
             if (startingWeapon != null)
                 EquipWeapon(startingWeapon);
         }
+
+        // Start, not Awake: PlayerController adds the procedural animator in its own Awake.
+        private void Start() => TryGetComponent(out _animator);
 
         public void EquipWeapon(WeaponDefinition definition, int level = 1)
         {
@@ -52,6 +58,8 @@ namespace NinjaVillage.Gameplay.Combat
             if (target == null) return;
 
             _weapon.Definition.Fire(this, transform, target, _stats);
+            Sfx.PlayAt(_weapon.Definition.FireSoundId, transform.position);
+            if (_animator != null) _animator.Punch(0.6f);
 
             float attacksPerSecond = _weapon.CurrentAttacksPerSecond * _stats.AttackSpeedMultiplier;
             _cooldownRemaining = 1f / Mathf.Max(0.01f, attacksPerSecond);
@@ -76,7 +84,7 @@ namespace NinjaVillage.Gameplay.Combat
             }
 
             float speed = speedOverride > 0f ? speedOverride : _weapon.Definition.ProjectileSpeed;
-            var instance = Instantiate(_weapon.Definition.ProjectilePrefab, origin, Quaternion.identity);
+            var instance = PrefabPool.Get(_weapon.Definition.ProjectilePrefab, origin, Quaternion.identity);
             if (!Mathf.Approximately(_stats.ProjectileSizeMultiplier, 1f))
                 instance.transform.localScale *= _stats.ProjectileSizeMultiplier;
 

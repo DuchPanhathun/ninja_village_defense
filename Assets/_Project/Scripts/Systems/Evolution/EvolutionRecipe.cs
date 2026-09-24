@@ -27,8 +27,13 @@ namespace NinjaVillage.Systems.Evolution
         [Tooltip("The evolved skill granted when prerequisites are satisfied.")]
         [SerializeField] private SkillDefinition resultSkill;
 
+        [Header("Hidden discovery")]
+        [Tooltip("Vague hint shown in the Collection before the recipe is discovered, e.g. \"Flames that ride the wind...\"")]
+        [SerializeField] private string hint;
+
         public SkillDefinition[] RequiredSkills => requiredSkills;
         public WeaponDefinition RequiredWeapon => requiredWeapon;
         public SkillDefinition ResultSkill => resultSkill;
+        public string Hint => hint;
     }
 }

@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "leaderboard",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bestWave", "order": "DESCENDING" },
+        { "fieldPath": "bestKills", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

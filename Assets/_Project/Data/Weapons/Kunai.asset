@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Kunai
   m_EditorClassIdentifier: 
   id: Kunai
-  displayName: 
-  description: 
+  displayName: Kunai
+  description: Fast, reliable throwing knife aimed at the nearest demon.
   icon: {fileID: 0}
   rarity: 0
+  element: 0
   baseDamage: 10
   baseAttacksPerSecond: 2
   range: 6

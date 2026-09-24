@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e7e620e84bcc114a99b692b5d9eb04, type: 3}
+  m_Name: Blessing_prosperity
+  m_EditorClassIdentifier: 
+  id: prosperity
+  displayName: Blessing of Prosperity
+  description: +Coins from every source.
+  icon: {fileID: 0}
+  stat: 3
+  valuePerRank: 0.05
+  maxRank: 10
+  requiredShrineLevel: 2
+  rankCost:
+    type: 0
+    currency: 0
+    baseCost: 160
+    growth: 1.4
+    linearStep: 0
+    table: 
+    roundTo: 5
+  color: {r: 1, g: 0.85, b: 0.3, a: 1}

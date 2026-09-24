@@ -1,4 +1,5 @@
 using NinjaVillage.Core;
+using NinjaVillage.Core.Audio;
 using NinjaVillage.Core.ScriptableObjects;
 using NinjaVillage.Gameplay.Combat;
 using NinjaVillage.Gameplay.Player;
@@ -14,7 +15,7 @@ namespace NinjaVillage.Gameplay.Weapons
     /// other weapons subclass this and override it.
     /// </summary>
     [CreateAssetMenu(fileName = "NewWeapon", menuName = "Ninja Village/Weapon Definition")]
-    public class WeaponDefinition : DescriptiveScriptableObject
+    public class WeaponDefinition : DescriptiveScriptableObject, IWeapon
     {
         [Header("Rarity")]
         [SerializeField] private Rarity rarity = Rarity.Common;
@@ -44,6 +45,9 @@ namespace NinjaVillage.Gameplay.Weapons
         public float KnockbackForce => knockbackForce;
         public GameObject ProjectilePrefab => projectilePrefab;
         public float ProjectileSpeed => projectileSpeed;
+
+        /// <summary>Sound played each time this weapon fires (AutoAttackController plays it).</summary>
+        public virtual string FireSoundId => AudioCueIds.KunaiThrow;
 
         public float GetDamage(int level) => baseDamage + damagePerLevel * (level - 1);
         public float GetAttacksPerSecond(int level) => baseAttacksPerSecond + attacksPerSecondPerLevel * (level - 1);

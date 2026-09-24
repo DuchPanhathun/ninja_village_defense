@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e7c42eb8ec8b0236bbc6aa99b4c7d33, type: 3}
+  m_Name: Daily_skills_10
+  m_EditorClassIdentifier: 
+  id: daily_skills_10
+  displayName: Pick 10 skills
+  description: Pick 10 skills
+  icon: {fileID: 0}
+  scope: 0
+  statId: skill_picked
+  target: 10
+  reward:
+    currency: 0
+    amount: 100
+  weight: 1

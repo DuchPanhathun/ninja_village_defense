@@ -12,6 +12,8 @@ namespace NinjaVillage.Gameplay.Weapons
         [Header("Chain Sickle - Pull")]
         [SerializeField] private float pullForce = 6f;
 
+        public override string FireSoundId => NinjaVillage.Core.Audio.AudioCueIds.ChainSickleSwing;
+
         public override void Fire(AutoAttackController controller, Transform origin, Transform target, PlayerStats stats)
         {
             if (!target.TryGetComponent<IDamageable>(out var damageable) || !damageable.IsAlive) return;
@@ -21,6 +23,7 @@ namespace NinjaVillage.Gameplay.Weapons
 
             var (damage, isCritical) = controller.RollDamage();
             damageable.TakeDamage(new DamageInfo(damage, isCritical, pullDirection, pullForce, controller.gameObject));
+            NinjaVillage.Gameplay.Vfx.Vfx.Slash(target.position, -pullDirection, 0.6f, new Color(0.8f, 0.8f, 0.9f));
         }
     }
 }

@@ -86,16 +86,18 @@ namespace NinjaVillage.Gameplay.Waves
             {
                 for (int i = 0; i < entry.Count; i++)
                 {
-                    spawnManager.Spawn(entry.EnemyDefinition, spawnManager.GetSpawnPositionAroundPlayer(), difficultyMultiplier);
-                    _aliveCount++;
+                    // Wait for room under the live-enemy cap instead of dropping the spawn.
+                    while (!spawnManager.CanSpawn) yield return null;
+                    if (spawnManager.Spawn(entry.EnemyDefinition, spawnManager.GetSpawnPositionAroundPlayer(), difficultyMultiplier) != null)
+                        _aliveCount++; // only count what actually spawned, or the wave could never clear
                     yield return new WaitForSeconds(wave.SpawnInterval);
                 }
             }
 
             if (wave.IsBossWave && wave.BossDefinition != null)
             {
-                spawnManager.Spawn(wave.BossDefinition, spawnManager.GetSpawnPositionAroundPlayer(), difficultyMultiplier);
-                _aliveCount++;
+                if (spawnManager.Spawn(wave.BossDefinition, spawnManager.GetSpawnPositionAroundPlayer(), difficultyMultiplier) != null)
+                    _aliveCount++;
             }
 
             _finishedSpawningCurrentWave = true;

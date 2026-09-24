@@ -1,4 +1,5 @@
 using NinjaVillage.Core.Events;
+using NinjaVillage.Core.Utilities;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Progression
@@ -15,7 +16,7 @@ namespace NinjaVillage.Gameplay.Progression
         {
             if (xpOrbPrefab == null || evt.XpReward <= 0) return;
 
-            var instance = Instantiate(xpOrbPrefab, evt.Position, Quaternion.identity);
+            var instance = PrefabPool.Get(xpOrbPrefab, evt.Position, Quaternion.identity);
             instance.GetComponent<XpOrb>().Initialize(evt.XpReward);
         }
     }

@@ -37,7 +37,10 @@ namespace NinjaVillage.EditorTools
         public const string PrefabRoot = "Assets/_Project/Prefabs";
 
         [MenuItem("Ninja Village/Generate Default Content", priority = 0)]
-        public static void GenerateAll()
+        public static void GenerateAll() => RunGenerators();
+
+        /// <summary>Runs every generator; returns how many failed (for batch-mode exit codes).</summary>
+        public static int RunGenerators()
         {
             var generators = TypeCache.GetMethodsWithAttribute<ContentGeneratorAttribute>()
                 .Where(m => m.IsStatic && m.GetParameters().Length == 0)
@@ -48,21 +51,24 @@ namespace NinjaVillage.EditorTools
 
             // No StartAssetEditing batching on purpose: later generators look up assets that
             // earlier ones created (e.g. hero → weapon), which needs each import to land immediately.
+            int failures = 0;
             foreach (var (method, attr) in generators)
             {
                 try
                 {
                     method.Invoke(null, null);
                     AssetDatabase.SaveAssets();
-                    Debug.Log($"[ContentGen] ✓ {attr.Name}");
+                    Debug.Log($"[ContentGen] OK   {attr.Name}");
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"[ContentGen] ✗ {attr.Name}: {e.InnerException ?? e}");
+                    failures++;
+                    Debug.LogError($"[ContentGen] FAIL {attr.Name}: {e.InnerException ?? e}");
                 }
             }
             AssetDatabase.Refresh();
-            Debug.Log($"[ContentGen] Ran {generators.Count} generator(s).");
+            Debug.Log($"[ContentGen] Ran {generators.Count} generator(s), {failures} failed.");
+            return failures;
         }
 
         /// <summary>Creates every missing folder along <paramref name="assetFolder"/> ("Assets/a/b/c").</summary>
@@ -80,14 +86,37 @@ namespace NinjaVillage.EditorTools
         /// <summary>Loads the asset at <paramref name="assetPath"/> or creates it. Never duplicates.</summary>
         public static T CreateOrLoad<T>(string assetPath) where T : ScriptableObject => (T)CreateOrLoad(typeof(T), assetPath);
 
-        public static ScriptableObject CreateOrLoad(Type type, string assetPath)
+        public static ScriptableObject CreateOrLoad(Type type, string assetPath) => CreateOrLoad(type, assetPath, out _);
+
+        /// <summary>
+        /// Like <see cref="CreateOrLoad{T}(string)"/> but reports whether the asset is new. Generators apply
+        /// their default values only when <paramref name="created"/> is true, so re-running never
+        /// overwrites balance tweaks a designer made to an existing asset.
+        /// </summary>
+        public static T CreateOrLoad<T>(string assetPath, out bool created) where T : ScriptableObject =>
+            (T)CreateOrLoad(typeof(T), assetPath, out created);
+
+        public static ScriptableObject CreateOrLoad(Type type, string assetPath, out bool created)
         {
             var existing = AssetDatabase.LoadAssetAtPath(assetPath, type) as ScriptableObject;
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                created = false;
+                return existing;
+            }
 
             EnsureFolder(System.IO.Path.GetDirectoryName(assetPath)?.Replace('\\', '/'));
             var asset = ScriptableObject.CreateInstance(type);
             AssetDatabase.CreateAsset(asset, assetPath);
+            created = true;
+            return asset;
+        }
+
+        /// <summary>Loads a definition by path, creating it with <paramref name="values"/> only if it doesn't exist yet.</summary>
+        public static T Define<T>(string assetPath, params (string field, object value)[] values) where T : ScriptableObject
+        {
+            var asset = CreateOrLoad<T>(assetPath, out bool created);
+            if (created) Set(asset, values);
             return asset;
         }
 

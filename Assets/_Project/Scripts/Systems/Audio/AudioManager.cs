@@ -172,10 +172,12 @@ namespace NinjaVillage.Systems.Audio
             if (cue.Clips.Count == 0) return;
 
             float pan = 0f;
-            if (positional && !ComputePositional(position, out pan, out float attenuation))
-                return;
-            else if (positional)
+            if (positional)
+            {
+                if (!ComputePositional(position, out pan, out float attenuation))
+                    return;
                 mix *= attenuation;
+            }
 
             float now = Time.unscaledTime;
             if (!_throttle.TryPlay(cueId, now, cue.Settings.Cooldown, CountActiveVoices(cueId), cue.Settings.MaxVoices))

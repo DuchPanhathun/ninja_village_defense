@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44cdd3937edb814eeb709b58c1dcd6f4, type: 3}
+  m_Name: Pet_dragon
+  m_EditorClassIdentifier: 
+  id: dragon
+  displayName: Dragon
+  description: Breathes a cone of fire that burns everything in front of it.
+  icon: {fileID: 0}
+  abilityType: 5
+  abilitySummary: Breathes a cone of fire that burns everything in front of it.
+  sortOrder: 4
+  prefab: {fileID: 0}
+  placeholderColor: {r: 0.9, g: 0.2, b: 0.15, a: 1}
+  placeholderScale: 0.6
+  abilityPrefab: {fileID: 0}
+  followDistance: 1.4
+  unlockCurrency: 1
+  unlockCost: 200
+  requiredPetHouseLevel: 4
+  isPremium: 1
+  maxLevel: 20
+  upgradeCostBase: 80
+  upgradeCostExponent: 1.55
+  stats:
+    basePower: 14
+    powerGrowthPerLevel: 0.1
+    baseCooldown: 3.5
+    cooldownReductionPerLevel: 0.02
+    baseRange: 4
+    rangePerLevel: 0.1
+    baseEffectDuration: 3
+    effectDurationPerLevel: 0.05
+    moveSpeed: 7
+  ownerDamageInheritance: 0.5
+  ownerBonus:
+    xpGainPercent: 0
+    luckyDropChance: 0
+    goldBonusPercent: 0
+    xpMagnetPercent: 0
+    moveSpeedPercent: 0
+  ownerBonusPerLevel:
+    xpGainPercent: 0
+    luckyDropChance: 0
+    goldBonusPercent: 0
+    xpMagnetPercent: 0
+    moveSpeedPercent: 0

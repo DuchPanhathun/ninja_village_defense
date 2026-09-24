@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e8c9b4b4c9bff5909167df3d4c3e5a7, type: 3}
+  m_Name: Skill_Clone
+  m_EditorClassIdentifier: 
+  id: Skill_Clone
+  displayName: Shadow Clone
+  description: A shadow clone fights beside you. +1 clone per level.
+  icon: {fileID: 0}
+  category: 0
+  rarity: 1
+  maxLevel: 3
+  element: 6
+  isEvolution: 0
+  damageFraction: 0.35
+  damageFractionPerLevel: 0.05
+  orbitRadius: 1.6

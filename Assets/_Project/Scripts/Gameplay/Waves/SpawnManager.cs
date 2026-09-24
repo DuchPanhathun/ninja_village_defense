@@ -1,5 +1,6 @@
 using NinjaVillage.Gameplay.Enemies;
 using NinjaVillage.Gameplay.Player;
+using NinjaVillage.Core.Events;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Waves
@@ -13,6 +14,17 @@ namespace NinjaVillage.Gameplay.Waves
     {
         [SerializeField] private float minSpawnRadius = 8f;
         [SerializeField] private float maxSpawnRadius = 11f;
+        [Tooltip("Cap on enemies alive at once (EPIC 23 mobile performance). The WaveManager waits for room instead of dropping spawns.")]
+        [SerializeField] private int maxAliveEnemies = 150;
+
+        private int _alive;
+        public int AliveEnemies => _alive;
+        /// <summary>False while the arena is at the enemy cap — spawners should wait, not skip.</summary>
+        public bool CanSpawn => _alive < maxAliveEnemies;
+
+        private void OnEnable() => EventBus<EnemyKilledEvent>.Subscribe(OnEnemyKilled);
+        private void OnDisable() => EventBus<EnemyKilledEvent>.Unsubscribe(OnEnemyKilled);
+        private void OnEnemyKilled(EnemyKilledEvent evt) => _alive = Mathf.Max(0, _alive - 1);
 
         public EnemyController Spawn(EnemyDefinition definition, Vector2 position, float difficultyMultiplier = 1f, bool forceElite = false)
         {
@@ -23,6 +35,7 @@ namespace NinjaVillage.Gameplay.Waves
             }
 
             var instance = Instantiate(definition.EnemyPrefab, position, Quaternion.identity);
+            _alive++;
             var controller = instance.GetComponent<EnemyController>();
             controller.Initialize(definition, difficultyMultiplier, forceElite);
             return controller;

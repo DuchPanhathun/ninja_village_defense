@@ -14,6 +14,8 @@ namespace NinjaVillage.Systems.Save
         /// <summary>Talent node id → rank.</summary>
         public List<IdLevelEntry> Nodes = new();
         public int TimesReset;
+        /// <summary>Coins spent on talents since the last reset — refunded in full by a reset.</summary>
+        public int CoinsSpent;
 
         /// <summary>Coins spent on ranks since the last reset (refunded by a reset).</summary>
         public int CoinsInvested;

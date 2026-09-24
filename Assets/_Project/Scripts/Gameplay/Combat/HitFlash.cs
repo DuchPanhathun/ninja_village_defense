@@ -28,6 +28,12 @@ namespace NinjaVillage.Gameplay.Combat
                 _originalColor = spriteRenderer.color;
         }
 
+        /// <summary>Re-reads the sprite's color as the one to return to after a flash (call after tinting, e.g. skins).</summary>
+        public void RefreshBaseColor()
+        {
+            if (spriteRenderer != null && _activeFlash == null) _originalColor = spriteRenderer.color;
+        }
+
         private void OnEnable() => _health.OnDamaged += OnDamaged;
         private void OnDisable()
         {

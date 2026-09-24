@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bad2735b4809f126b3bf54d86e4730f, type: 3}
+  m_Name: Achievement_veteran
+  m_EditorClassIdentifier: 
+  id: veteran
+  displayName: Veteran
+  description: Complete battles.
+  icon: {fileID: 0}
+  statId: run_completed
+  tierTargets: 050000001900000064000000
+  tierRewards:
+  - currency: 0
+    amount: 500
+  - currency: 0
+    amount: 2000
+  - currency: 0
+    amount: 8000
+  sortOrder: 4

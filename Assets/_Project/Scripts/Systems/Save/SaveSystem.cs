@@ -16,7 +16,11 @@ namespace NinjaVillage.Systems.Save
     public static class SaveSystem
     {
         private const string FileName = "save.json";
-        private static string FilePath => Path.Combine(Application.persistentDataPath, FileName);
+
+        /// <summary>Tests point saves at a temp folder so they never touch the real save. Null = persistentDataPath.</summary>
+        public static string OverrideDirectory;
+
+        private static string FilePath => Path.Combine(OverrideDirectory ?? Application.persistentDataPath, FileName);
         private static string TempPath => FilePath + ".tmp";
         private static string BackupPath => FilePath + ".bak";
 

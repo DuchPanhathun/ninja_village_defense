@@ -1,0 +1,335 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43b3f15b379ae6c70aaaa6179b839b74, type: 3}
+  m_Name: AudioLibrary
+  m_EditorClassIdentifier: 
+  cues:
+  - id: sfx_kunai_throw
+    clips: []
+    volume: 0.35
+    pitchMin: 0.92
+    pitchMax: 1.08
+    cooldown: 0.06
+    maxVoices: 3
+    loop: 0
+  - id: sfx_shuriken_throw
+    clips: []
+    volume: 0.35
+    pitchMin: 0.92
+    pitchMax: 1.08
+    cooldown: 0.06
+    maxVoices: 3
+    loop: 0
+  - id: sfx_katana_slash
+    clips: []
+    volume: 0.45
+    pitchMin: 0.92
+    pitchMax: 1.08
+    cooldown: 0.08
+    maxVoices: 3
+    loop: 0
+  - id: sfx_bow_shot
+    clips: []
+    volume: 0.35
+    pitchMin: 0.92
+    pitchMax: 1.08
+    cooldown: 0.06
+    maxVoices: 3
+    loop: 0
+  - id: sfx_bow_charged
+    clips: []
+    volume: 0.6
+    pitchMin: 0.95
+    pitchMax: 1.05
+    cooldown: 0.15
+    maxVoices: 2
+    loop: 0
+  - id: sfx_chain_sickle
+    clips: []
+    volume: 0.45
+    pitchMin: 0.92
+    pitchMax: 1.08
+    cooldown: 0.08
+    maxVoices: 3
+    loop: 0
+  - id: sfx_enemy_hit
+    clips: []
+    volume: 0.3
+    pitchMin: 0.88
+    pitchMax: 1.12
+    cooldown: 0.045
+    maxVoices: 4
+    loop: 0
+  - id: sfx_critical_hit
+    clips: []
+    volume: 0.45
+    pitchMin: 0.95
+    pitchMax: 1.08
+    cooldown: 0.07
+    maxVoices: 3
+    loop: 0
+  - id: sfx_enemy_death
+    clips: []
+    volume: 0.4
+    pitchMin: 0.85
+    pitchMax: 1.15
+    cooldown: 0.06
+    maxVoices: 4
+    loop: 0
+  - id: sfx_player_hurt
+    clips: []
+    volume: 0.7
+    pitchMin: 0.95
+    pitchMax: 1.05
+    cooldown: 0.2
+    maxVoices: 1
+    loop: 0
+  - id: sfx_player_death
+    clips: []
+    volume: 0.9
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 1
+    maxVoices: 1
+    loop: 0
+  - id: sfx_boss_roar
+    clips: []
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.02
+    cooldown: 2
+    maxVoices: 1
+    loop: 0
+  - id: sfx_dash
+    clips: []
+    volume: 0.5
+    pitchMin: 0.95
+    pitchMax: 1.05
+    cooldown: 0.1
+    maxVoices: 2
+    loop: 0
+  - id: sfx_lightning
+    clips: []
+    volume: 0.55
+    pitchMin: 0.9
+    pitchMax: 1.1
+    cooldown: 0.06
+    maxVoices: 3
+    loop: 0
+  - id: sfx_explosion
+    clips: []
+    volume: 0.65
+    pitchMin: 0.9
+    pitchMax: 1.1
+    cooldown: 0.08
+    maxVoices: 3
+    loop: 0
+  - id: sfx_burn
+    clips: []
+    volume: 0.3
+    pitchMin: 0.9
+    pitchMax: 1.1
+    cooldown: 0.15
+    maxVoices: 2
+    loop: 0
+  - id: sfx_poison
+    clips: []
+    volume: 0.3
+    pitchMin: 0.9
+    pitchMax: 1.1
+    cooldown: 0.15
+    maxVoices: 2
+    loop: 0
+  - id: sfx_shield
+    clips: []
+    volume: 0.55
+    pitchMin: 0.97
+    pitchMax: 1.03
+    cooldown: 0.3
+    maxVoices: 1
+    loop: 0
+  - id: sfx_smoke_bomb
+    clips: []
+    volume: 0.55
+    pitchMin: 0.97
+    pitchMax: 1.03
+    cooldown: 0.3
+    maxVoices: 1
+    loop: 0
+  - id: sfx_teleport
+    clips: []
+    volume: 0.55
+    pitchMin: 0.95
+    pitchMax: 1.05
+    cooldown: 0.2
+    maxVoices: 2
+    loop: 0
+  - id: sfx_ultimate
+    clips: []
+    volume: 0.95
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.5
+    maxVoices: 1
+    loop: 0
+  - id: sfx_evolution
+    clips: []
+    volume: 0.95
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.5
+    maxVoices: 1
+    loop: 0
+  - id: sfx_coin
+    clips: []
+    volume: 0.35
+    pitchMin: 0.97
+    pitchMax: 1.08
+    cooldown: 0.05
+    maxVoices: 3
+    loop: 0
+  - id: sfx_xp
+    clips: []
+    volume: 0.22
+    pitchMin: 0.95
+    pitchMax: 1.12
+    cooldown: 0.04
+    maxVoices: 3
+    loop: 0
+  - id: sfx_equipment
+    clips: []
+    volume: 0.6
+    pitchMin: 0.98
+    pitchMax: 1.02
+    cooldown: 0.1
+    maxVoices: 2
+    loop: 0
+  - id: sfx_chest
+    clips: []
+    volume: 0.8
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.2
+    maxVoices: 1
+    loop: 0
+  - id: sfx_level_up
+    clips: []
+    volume: 0.75
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.3
+    maxVoices: 1
+    loop: 0
+  - id: sfx_skill_select
+    clips: []
+    volume: 0.65
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.1
+    maxVoices: 1
+    loop: 0
+  - id: sfx_ui_click
+    clips: []
+    volume: 0.6
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.03
+    maxVoices: 2
+    loop: 0
+  - id: sfx_ui_back
+    clips: []
+    volume: 0.6
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.03
+    maxVoices: 2
+    loop: 0
+  - id: sfx_ui_purchase
+    clips: []
+    volume: 0.75
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.08
+    maxVoices: 2
+    loop: 0
+  - id: sfx_ui_error
+    clips: []
+    volume: 0.6
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.15
+    maxVoices: 1
+    loop: 0
+  - id: sfx_ui_upgrade
+    clips: []
+    volume: 0.75
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.08
+    maxVoices: 2
+    loop: 0
+  - id: sfx_reward_claim
+    clips: []
+    volume: 0.75
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0.08
+    maxVoices: 2
+    loop: 0
+  - id: music_menu
+    clips: []
+    volume: 0.55
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0
+    maxVoices: 1
+    loop: 1
+  - id: music_village
+    clips: []
+    volume: 0.55
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0
+    maxVoices: 1
+    loop: 1
+  - id: music_battle
+    clips: []
+    volume: 0.55
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0
+    maxVoices: 1
+    loop: 1
+  - id: music_boss
+    clips: []
+    volume: 0.55
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0
+    maxVoices: 1
+    loop: 1
+  - id: music_victory
+    clips: []
+    volume: 0.7
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0
+    maxVoices: 1
+    loop: 0
+  - id: music_defeat
+    clips: []
+    volume: 0.7
+    pitchMin: 1
+    pitchMax: 1
+    cooldown: 0
+    maxVoices: 1
+    loop: 0

@@ -15,6 +15,8 @@ namespace NinjaVillage.Gameplay.Weapons
         [Header("Shuriken - Circular Throw")]
         [SerializeField] private int baseProjectileCount = 8;
 
+        public override string FireSoundId => NinjaVillage.Core.Audio.AudioCueIds.ShurikenThrow;
+
         public override void Fire(AutoAttackController controller, Transform origin, Transform target, PlayerStats stats)
         {
             Vector2 originPos = origin.position;

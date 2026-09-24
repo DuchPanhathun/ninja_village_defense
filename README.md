@@ -1,13 +1,13 @@
 # Ninja Village Defense
 
-A 2D roguelike action game (in the vein of *Survivor.io* / *Archero*) built in **Unity 6 (6000.0 LTS)** with **C#**, backed by **Firebase**. Target platforms: **Android first, then iOS** from the same codebase.
+A 2D roguelike action game (in the vein of *Survivor.io* / *Archero*) built in **Unity 6 (6000.0.84f1 LTS)** with **C#**, backed by **Firebase**. Target platforms: **Android first, then iOS** from the same codebase.
 
 > Become the last ninja protecting your hidden village against endless demon invasions. Every battle makes your village stronger, unlocks new ninjas, and reveals ancient forbidden techniques.
 
 See [`goal.text`](goal.text) for the full design vision and [`task.text`](task.text) for the living build checklist.
 
 ## Tech Stack
-- **Engine:** Unity 6000.0 LTS — URP (Universal Render Pipeline), new Input System, Addressables, Cinemachine, 2D packages.
+- **Engine:** Unity 6000.0.84f1 LTS — URP (Universal Render Pipeline), new Input System, Addressables, Cinemachine, 2D packages, Unity IAP 5.
 - **Language:** C# (`NinjaVillage.*` namespaces, single `NinjaVillage` assembly for now).
 - **Backend:** Firebase — Auth, Cloud Save (Firestore), Remote Config, Analytics, Crashlytics.
 
@@ -47,4 +47,12 @@ The committed `firebase_cred.tsx` is a **web** config — Unity does **not** use
 Both credential files are git-ignored — never commit them.
 
 ## Status
-Currently completing **EPIC 0 – Project Setup**. Progress tracked in [`task.text`](task.text).
+All EPICs are implemented (220/221 tasks; optional DI skipped). The core loop runs end to end:
+Main Menu → Village → Battle → back. Placeholder art and audio are generated in code. See
+[`NEXT_STEPS.md`](NEXT_STEPS.md) for what's verified and what still needs you: Firebase console, store
+products, an ad network, real art/audio, and device testing.
+
+### Working on the project
+- **Regenerate content + scenes:** Unity menu *Ninja Village → Setup Everything (Content + Scenes)*.
+- **Fast compile check (no Editor needed after one import):** `python3 Tools/compile_check.py --player`
+- **Tests:** `unity test . --mode EditMode` / `unity test . --mode PlayMode`

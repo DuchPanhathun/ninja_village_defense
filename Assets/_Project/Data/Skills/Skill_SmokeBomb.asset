@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09e3ed368eaa48a9ba7418b85f016e6f, type: 3}
+  m_Name: Skill_SmokeBomb
+  m_EditorClassIdentifier: 
+  id: Skill_SmokeBomb
+  displayName: Smoke Bomb
+  description: "Periodically vanish in smoke \u2014 enemies lose track of you."
+  icon: {fileID: 0}
+  category: 1
+  rarity: 1
+  maxLevel: 5
+  element: 6
+  activeDurationPerLevel: 1.5
+  cycleDuration: 6

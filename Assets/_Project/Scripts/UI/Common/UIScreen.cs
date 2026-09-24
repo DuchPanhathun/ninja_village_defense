@@ -31,6 +31,12 @@ namespace NinjaVillage.UI.Common
         /// <summary>Popups draw over the previous screen instead of replacing it.</summary>
         public virtual bool IsPopup => false;
 
+        /// <summary>
+        /// HUD screens (e.g. the village overlay) have a transparent root that lets touches through to
+        /// the world behind; only their own buttons/panels catch input.
+        /// </summary>
+        protected virtual bool IsHud => false;
+
         public RectTransform Root { get; private set; }
         /// <summary>Area below the header where <see cref="Build"/> puts content (has a VerticalLayoutGroup).</summary>
         protected RectTransform Body { get; private set; }
@@ -42,6 +48,11 @@ namespace NinjaVillage.UI.Common
         {
             var navigator = UIScreenNavigator.Instance;
             Root = UIBuilder.Panel(navigator.CanvasTransform, $"Screen_{ScreenId}", IsPopup ? new Color(0, 0, 0, 0.7f) : UITheme.Backdrop);
+            if (IsHud && Root.TryGetComponent<Image>(out var rootImage))
+            {
+                rootImage.color = Color.clear;
+                rootImage.raycastTarget = false;
+            }
 
             RectTransform container = Root;
             if (IsPopup)

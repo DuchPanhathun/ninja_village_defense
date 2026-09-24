@@ -46,9 +46,11 @@ namespace NinjaVillage.Gameplay.Skills.Behaviors
             // Only consume the cooldown when the bomb actually lands near something,
             // so the skill doesn't feel wasted while kiting in open space.
             if (hits > 0)
+            {
                 _nextBombAt = Time.time + _interval;
-
-            // TODO(VFX): explosion effect at blastCenter (EPIC 23).
+                // The ring itself comes from AreaDamage.AreaHit → VfxDirector.
+                NinjaVillage.Core.Audio.Sfx.PlayAt(NinjaVillage.Core.Audio.AudioCueIds.Explosion, blastCenter);
+            }
         }
     }
 }

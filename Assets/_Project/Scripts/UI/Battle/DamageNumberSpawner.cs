@@ -1,4 +1,6 @@
 using NinjaVillage.Core.Events;
+using NinjaVillage.Core.Utilities;
+using NinjaVillage.Systems.Save;
 using UnityEngine;
 
 namespace NinjaVillage.UI.Battle
@@ -14,13 +16,13 @@ namespace NinjaVillage.UI.Battle
 
         private void OnEntityDamaged(EntityDamagedEvent evt)
         {
-            if (damageNumberPrefab == null) return;
+            if (damageNumberPrefab == null || !SaveService.Data.Settings.ShowDamageNumbers) return;
 
             Vector2 position = evt.Position + new Vector2(
                 Random.Range(-randomOffset.x, randomOffset.x),
                 Random.Range(0f, randomOffset.y));
 
-            var instance = Instantiate(damageNumberPrefab, position, Quaternion.identity);
+            var instance = PrefabPool.Get(damageNumberPrefab, position, Quaternion.identity);
             instance.Show(evt.Amount, evt.IsCritical);
         }
     }

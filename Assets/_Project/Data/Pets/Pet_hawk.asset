@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44cdd3937edb814eeb709b58c1dcd6f4, type: 3}
+  m_Name: Pet_hawk
+  m_EditorClassIdentifier: 
+  id: hawk
+  displayName: Hawk
+  description: Scouts ahead and reveals hidden treasure.
+  icon: {fileID: 0}
+  abilityType: 3
+  abilitySummary: Scouts ahead and reveals hidden treasure.
+  sortOrder: 2
+  prefab: {fileID: 0}
+  placeholderColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+  placeholderScale: 0.6
+  abilityPrefab: {fileID: 0}
+  followDistance: 1.4
+  unlockCurrency: 0
+  unlockCost: 1200
+  requiredPetHouseLevel: 2
+  isPremium: 0
+  maxLevel: 20
+  upgradeCostBase: 80
+  upgradeCostExponent: 1.55
+  stats:
+    basePower: 8
+    powerGrowthPerLevel: 0.1
+    baseCooldown: 12
+    cooldownReductionPerLevel: 0.02
+    baseRange: 6
+    rangePerLevel: 0.1
+    baseEffectDuration: 0
+    effectDurationPerLevel: 0.05
+    moveSpeed: 10
+  ownerDamageInheritance: 0.5
+  ownerBonus:
+    xpGainPercent: 0
+    luckyDropChance: 0.02
+    goldBonusPercent: 0
+    xpMagnetPercent: 0
+    moveSpeedPercent: 0
+  ownerBonusPerLevel:
+    xpGainPercent: 0
+    luckyDropChance: 0.002
+    goldBonusPercent: 0
+    xpMagnetPercent: 0
+    moveSpeedPercent: 0

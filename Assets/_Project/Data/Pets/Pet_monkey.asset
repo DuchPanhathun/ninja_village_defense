@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44cdd3937edb814eeb709b58c1dcd6f4, type: 3}
+  m_Name: Pet_monkey
+  m_EditorClassIdentifier: 
+  id: monkey
+  displayName: Monkey
+  description: Throws bananas that damage and stun demons.
+  icon: {fileID: 0}
+  abilityType: 4
+  abilitySummary: Throws bananas that damage and stun demons.
+  sortOrder: 3
+  prefab: {fileID: 0}
+  placeholderColor: {r: 0.75, g: 0.6, b: 0.4, a: 1}
+  placeholderScale: 0.6
+  abilityPrefab: {fileID: 0}
+  followDistance: 1.4
+  unlockCurrency: 0
+  unlockCost: 1600
+  requiredPetHouseLevel: 3
+  isPremium: 0
+  maxLevel: 20
+  upgradeCostBase: 80
+  upgradeCostExponent: 1.55
+  stats:
+    basePower: 9
+    powerGrowthPerLevel: 0.08
+    baseCooldown: 2.5
+    cooldownReductionPerLevel: 0.02
+    baseRange: 6
+    rangePerLevel: 0.1
+    baseEffectDuration: 1
+    effectDurationPerLevel: 0.05
+    moveSpeed: 8
+  ownerDamageInheritance: 0.5
+  ownerBonus:
+    xpGainPercent: 0
+    luckyDropChance: 0
+    goldBonusPercent: 0
+    xpMagnetPercent: 0
+    moveSpeedPercent: 0
+  ownerBonusPerLevel:
+    xpGainPercent: 0
+    luckyDropChance: 0
+    goldBonusPercent: 0
+    xpMagnetPercent: 0
+    moveSpeedPercent: 0

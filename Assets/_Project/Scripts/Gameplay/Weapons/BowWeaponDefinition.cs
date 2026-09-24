@@ -18,6 +18,8 @@ namespace NinjaVillage.Gameplay.Weapons
         [SerializeField] private float chargedDamageMultiplier = 2.5f;
         [SerializeField] private float chargedSpeedMultiplier = 1.5f;
 
+        public override string FireSoundId => NinjaVillage.Core.Audio.AudioCueIds.BowShot;
+
         public override void Fire(AutoAttackController controller, Transform origin, Transform target, PlayerStats stats)
         {
             Vector2 originPos = origin.position;

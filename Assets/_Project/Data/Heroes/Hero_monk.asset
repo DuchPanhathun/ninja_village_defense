@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf5193e05e74b52368ccd5ceb9698b12, type: 3}
+  m_Name: Hero_monk
+  m_EditorClassIdentifier: 
+  id: monk
+  displayName: Monk
+  description: Heals over time and starts every battle shielded.
+  icon: {fileID: 0}
+  roleSummary: Heals over time and starts every battle shielded.
+  themeColor: {r: 1, g: 0.7, b: 0.25, a: 1}
+  sortOrder: 2
+  unlockedByDefault: 0
+  unlockCurrency: 0
+  unlockCost: 2500
+  requiredDojoLevel: 2
+  isPremium: 0
+  maxLevel: 30
+  upgradeCostBase: 120
+  upgradeCostExponent: 1.6
+  baseStats:
+    maxHealthPercent: 0.1
+    maxHealthFlat: 0
+    attackDamagePercent: 0
+    attackSpeedPercent: 0
+    moveSpeedPercent: 0
+    critChance: 0
+    critDamage: 0
+    damageReduction: 0
+    healPerSecond: 1
+    dodgeChance: 0
+    startingShield: 20
+    xpGainPercent: 0.1
+    goldBonusPercent: 0
+    ultimateChargePercent: 0
+  statsPerLevel:
+    maxHealthPercent: 0
+    maxHealthFlat: 0
+    attackDamagePercent: 0.015
+    attackSpeedPercent: 0
+    moveSpeedPercent: 0
+    critChance: 0
+    critDamage: 0
+    damageReduction: 0
+    healPerSecond: 0.08
+    dodgeChance: 0
+    startingShield: 1
+    xpGainPercent: 0
+    goldBonusPercent: 0
+    ultimateChargePercent: 0
+  signatureWeapon: {fileID: 11400000, guid: 1d7deba2895616567be816a29e0d2c5e, type: 2}
+  startingSkills: []
+  ultimate: {fileID: 11400000, guid: 01f0458f54795722594eac274f879812, type: 2}
+  companionPet: {fileID: 0}
+  companionCount: 0
+  extraCompanionEveryLevels: 0
+  maxCompanions: 3
+  companionPowerScale: 0.6

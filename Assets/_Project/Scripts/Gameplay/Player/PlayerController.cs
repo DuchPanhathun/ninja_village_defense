@@ -1,6 +1,7 @@
 using NinjaVillage.Core.Combat;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Core.Input;
+using NinjaVillage.Gameplay.Animation;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Player
@@ -27,6 +28,21 @@ namespace NinjaVillage.Gameplay.Player
         private Vector2 _currentMoveDir;
         private bool _isDead;
         private float _healAccumulator;
+        private Vector2 _facing = Vector2.right;
+        private Vector2 _dashVelocity;
+        private float _dashUntil;
+
+        /// <summary>Last non-zero movement direction (dash direction when standing still).</summary>
+        public Vector2 FacingDirection => _facing;
+        public bool IsDashing => Time.time < _dashUntil;
+        public bool IsDead => _isDead;
+
+        /// <summary>Overrides normal movement with <paramref name="velocity"/> for <paramref name="duration"/> seconds (DashController).</summary>
+        public void ApplyDash(Vector2 velocity, float duration)
+        {
+            _dashVelocity = velocity;
+            _dashUntil = Time.time + duration;
+        }
 
         private static readonly int SpeedParam = Animator.StringToHash("Speed");
 
@@ -38,6 +54,10 @@ namespace NinjaVillage.Gameplay.Player
             _moveInput = moveInputSource as IMoveInputProvider;
             _health.DodgeRoll = () => Random.value < _stats.DodgeChance;
             _health.IncomingDamageModifier = amount => amount * (1f - _stats.DamageReduction);
+
+            // No sprite clips yet → code-driven placeholder animation (EPIC 1 "Movement animation").
+            if ((animator == null || animator.runtimeAnimatorController == null) && !TryGetComponent<ProceduralSpriteAnimator>(out _))
+                gameObject.AddComponent<ProceduralSpriteAnimator>();
 
             if (_moveInput == null)
                 Debug.LogWarning($"{nameof(PlayerController)} on {name}: moveInputSource does not implement IMoveInputProvider.", this);
@@ -64,6 +84,7 @@ namespace NinjaVillage.Gameplay.Player
             if (_moveInput == null) return;
 
             _currentMoveDir = Vector2.ClampMagnitude(_moveInput.GetMoveInput(), 1f);
+            if (_currentMoveDir.sqrMagnitude > 0.01f) _facing = _currentMoveDir.normalized;
 
             if (animator != null)
                 animator.SetFloat(SpeedParam, _currentMoveDir.sqrMagnitude);
@@ -79,7 +100,8 @@ namespace NinjaVillage.Gameplay.Player
         private void FixedUpdate()
         {
             if (_isDead) return;
-            _rigidbody.MovePosition(_rigidbody.position + _currentMoveDir * (_stats.MoveSpeed * Time.fixedDeltaTime));
+            Vector2 velocity = IsDashing ? _dashVelocity : _currentMoveDir * _stats.MoveSpeed;
+            _rigidbody.MovePosition(_rigidbody.position + velocity * Time.fixedDeltaTime);
         }
 
         private void HandleDamaged(float amount, float current, float max)
@@ -95,6 +117,20 @@ namespace NinjaVillage.Gameplay.Player
                 animator.SetTrigger("Die");
 
             EventBus<PlayerDiedEvent>.Raise(new PlayerDiedEvent());
+        }
+
+        /// <summary>
+        /// Brings the player back after death (revive ad): partial health, a few seconds of invulnerability
+        /// and a shockwave that pushes nearby enemies away so the player isn't killed again instantly.
+        /// </summary>
+        public void Revive(float healthFraction, LayerMask enemyMask)
+        {
+            if (!_isDead) return;
+            _health.Revive(healthFraction);
+            _health.GrantInvulnerability(3f);
+            _isDead = false;
+            if (TryGetComponent<ProceduralSpriteAnimator>(out var procedural)) procedural.ResetAfterRevive();
+            AreaDamage.KnockbackCircle(transform.position, 5f, enemyMask, 12f);
         }
 
         /// <summary>Call when starting/restarting a run so a previous death doesn't carry over.</summary>

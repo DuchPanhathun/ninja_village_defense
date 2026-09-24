@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22f42a3bb03ef4b62a67e8da4df3f15f, type: 3}
+  m_Name: Evolution_invisible_assassin
+  m_EditorClassIdentifier: 
+  id: invisible_assassin
+  displayName: Smoke + Teleport
+  description: 
+  icon: {fileID: 0}
+  requiredSkills:
+  - {fileID: 11400000, guid: 4e4e228ed7d4732a294d3b891a749bdf, type: 2}
+  - {fileID: 11400000, guid: cfb175e2541546f60baf18fd9295f122, type: 2}
+  requiredWeapon: {fileID: 0}
+  resultSkill: {fileID: 11400000, guid: b72b4a23981fd36ebbe0a25750f8fd32, type: 2}
+  hint: Vanish, then vanish again...

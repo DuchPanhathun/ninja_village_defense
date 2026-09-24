@@ -1,4 +1,5 @@
 using TMPro;
+using NinjaVillage.Core.Utilities;
 using UnityEngine;
 
 namespace NinjaVillage.UI.Battle
@@ -8,7 +9,7 @@ namespace NinjaVillage.UI.Battle
     /// Prefab: empty GameObject + TextMeshPro (world) + this component.
     /// </summary>
     [RequireComponent(typeof(TMP_Text))]
-    public class DamageNumber : MonoBehaviour
+    public class DamageNumber : MonoBehaviour, IPoolable
     {
         [SerializeField] private float riseSpeed = 1.5f;
         [SerializeField] private float lifetime = 0.7f;
@@ -19,7 +20,21 @@ namespace NinjaVillage.UI.Battle
         private TMP_Text _text;
         private float _elapsed;
 
-        private void Awake() => _text = GetComponent<TMP_Text>();
+        private Vector3 _baseScale;
+
+        private void Awake()
+        {
+            _text = GetComponent<TMP_Text>();
+            _baseScale = transform.localScale;
+        }
+
+        public void OnSpawned()
+        {
+            _elapsed = 0f;
+            transform.localScale = _baseScale; // crits enlarge it; undo for reuse
+        }
+
+        public void OnDespawned() { }
 
         public void Show(float amount, bool isCritical)
         {
@@ -39,7 +54,7 @@ namespace NinjaVillage.UI.Battle
             _text.color = color;
 
             if (_elapsed >= lifetime)
-                Destroy(gameObject);
+                PrefabPool.Release(gameObject);
         }
     }
 }

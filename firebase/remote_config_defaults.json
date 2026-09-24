@@ -1,0 +1,11 @@
+{
+  "xp_multiplier": "1.0",
+  "coin_multiplier": "1.0",
+  "battle_pass_season_id": "",
+  "interstitial_every_n_runs": "3",
+  "min_supported_version": "1.0",
+  "cloud_save_enabled": "true",
+  "leaderboard_enabled": "true",
+  "event_cherry_blossom_enabled": "true",
+  "event_oni_moon_enabled": "true"
+}

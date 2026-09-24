@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e7e620e84bcc114a99b692b5d9eb04, type: 3}
+  m_Name: Blessing_wisdom
+  m_EditorClassIdentifier: 
+  id: wisdom
+  displayName: Blessing of Wisdom
+  description: "+XP gained in battle \u2014 level up faster."
+  icon: {fileID: 0}
+  stat: 4
+  valuePerRank: 0.04
+  maxRank: 10
+  requiredShrineLevel: 3
+  rankCost:
+    type: 0
+    currency: 0
+    baseCost: 200
+    growth: 1.4
+    linearStep: 0
+    table: 
+    roundTo: 5
+  color: {r: 0.6, g: 0.6, b: 1, a: 1}

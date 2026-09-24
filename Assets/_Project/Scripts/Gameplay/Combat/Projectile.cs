@@ -1,4 +1,5 @@
 using NinjaVillage.Core.Combat;
+using NinjaVillage.Core.Utilities;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Combat
@@ -9,7 +10,7 @@ namespace NinjaVillage.Gameplay.Combat
     /// Used by every basic ranged weapon (Kunai now, Shuriken/Bow later reuse it too).
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public class Projectile : MonoBehaviour
+    public class Projectile : MonoBehaviour, IPoolable
     {
         [SerializeField] private float lifetime = 3f;
         [SerializeField] private int pierceCount = 0;
@@ -25,9 +26,21 @@ namespace NinjaVillage.Gameplay.Combat
         private float _spawnTime;
         private StatusPayload _statusPayload;
 
+        private Vector3 _baseScale;
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+            _baseScale = transform.localScale;
+        }
+
+        // Pooled reuse: undo the per-shot size multiplier and stop any leftover motion.
+        public void OnSpawned() => transform.localScale = _baseScale;
+
+        public void OnDespawned()
+        {
+            if (_rigidbody != null) _rigidbody.linearVelocity = Vector2.zero;
+            _statusPayload = default;
         }
 
         /// <summary>Configures a freshly spawned/pooled projectile. Call immediately after Instantiate.</summary>
@@ -79,8 +92,7 @@ namespace NinjaVillage.Gameplay.Combat
 
         private void Despawn()
         {
-            // TODO(pooling): route through an object pool once perf work starts (EPIC 23).
-            Destroy(gameObject);
+            PrefabPool.Release(gameObject);
         }
     }
 }

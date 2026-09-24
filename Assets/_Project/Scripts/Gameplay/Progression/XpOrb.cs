@@ -1,5 +1,6 @@
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Player;
+using NinjaVillage.Core.Utilities;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Progression
@@ -53,7 +54,7 @@ namespace NinjaVillage.Gameplay.Progression
         private void Collect()
         {
             EventBus<XpGainedEvent>.Raise(new XpGainedEvent(_xpAmount));
-            Destroy(gameObject);
+            PrefabPool.Release(gameObject);
         }
     }
 }

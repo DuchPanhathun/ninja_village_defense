@@ -1,5 +1,6 @@
 using NinjaVillage.Gameplay.Player;
 using NinjaVillage.Systems.Economy;
+using NinjaVillage.Core.Utilities;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Loot
@@ -48,9 +49,9 @@ namespace NinjaVillage.Gameplay.Loot
 
         private void Collect()
         {
-            if (EconomyManager.Instance != null)
-                EconomyManager.Instance.Add(CurrencyType.Coins, _amount);
-            Destroy(gameObject);
+            // Through CurrencyService so quests/achievements/analytics count coins earned.
+            CurrencyService.Grant(CurrencyType.Coins, _amount, "coin_pickup");
+            PrefabPool.Release(gameObject);
         }
     }
 }

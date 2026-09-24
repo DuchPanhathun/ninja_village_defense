@@ -1,6 +1,7 @@
 using NinjaVillage.Core.Combat;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Player;
+using NinjaVillage.Gameplay.Animation;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Enemies
@@ -36,7 +37,15 @@ namespace NinjaVillage.Gameplay.Enemies
             Body = GetComponent<Rigidbody2D>();
             HealthComponent = GetComponent<Health>();
             Status = GetComponent<StatusEffectReceiver>();
+
+            // No sprite clips yet → code-driven placeholder animation (EPIC 3 "Enemy animation").
+            if ((animator == null || animator.runtimeAnimatorController == null) && !TryGetComponent<ProceduralSpriteAnimator>(out _))
+                _procedural = gameObject.AddComponent<ProceduralSpriteAnimator>();
+            else
+                TryGetComponent(out _procedural);
         }
+
+        private ProceduralSpriteAnimator _procedural;
 
         protected virtual void OnEnable()
         {
@@ -112,7 +121,9 @@ namespace NinjaVillage.Gameplay.Enemies
         protected virtual void Attack()
         {
             _attackCooldownRemaining = definition.AttackCooldown;
-            animator?.SetTrigger(AttackTrigger);
+            // Explicit null check: ?. bypasses Unity's destroyed/unassigned-object check.
+            if (animator != null) animator.SetTrigger(AttackTrigger);
+            if (_procedural != null) _procedural.Punch();
 
             if (PlayerTransform.TryGetComponent<IDamageable>(out var damageable) && damageable.IsAlive)
             {
@@ -124,7 +135,7 @@ namespace NinjaVillage.Gameplay.Enemies
         private void HandleDeath(Health health)
         {
             Body.linearVelocity = Vector2.zero;
-            animator?.SetTrigger(DieTrigger);
+            if (animator != null) animator.SetTrigger(DieTrigger);
 
             EventBus<EnemyKilledEvent>.Raise(new EnemyKilledEvent(transform.position, definition.XpReward, definition.CoinReward));
 

@@ -31,6 +31,12 @@ namespace NinjaVillage.Systems.GameFlow
         }
     }
 
+    /// <summary>
+    /// Raised when the player dies and a revive can be offered (once per run). The game is paused until
+    /// the prompt calls <see cref="GameManager.AcceptRevive"/> or <see cref="GameManager.DeclineRevive"/>.
+    /// </summary>
+    public readonly struct RevivePromptEvent : IGameEvent { }
+
     /// <summary>Raised just before <see cref="SceneLoader"/> switches scenes.</summary>
     public readonly struct SceneChangingEvent : IGameEvent
     {

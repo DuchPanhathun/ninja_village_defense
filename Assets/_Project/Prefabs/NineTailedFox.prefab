@@ -69,6 +69,18 @@ SpriteRenderer:
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -168,14 +180,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 6905634426454563991}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eba03824cb4b841a585aeaa848d4d7c8, type: 3}
+  m_Script: {fileID: 11500000, guid: f41d8cfe229112cf691f07dd9af3f610, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  definition: {fileID: 11400000, guid: 24dabb111a2644099a685d391a2d180e, type: 2}
+  animator: {fileID: 0}
   phaseHealthThresholds:
   - 0.66
   - 0.33
-  definition: {fileID: 11400000, guid: 24dabb111a2644099a685d391a2d180e, type: 2}
-  animator: {fileID: 0}
+  teleportCooldown: 5
+  teleportMinRange: 3
+  teleportMaxRange: 6
+  cloneCooldown: 8
+  clonesPerWave: 2
+  cloneMoveSpeed: 4.5
+  cloneExplosionRadius: 1.5
+  cloneExplosionDamage: 20
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!114 &487127495934279269
 MonoBehaviour:
   m_ObjectHideFlags: 0

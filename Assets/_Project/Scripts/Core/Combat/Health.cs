@@ -121,6 +121,14 @@ namespace NinjaVillage.Core.Combat
 
         public bool IsInvulnerable => Time.time < _invulnerableUntil;
 
+        /// <summary>Brings a dead entity back with <paramref name="healthFraction"/> of max health (revive ads).</summary>
+        public void Revive(float healthFraction)
+        {
+            if (IsAlive) return;
+            CurrentHealth = Mathf.Max(1f, maxHealth * Mathf.Clamp01(healthFraction));
+            CurrentShield = 0f;
+        }
+
         public void Heal(float amount)
         {
             if (!IsAlive) return;

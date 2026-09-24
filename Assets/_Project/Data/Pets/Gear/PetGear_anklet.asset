@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 947e568972683b9b892ea74f6e4de55d, type: 3}
+  m_Name: PetGear_anklet
+  m_EditorClassIdentifier: 
+  id: petgear_anklet
+  displayName: Swift Anklet
+  description: 
+  icon: {fileID: 0}
+  rarity: 0
+  sortOrder: 1
+  costCurrency: 0
+  cost: 250
+  requiredPetHouseLevel: 0
+  bonus:
+    powerPercent: 0
+    cooldownReduction: 0
+    rangeFlat: 0
+    durationPercent: 0
+    moveSpeedPercent: 0.2

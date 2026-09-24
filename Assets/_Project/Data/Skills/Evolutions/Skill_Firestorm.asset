@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d2ad00545838864a0bedce6e549e76, type: 3}
+  m_Name: Skill_Firestorm
+  m_EditorClassIdentifier: 
+  id: Skill_Firestorm
+  displayName: Firestorm
+  description: A ring of wind-fed fire erupts around you, burning every demon near.
+  icon: {fileID: 0}
+  category: 0
+  rarity: 3
+  maxLevel: 1
+  element: 1
+  isEvolution: 1
+  damage: 35
+  interval: 2
+  radius: 3.8
+  burnDps: 12
+  burnDuration: 3

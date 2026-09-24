@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e7e620e84bcc114a99b692b5d9eb04, type: 3}
+  m_Name: Blessing_fortune
+  m_EditorClassIdentifier: 
+  id: fortune
+  displayName: Blessing of Fortune
+  description: '+Luck: more double coin drops and better loot.'
+  icon: {fileID: 0}
+  stat: 2
+  valuePerRank: 0.02
+  maxRank: 10
+  requiredShrineLevel: 2
+  rankCost:
+    type: 0
+    currency: 0
+    baseCost: 160
+    growth: 1.4
+    linearStep: 0
+    table: 
+    roundTo: 5
+  color: {r: 0.4, g: 0.9, b: 0.9, a: 1}

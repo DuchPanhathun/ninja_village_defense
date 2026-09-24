@@ -1,5 +1,6 @@
 using System.Collections;
 using NinjaVillage.Core.Combat;
+using NinjaVillage.Core.Utilities;
 using NinjaVillage.Gameplay.Player;
 using UnityEngine;
 
@@ -103,6 +104,15 @@ namespace NinjaVillage.Gameplay.Ultimates
             _playerStats = stats;
             _damageFraction = damageFraction;
             _enemyMask = enemyMask;
+
+            // Clones spawned without a prefab would be invisible — give them a shadowy placeholder body.
+            if (GetComponentInChildren<SpriteRenderer>() == null)
+            {
+                GeneratedSprites.CreateRenderer(transform, "ShadowBody", GeneratedSprites.Circle, new Color(0.25f, 0.1f, 0.4f, 0.75f), 25,
+                    Vector2.zero, new Vector2(0.6f, 0.75f));
+                GeneratedSprites.CreateRenderer(transform, "ShadowGlow", GeneratedSprites.Glow, new Color(0.6f, 0.3f, 1f, 0.4f), 24,
+                    Vector2.zero, new Vector2(1.3f, 1.3f));
+            }
         }
 
         private void Update()
@@ -131,6 +141,8 @@ namespace NinjaVillage.Gameplay.Ultimates
             rb.gravityScale = 0f;
             rb.linearVelocity = dir * ProjectileSpeed;
 
+            GeneratedSprites.CreateRenderer(go.transform, "Glow", GeneratedSprites.Glow, new Color(0.7f, 0.4f, 1f, 0.9f), 30,
+                Vector2.zero, new Vector2(0.45f, 0.45f));
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
             col.radius = 0.15f;

@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecb351f1c650ced3383ec12105e1febd, type: 3}
+  m_Name: EconomyConfig
+  m_EditorClassIdentifier: 
+  waveClearBaseCoins: 5
+  waveClearCoinsPerWave: 3
+  gemsPerBossKill: 2
+  victoryBonusCoins: 150
+  weaponUpgradeCost:
+    type: 0
+    currency: 0
+    baseCost: 60
+    growth: 1.45
+    linearStep: 0
+    table: 
+    roundTo: 5
+  upgradeCostRarityMultiplier:
+  - 1
+  - 1.5
+  - 2.25
+  - 3.5
+  craftCoinCostByRarity: 2c01000084030000c409000070170000
+  craftForgeLevelByRarity: 01000000030000000500000007000000
+  weaponTiers:
+  - Name: Iron
+    AttackBonus: 0
+    CoinCost: 0
+    RequiredForgeLevel: 0
+    RequiredWeaponLevel: 0
+    MaterialCount: 0
+    MaterialMinRarity: 0
+  - Name: Steel
+    AttackBonus: 0.15
+    CoinCost: 400
+    RequiredForgeLevel: 3
+    RequiredWeaponLevel: 4
+    MaterialCount: 2
+    MaterialMinRarity: 0
+  - Name: Golden
+    AttackBonus: 0.35
+    CoinCost: 1500
+    RequiredForgeLevel: 5
+    RequiredWeaponLevel: 7
+    MaterialCount: 2
+    MaterialMinRarity: 1
+  - Name: Legendary
+    AttackBonus: 0.6
+    CoinCost: 5000
+    RequiredForgeLevel: 9
+    RequiredWeaponLevel: 10
+    MaterialCount: 2
+    MaterialMinRarity: 2

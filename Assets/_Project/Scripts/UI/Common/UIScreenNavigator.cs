@@ -69,6 +69,9 @@ namespace NinjaVillage.UI.Common
             _stack.Remove(screen);
         }
 
+        /// <summary>Whether a screen with this id exists in the current scene.</summary>
+        public bool Has(string screenId) => !string.IsNullOrEmpty(screenId) && _screens.ContainsKey(screenId);
+
         public bool TryGet<T>(out T screen) where T : UIScreen
         {
             foreach (var s in _screens.Values)

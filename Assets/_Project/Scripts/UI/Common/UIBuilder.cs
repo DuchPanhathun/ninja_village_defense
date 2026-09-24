@@ -63,8 +63,8 @@ namespace NinjaVillage.UI.Common
         public static void EnsureEventSystem()
         {
             if (EventSystem.current != null || Object.FindAnyObjectByType<EventSystem>() != null) return;
-            var go = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-            Object.DontDestroyOnLoad(go);
+            // Scene-local on purpose: a persistent one would duplicate the EventSystem already in Battle.unity.
+            new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         }
 
         public static RectTransform Rect(Transform parent, string name)
@@ -186,6 +186,130 @@ namespace NinjaVillage.UI.Common
             var image = layout.gameObject.AddComponent<Image>();
             image.color = UITheme.Card;
             return layout;
+        }
+
+        /// <summary>
+        /// The standard list entry: a card with a bold title, a muted multi-line body and a row for
+        /// action buttons (returned). <paramref name="accent"/> tints the title (rarity, hero theme...).
+        /// </summary>
+        public static HorizontalLayoutGroup ActionCard(Transform parent, string title, string body,
+            out TextMeshProUGUI titleText, out TextMeshProUGUI bodyText, Color? accent = null)
+        {
+            var card = Card(parent, "Card_" + title, 10f, 22);
+            titleText = Text(card.transform, title, UITheme.HeaderSize * 0.85f, TextAlignmentOptions.Left, accent ?? UITheme.Text, FontStyles.Bold);
+            bodyText = Text(card.transform, body, UITheme.SmallSize, TextAlignmentOptions.Left, UITheme.TextMuted);
+            bodyText.richText = true;
+            if (string.IsNullOrEmpty(body)) bodyText.gameObject.SetActive(false);
+
+            var actions = Horizontal(card.transform, "Actions", 12f, 0, TextAnchor.MiddleRight);
+            actions.childForceExpandWidth = false;
+            SetPreferredSize(actions, -1f, 96f);
+            return actions;
+        }
+
+        /// <summary>Compact button for card action rows.</summary>
+        public static Button SmallButton(Transform parent, string label, UnityAction onClick, Color? color = null, float width = 260f)
+        {
+            var button = Button(parent, label, onClick, color, 90f, UITheme.SmallSize + 2f);
+            SetPreferredSize(button, width, 90f);
+            return button;
+        }
+
+        /// <summary>Bold section heading inside a list ("Offense", "Daily Quests"...).</summary>
+        public static TextMeshProUGUI SectionHeader(Transform parent, string text)
+        {
+            var header = Text(parent, text, UITheme.HeaderSize, TextAlignmentOptions.Left, UITheme.Gold, FontStyles.Bold);
+            SetPreferredSize(header, -1f, 70f);
+            return header;
+        }
+
+        /// <summary>Empty element that soaks up the remaining space in a layout (pushes siblings apart).</summary>
+        public static RectTransform FlexibleSpacer(Transform parent)
+        {
+            var rt = Rect(parent, "Spacer");
+            SetFlexible(rt, 1f, 1f);
+            return rt;
+        }
+
+        /// <summary>Fixed-height gap.</summary>
+        public static RectTransform Spacer(Transform parent, float height)
+        {
+            var rt = Rect(parent, "Gap");
+            SetPreferredSize(rt, -1f, height);
+            return rt;
+        }
+
+        /// <summary>Labeled 0..1 slider row ("Music ────●──"). <paramref name="onChanged"/> fires while dragging.</summary>
+        public static Slider Slider(Transform parent, string label, float value, UnityAction<float> onChanged)
+        {
+            var row = Horizontal(parent, "Slider_" + label, 20f, 0, TextAnchor.MiddleLeft);
+            row.childForceExpandWidth = false;
+            SetPreferredSize(row, -1f, 90f);
+            var text = Text(row.transform, label, UITheme.BodySize);
+            SetPreferredSize(text, 280f, 90f);
+
+            var root = Rect(row.transform, "Slider");
+            SetFlexible(root, 1f, 0f);
+            SetPreferredSize(root, -1f, 60f);
+            var slider = root.gameObject.AddComponent<Slider>();
+
+            var background = Image(root, "Background", new Color(0f, 0f, 0f, 0.45f));
+            Stretch(background.rectTransform);
+            background.rectTransform.offsetMin = new Vector2(0f, 18f);
+            background.rectTransform.offsetMax = new Vector2(0f, -18f);
+
+            var fillArea = Rect(root, "Fill Area");
+            Stretch(fillArea);
+            fillArea.offsetMin = new Vector2(10f, 18f);
+            fillArea.offsetMax = new Vector2(-10f, -18f);
+            var fill = Image(fillArea, "Fill", UITheme.Button);
+            fill.rectTransform.sizeDelta = Vector2.zero;
+
+            var handleArea = Rect(root, "Handle Slide Area");
+            Stretch(handleArea);
+            handleArea.offsetMin = new Vector2(20f, 0f);
+            handleArea.offsetMax = new Vector2(-20f, 0f);
+            var handle = Image(handleArea, "Handle", UITheme.Text, WhiteSprite);
+            handle.rectTransform.sizeDelta = new Vector2(44f, 0f);
+
+            slider.fillRect = fill.rectTransform;
+            slider.handleRect = handle.rectTransform;
+            slider.targetGraphic = handle;
+            slider.direction = UnityEngine.UI.Slider.Direction.LeftToRight;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.SetValueWithoutNotify(Mathf.Clamp01(value));
+            if (onChanged != null) slider.onValueChanged.AddListener(onChanged);
+            return slider;
+        }
+
+        /// <summary>Single-line text input with a placeholder (TMP_InputField built from code).</summary>
+        public static TMP_InputField InputField(Transform parent, string text, string placeholder, int characterLimit = 20)
+        {
+            var background = Image(parent, "InputField", new Color(0f, 0f, 0f, 0.45f));
+            SetPreferredSize(background, -1f, 100f);
+            var input = background.gameObject.AddComponent<TMP_InputField>();
+
+            var area = Rect(background.transform, "Text Area");
+            Stretch(area, 16f);
+            area.gameObject.AddComponent<RectMask2D>();
+
+            var placeholderText = Text(area, placeholder, UITheme.BodySize, TextAlignmentOptions.Left, UITheme.TextMuted, FontStyles.Italic);
+            Stretch(placeholderText.rectTransform);
+            placeholderText.textWrappingMode = TextWrappingModes.NoWrap;
+
+            var valueText = Text(area, string.Empty, UITheme.BodySize, TextAlignmentOptions.Left);
+            Stretch(valueText.rectTransform);
+            valueText.textWrappingMode = TextWrappingModes.NoWrap;
+
+            input.textViewport = area;
+            input.textComponent = valueText;
+            input.placeholder = placeholderText;
+            input.pointSize = UITheme.BodySize;
+            input.characterLimit = characterLimit;
+            input.lineType = TMP_InputField.LineType.SingleLine;
+            input.SetTextWithoutNotify(text ?? string.Empty);
+            return input;
         }
 
         /// <summary>Vertical scroll view; add rows to <paramref name="content"/>.</summary>

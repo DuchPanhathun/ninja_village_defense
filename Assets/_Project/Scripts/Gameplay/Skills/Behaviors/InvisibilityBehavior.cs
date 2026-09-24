@@ -48,6 +48,11 @@ namespace NinjaVillage.Gameplay.Skills.Behaviors
 
         private void SetInvisible(bool invisible)
         {
+            if (invisible && !_isInvisible)
+            {
+                NinjaVillage.Core.Audio.Sfx.PlayAt(NinjaVillage.Core.Audio.AudioCueIds.SmokeBomb, transform.position);
+                NinjaVillage.Gameplay.Vfx.Vfx.DeathPuff(transform.position, new Color(0.8f, 0.8f, 0.85f));
+            }
             _isInvisible = invisible;
             if (_spriteRenderer != null)
             {

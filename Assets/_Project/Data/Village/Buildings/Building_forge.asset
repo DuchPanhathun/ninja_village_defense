@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b7e8bf3fe914a517bf1b32fe622841a, type: 3}
+  m_Name: Building_forge
+  m_EditorClassIdentifier: 
+  id: forge
+  displayName: Forge
+  description: Craft new weapons, level them up and reforge them into legendary tiers.
+  icon: {fileID: 0}
+  maxLevel: 10
+  startLevel: 0
+  requiredCastleLevel: 1
+  levelsPerCastleLevel: 1
+  waveRequirementPerLevel: 0
+  upgradeCost:
+    type: 0
+    currency: 0
+    baseCost: 200
+    growth: 1.45
+    linearStep: 50
+    table: 
+    roundTo: 5
+  effectDisplay: 2
+  effectLabel: Max weapon level
+  effectAtFirstLevel: 3
+  effectAtMaxLevel: 10
+  plotPosition: {x: 7.5, y: 2}
+  footprint: {x: 3, y: 2.4}
+  color: {r: 0.45, g: 0.42, b: 0.42, a: 1}
+  roofColor: {r: 0.25, g: 0.22, b: 0.22, a: 1}
+  stageNames:
+  - Anvil
+  - Forge
+  - Great Forge

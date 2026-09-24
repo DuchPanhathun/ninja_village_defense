@@ -1,0 +1,203 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c268dfbaad753d599fcbe8dbac2c27e, type: 3}
+  m_Name: Season_season_1
+  m_EditorClassIdentifier: 
+  id: season_1
+  displayName: 'Season 1: Blossom Blades'
+  description: Earn XP in battle to climb 30 tiers of rewards.
+  icon: {fileID: 0}
+  startDate: 2026-09-01
+  durationDays: 60
+  xpPerTier: 300
+  freeRewards:
+  - type: 0
+    id: 
+    amount: 160
+  - type: 0
+    id: 
+    amount: 170
+  - type: 0
+    id: 
+    amount: 180
+  - type: 0
+    id: 
+    amount: 190
+  - type: 1
+    id: 
+    amount: 10
+  - type: 0
+    id: 
+    amount: 210
+  - type: 0
+    id: 
+    amount: 220
+  - type: 0
+    id: 
+    amount: 230
+  - type: 0
+    id: 
+    amount: 240
+  - type: 2
+    id: jade_charm
+    amount: 1
+  - type: 0
+    id: 
+    amount: 260
+  - type: 0
+    id: 
+    amount: 270
+  - type: 0
+    id: 
+    amount: 280
+  - type: 0
+    id: 
+    amount: 290
+  - type: 1
+    id: 
+    amount: 10
+  - type: 0
+    id: 
+    amount: 310
+  - type: 0
+    id: 
+    amount: 320
+  - type: 0
+    id: 
+    amount: 330
+  - type: 0
+    id: 
+    amount: 340
+  - type: 2
+    id: jade_charm
+    amount: 1
+  - type: 0
+    id: 
+    amount: 360
+  - type: 0
+    id: 
+    amount: 370
+  - type: 0
+    id: 
+    amount: 380
+  - type: 0
+    id: 
+    amount: 390
+  - type: 1
+    id: 
+    amount: 10
+  - type: 0
+    id: 
+    amount: 410
+  - type: 0
+    id: 
+    amount: 420
+  - type: 0
+    id: 
+    amount: 430
+  - type: 0
+    id: 
+    amount: 440
+  - type: 2
+    id: blood_talisman
+    amount: 1
+  premiumRewards:
+  - type: 0
+    id: 
+    amount: 420
+  - type: 0
+    id: 
+    amount: 440
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 480
+  - type: 0
+    id: 
+    amount: 500
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 540
+  - type: 0
+    id: 
+    amount: 560
+  - type: 1
+    id: 
+    amount: 20
+  - type: 2
+    id: dragon_scale
+    amount: 1
+  - type: 0
+    id: 
+    amount: 620
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 660
+  - type: 0
+    id: 
+    amount: 680
+  - type: 3
+    id: samurai
+    amount: 1
+  - type: 0
+    id: 
+    amount: 720
+  - type: 0
+    id: 
+    amount: 740
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 780
+  - type: 2
+    id: dragon_scale
+    amount: 1
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 840
+  - type: 0
+    id: 
+    amount: 860
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 900
+  - type: 0
+    id: 
+    amount: 920
+  - type: 1
+    id: 
+    amount: 20
+  - type: 0
+    id: 
+    amount: 960
+  - type: 0
+    id: 
+    amount: 980
+  - type: 4
+    id: skin_assassin_sakura
+    amount: 1

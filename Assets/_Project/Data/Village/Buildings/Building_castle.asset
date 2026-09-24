@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b7e8bf3fe914a517bf1b32fe622841a, type: 3}
+  m_Name: Building_castle
+  m_EditorClassIdentifier: 
+  id: castle
+  displayName: Castle
+  description: The heart of the village. Its level caps every other building and
+    adds equipment slots.
+  icon: {fileID: 0}
+  maxLevel: 10
+  startLevel: 1
+  requiredCastleLevel: 0
+  levelsPerCastleLevel: 0
+  waveRequirementPerLevel: 3
+  upgradeCost:
+    type: 0
+    currency: 0
+    baseCost: 400
+    growth: 1.6
+    linearStep: 50
+    table: 
+    roundTo: 5
+  effectDisplay: 2
+  effectLabel: Equipment slots
+  effectAtFirstLevel: 2
+  effectAtMaxLevel: 5
+  plotPosition: {x: 0, y: 6.5}
+  footprint: {x: 4, y: 3.2}
+  color: {r: 0.78, g: 0.74, b: 0.66, a: 1}
+  roofColor: {r: 0.35, g: 0.22, b: 0.45, a: 1}
+  stageNames:
+  - Hut
+  - House
+  - Manor
+  - Keep
+  - Fortress
+  - Castle

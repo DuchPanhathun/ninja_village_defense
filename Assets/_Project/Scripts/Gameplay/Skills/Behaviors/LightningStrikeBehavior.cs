@@ -12,7 +12,9 @@ namespace NinjaVillage.Gameplay.Skills.Behaviors
     public class LightningStrikeBehavior : MonoBehaviour
     {
         private static readonly Collider2D[] Buffer = new Collider2D[32];
-        private static readonly ContactFilter2D Filter = new() { useTriggers = true };
+        // Not readonly: SetLayerMask mutates the struct, and on a readonly field it would mutate a
+        // defensive copy — the mask would never apply and strikes could hit the player.
+        private static ContactFilter2D Filter = new() { useTriggers = true };
 
         private float _damage;
         private float _interval;
@@ -52,7 +54,8 @@ namespace NinjaVillage.Gameplay.Skills.Behaviors
             damageable.TakeDamage(new DamageInfo(_damage, false, Vector2.zero, 0f, gameObject));
             _nextStrikeAt = Time.time + _interval;
 
-            // TODO(VFX): lightning bolt effect at target.transform.position (EPIC 23).
+            NinjaVillage.Gameplay.Vfx.Vfx.Lightning(target.transform.position);
+            NinjaVillage.Core.Audio.Sfx.PlayAt(NinjaVillage.Core.Audio.AudioCueIds.LightningStrike, target.transform.position);
         }
     }
 }
