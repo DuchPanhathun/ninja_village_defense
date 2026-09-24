@@ -139,6 +139,44 @@ namespace NinjaVillage.Tests
             Assert.IsNotNull(runStart.Context, "run start modifiers never ran");
         }
 
+#if UNITY_EDITOR
+        /// <summary>Each ultimate spawns its pixel-art effect (not the placeholder shapes) without errors.</summary>
+        [UnityTest]
+        public IEnumerator Battle_EveryUltimatePlaysItsArtEffect()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var player = PlayerReference.Instance;
+            var runner = player.GetComponent<NinjaVillage.Gameplay.Ultimates.UltimateController>();
+            var stats = player.GetComponent<PlayerStats>();
+            var mask = player.GetComponent<NinjaVillage.Gameplay.Combat.AutoAttackController>().EnemyMask;
+
+            foreach (var (asset, effect) in new[]
+                     {
+                         ("Ultimate_DragonSlash", "DragonSlash_Dragon"),
+                         ("Ultimate_HeavenlyStorm", "HeavenlyStorm_Shuriken"),
+                         ("Ultimate_ShadowCloneArmy", "ShadowBody"),
+                     })
+            {
+                var ultimate = UnityEditor.AssetDatabase.LoadAssetAtPath<NinjaVillage.Gameplay.Ultimates.UltimateDefinition>(
+                    $"Assets/_Project/Data/Ultimates/{asset}.asset");
+                Assert.IsNotNull(ultimate, asset);
+                ultimate.Activate(new NinjaVillage.Gameplay.Ultimates.UltimateContext(runner, player.transform, stats, mask));
+
+                SpriteRenderer found = null;
+                for (float end = Time.realtimeSinceStartup + 2f; found == null && Time.realtimeSinceStartup < end;)
+                {
+                    Time.timeScale = 1f; // level-ups from the kills would pause the effect
+                    var go = GameObject.Find(effect);
+                    found = go != null ? go.GetComponent<SpriteRenderer>() : null;
+                    yield return null;
+                }
+                Assert.IsNotNull(found, $"{asset}: '{effect}' never appeared");
+                Assert.IsNotNull(found.sprite, $"{asset}: '{effect}' has no art");
+            }
+            yield return new WaitForSecondsRealtime(1f);
+        }
+#endif
+
         [UnityTest]
         public IEnumerator Battle_DeathOffersReviveThenRecordsTheRun()
         {

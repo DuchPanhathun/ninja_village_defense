@@ -65,8 +65,9 @@ namespace NinjaVillage.UI.Battle
             banner._flash.raycastTarget = false;
 
             var box = UIBuilder.Rect(canvas.transform, "Box");
-            box.anchorMin = new Vector2(0f, 0.72f);
-            box.anchorMax = new Vector2(1f, 0.86f);
+            // Between the boss bar and the level-up cards, so neither hides it.
+            box.anchorMin = new Vector2(0f, 0.63f);
+            box.anchorMax = new Vector2(1f, 0.77f);
             box.offsetMin = box.offsetMax = Vector2.zero;
 
             banner._title = UIBuilder.Text(box, "", UITheme.TitleSize * 1.5f, TextAlignmentOptions.Center, Color.white, FontStyles.Bold);

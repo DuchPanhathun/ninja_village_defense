@@ -97,9 +97,15 @@ namespace NinjaVillage.Gameplay.Ultimates
         private LayerMask _enemyMask;
         private float _cooldownRemaining;
         private Transform _visual;
+        private SpriteRenderer _bodyRenderer;
+        private float _flickerPhase;
         private Sprite _projectileSprite;
 
         public static readonly Color ShadowColor = new(0.42f, 0.28f, 0.72f, 0.82f);
+        /// <summary>Near the hero's own colours (a purple multiply tint turns dark heroes into blobs, and
+        /// see-through bodies turn muddy on the grass); the violet aura underneath marks them as clones.</summary>
+        private static readonly Color SpiritColor = new(0.85f, 0.8f, 1f, 0.92f);
+        private const float BodyScale = 0.8f;
 
         private const float AttacksPerSecond = 2f;
         private const float ProjectileSpeed = 10f;
@@ -112,7 +118,8 @@ namespace NinjaVillage.Gameplay.Ultimates
             _damageFraction = damageFraction;
             _enemyMask = enemyMask;
 
-            // Shadow copies of the player: the hero's (or skin's) own animated frames, tinted shadow purple.
+            // Copies of the player: the hero's (or skin's) own animated frames, a bit smaller, over a violet
+            // chakra aura so they stand apart from both the player and the enemies.
             var heroFrames = playerTransform != null ? playerTransform.GetComponent<NinjaVillage.Gameplay.Animation.SpriteFrameAnimator>() : null;
             if (GetComponentInChildren<SpriteRenderer>() == null && heroFrames != null && heroFrames.SpriteSet != null)
             {
@@ -120,10 +127,15 @@ namespace NinjaVillage.Gameplay.Ultimates
                 body.transform.SetParent(transform, false);
                 var bodyRenderer = body.AddComponent<SpriteRenderer>();
                 bodyRenderer.sprite = heroFrames.SpriteSet.DefaultSprite;
-                bodyRenderer.color = ShadowColor;
+                bodyRenderer.color = SpiritColor;
                 bodyRenderer.sortingOrder = 25;
                 body.AddComponent<NinjaVillage.Gameplay.Animation.SpriteFrameAnimator>().SetSpriteSet(heroFrames.SpriteSet);
+                body.transform.localScale = Vector3.one * BodyScale;
                 _visual = body.transform;
+                _bodyRenderer = bodyRenderer;
+                _flickerPhase = Random.value * 10f;
+                GeneratedSprites.CreateRenderer(transform, "SpiritGlow", GeneratedSprites.Glow, new Color(0.7f, 0.4f, 1f, 0.6f), 24,
+                    new Vector2(0f, -0.1f), new Vector2(1.5f, 1.5f));
             }
 
             // They throw what the player throws (the weapon's projectile sprite), else a kunai.
@@ -146,6 +158,13 @@ namespace NinjaVillage.Gameplay.Ultimates
 
         private void Update()
         {
+            if (_bodyRenderer != null) // a gentle ghostly flicker
+            {
+                var c = SpiritColor;
+                c.a *= 0.88f + 0.12f * Mathf.Sin(Time.time * 7f + _flickerPhase);
+                _bodyRenderer.color = c;
+            }
+
             _cooldownRemaining -= Time.deltaTime;
             if (_cooldownRemaining > 0f) return;
 
@@ -161,7 +180,7 @@ namespace NinjaVillage.Gameplay.Ultimates
             float baseDamage = _playerStats != null ? 10f * _playerStats.AttackDamageMultiplier * _damageFraction : 5f;
             Vector2 dir = ((Vector2)target.position - (Vector2)transform.position).normalized;
             if (_visual != null && Mathf.Abs(dir.x) > 0.01f) // face the target (sprites face right)
-                _visual.localScale = new Vector3(Mathf.Sign(dir.x), 1f, 1f);
+                _visual.localScale = new Vector3(Mathf.Sign(dir.x) * BodyScale, BodyScale, 1f);
 
             var go = new GameObject("CloneProjectile");
             go.transform.position = transform.position;
