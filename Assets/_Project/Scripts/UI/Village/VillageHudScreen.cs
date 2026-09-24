@@ -26,7 +26,8 @@ namespace NinjaVillage.UI.Village
     /// Dig up). The Kitchen button glides to the Kitchen and opens it ("!" when a meal is done); Requests (or tapping
     /// a villager with a "!") opens today's villager requests; tapping a house plot opens its <see cref="HouseScreen"/>;
     /// Fish (left) or tapping the pond opens the fishing mini-game; tapping the mine collects its bars. Coming home
-    /// shows what visitors left (likes, gifts, watered crops); visiting someone shows Like / Gift / Water.
+    /// shows what visitors left (likes, gifts, watered crops); visiting someone shows Like / Gift / Water. Tapping one
+    /// of your pets opens its care bar (Pet / Feed); rain says when it watered your crops.
     /// Visiting someone else's village
     /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
@@ -40,7 +41,11 @@ namespace NinjaVillage.UI.Village
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
         private GameObject _decorate, _decorateBadge, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _requests, _requestsBadge, _fish, _fishBadge, _tabBar;
-        private RectTransform _placeBar, _decoBar, _visitorBar;
+        private RectTransform _placeBar, _decoBar, _visitorBar, _petBar;
+        private Image _petIcon;
+        private TextMeshProUGUI _petTitle, _petHint;
+        private Button _petPet, _petFeed;
+        private string _selectedPet;
         private Button _like, _gift, _water;
         private TextMeshProUGUI _visitorTitle;
         private static VisitSummary _shownNews;
@@ -69,6 +74,7 @@ namespace NinjaVillage.UI.Village
             BuildDecorationBar(safe);
             BuildFarmBar(safe);
             BuildVisitorBar(safe);
+            BuildPetBar(safe);
         }
 
         // ------------------------------------------------------------------ layout
@@ -226,6 +232,7 @@ namespace NinjaVillage.UI.Village
         {
             _selectedPlot = plot;
             if (plot >= 0) SelectDecoration(0);
+            if (plot >= 0 && _selectedPet != null) SelectPet(null);
             RefreshFarmBar();
         }
 
@@ -357,6 +364,103 @@ namespace NinjaVillage.UI.Village
             SmallButton(_placeBar, "Cancel", new Vector2(-250f, 0f), new Color(0.75f, 0.3f, 0.28f), () => DecorationPlacer.Instance?.Cancel());
             _placeConfirm = SmallButton(_placeBar, "Place", new Vector2(-30f, 0f), UITheme.Positive, Confirm);
             _placeBar.gameObject.SetActive(false);
+        }
+
+        /// <summary>Tapping a pet: Pet and Feed it once a day (a happy pet fights harder today), or manage your pets.</summary>
+        private void BuildPetBar(RectTransform parent)
+        {
+            _petBar = Bar(parent, "PetBar", out _petIcon, out _petTitle, out _petHint);
+            SmallButton(_petBar, "Close", new Vector2(-690f, 0f), UITheme.ButtonSecondary, () => SelectPet(null));
+            SmallButton(_petBar, "Pets", new Vector2(-470f, 0f), UITheme.ButtonSecondary, () =>
+            {
+                SelectPet(null);
+                Open(ScreenIds.Pets);
+            });
+            _petFeed = SmallButton(_petBar, "Feed", new Vector2(-250f, 0f), UITheme.Gold, FeedPet);
+            _petPet = SmallButton(_petBar, "Pet", new Vector2(-30f, 0f), new Color(0.85f, 0.3f, 0.4f), PetPet);
+            _petBar.gameObject.SetActive(false);
+        }
+
+        private void SelectPet(string petId)
+        {
+            _selectedPet = petId;
+            if (petId != null)
+            {
+                SelectDecoration(0);
+                SelectPlot(-1);
+            }
+            RefreshPetBar();
+        }
+
+        private void RefreshPetBar()
+        {
+            bool show = _selectedPet != null && !VillageVisit.IsVisiting;
+            _petBar.gameObject.SetActive(show);
+            if (!show) return;
+            var pet = NinjaVillage.Systems.Pets.PetService.Get(_selectedPet);
+            string name = pet != null && !string.IsNullOrEmpty(pet.DisplayName) ? pet.DisplayName : _selectedPet;
+            var set = NinjaVillage.Gameplay.Animation.CharacterSpriteLibrary.Find(NinjaVillage.Gameplay.Animation.CharacterSpriteLibrary.PetKey(_selectedPet));
+            _petIcon.sprite = set != null ? set.DefaultSprite : null;
+            bool canPet = NinjaVillage.Systems.Pets.PetCareService.CanPet(_selectedPet);
+            bool canFeed = NinjaVillage.Systems.Pets.PetCareService.CanFeed(_selectedPet);
+            float bonus = NinjaVillage.Systems.Pets.PetCareService.PowerScale(SaveService.Data, _selectedPet) - 1f;
+            _petTitle.text = bonus > 0f ? $"{name}  <color=#FF9AAE>happy! +{bonus * 100f:0}% power today</color>" : $"{name} wants some attention";
+            string treat = NinjaVillage.Systems.Pets.PetCareService.NextTreat;
+            var treatGoods = treat != null ? NinjaVillage.Systems.Farm.GoodsService.Get(treat) : null;
+            _petHint.text = !canFeed || treat != null
+                ? $"Pet (+{NinjaVillage.Systems.Pets.PetCareRules.PettedBonus * 100f:0}%) and feed (+{NinjaVillage.Systems.Pets.PetCareRules.FedBonus * 100f:0}%) it once a day: it fights harder in today's battles."
+                : "No treats: catch fish at the pond or grow crops to feed it.";
+            SetCareButton(_petPet, canPet, "Pet", "Petted", new Color(0.85f, 0.3f, 0.4f));
+            SetCareButton(_petFeed, canFeed && treat != null, canFeed && treatGoods != null ? $"Feed {treatGoods.NameOrId}" : "Feed", canFeed ? "Feed" : "Fed", UITheme.Gold);
+        }
+
+        private static void SetCareButton(Button button, bool available, string label, string doneLabel, Color color)
+        {
+            button.interactable = available;
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text != null)
+            {
+                text.text = available ? label : doneLabel;
+                text.enableAutoSizing = true;
+                text.fontSizeMin = 20f;
+                text.fontSizeMax = 36f;
+            }
+            button.image.color = available ? color : new Color(0.35f, 0.33f, 0.32f, 1f);
+        }
+
+        private void PetPet()
+        {
+            if (_selectedPet == null) return;
+            if (NinjaVillage.Systems.Pets.PetCareService.Pet(_selectedPet) == NinjaVillage.Systems.Pets.PetCareResult.Success)
+                Sfx.Play(AudioCueIds.RewardClaim);
+            RefreshPetBar();
+        }
+
+        private void FeedPet()
+        {
+            if (_selectedPet == null) return;
+            var result = NinjaVillage.Systems.Pets.PetCareService.Feed(_selectedPet, out var treat);
+            if (result == NinjaVillage.Systems.Pets.PetCareResult.Success)
+            {
+                Sfx.Play(AudioCueIds.RewardClaim);
+                var goods = NinjaVillage.Systems.Farm.GoodsService.Get(treat);
+                UIScreenNavigator.Instance.Toast($"Yum! It loved the {(goods != null ? goods.NameOrId.ToLowerInvariant() : treat)}.");
+            }
+            else Sfx.Play(AudioCueIds.UiError);
+            RefreshPetBar();
+        }
+
+        private void OnPetTapped(PetTappedEvent evt)
+        {
+            if (!IsCurrent || DecorationPlacer.IsActive || VillageVisit.IsVisiting) return;
+            Sfx.Play(AudioCueIds.UiClick);
+            SelectPet(evt.PetId);
+        }
+
+        private void OnRainWatered(RainWateredEvent evt)
+        {
+            if (!IsCurrent) return;
+            UIScreenNavigator.Instance.Toast($"It's raining: {evt.Crops} crop{(evt.Crops == 1 ? "" : "s")} watered for free!");
         }
 
         /// <summary>Visiting someone: Like (weekly), Gift (daily) and Water their crops (daily, pays the helper).</summary>
@@ -512,6 +616,8 @@ namespace NinjaVillage.UI.Village
             EventBus<VillagerRequestTappedEvent>.Subscribe(OnRequestTapped);
             EventBus<HousePlotTappedEvent>.Subscribe(OnHouseTapped);
             EventBus<PondTappedEvent>.Subscribe(OnPondTapped);
+            EventBus<PetTappedEvent>.Subscribe(OnPetTapped);
+            EventBus<RainWateredEvent>.Subscribe(OnRainWatered);
             EventBus<FarmChangedEvent>.Subscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Subscribe(OnCurrencyChanged);
         }
@@ -526,6 +632,8 @@ namespace NinjaVillage.UI.Village
             EventBus<VillagerRequestTappedEvent>.Unsubscribe(OnRequestTapped);
             EventBus<HousePlotTappedEvent>.Unsubscribe(OnHouseTapped);
             EventBus<PondTappedEvent>.Unsubscribe(OnPondTapped);
+            EventBus<PetTappedEvent>.Unsubscribe(OnPetTapped);
+            EventBus<RainWateredEvent>.Unsubscribe(OnRainWatered);
             EventBus<FarmChangedEvent>.Unsubscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Unsubscribe(OnCurrencyChanged);
         }
@@ -631,6 +739,7 @@ namespace NinjaVillage.UI.Village
         private void SelectDecoration(int uid)
         {
             _selectedUid = uid;
+            if (uid != 0 && _selectedPet != null) SelectPet(null);
             if (uid != 0 && _selectedPlot >= 0)
             {
                 _selectedPlot = -1;
@@ -683,6 +792,7 @@ namespace NinjaVillage.UI.Village
             bool active = evt.Active && placer != null && placer.Definition != null;
             _placeBar.gameObject.SetActive(active);
             if (active && _selectedPlot >= 0) SelectPlot(-1);
+            if (active && _selectedPet != null) SelectPet(null);
             _tabBar.SetActive(!active);
             _decorate.SetActive(!active && !VillageVisit.IsVisiting);
             _kitchen.SetActive(!active && !VillageVisit.IsVisiting);

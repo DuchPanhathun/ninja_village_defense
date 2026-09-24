@@ -47,6 +47,8 @@ namespace NinjaVillage.Gameplay.Village
         [SerializeField] private Sprite mineCrane;
         [Tooltip("Iron, gold, mithril.")]
         [SerializeField] private Sprite[] bars = System.Array.Empty<Sprite>();
+        [Header("Atmosphere & pets")]
+        [SerializeField] private Sprite heart;
 
         public Sprite Ground => ground;
         public Sprite Path => path;
@@ -74,6 +76,7 @@ namespace NinjaVillage.Gameplay.Village
         public Sprite[] Fish => fish;
         public Sprite MineCrane => mineCrane;
         public Sprite[] Bars => bars;
+        public Sprite Heart => heart;
 
         /// <summary>The picture for a house style id (<see cref="NinjaVillage.Systems.Village.HousingRules.Styles"/>).</summary>
         public Sprite HouseSprite(string styleId)

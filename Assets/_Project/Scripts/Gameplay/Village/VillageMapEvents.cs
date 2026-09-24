@@ -53,6 +53,13 @@ namespace NinjaVillage.Gameplay.Village
         public DecorationTappedEvent(int uid) => Uid = uid;
     }
 
+    /// <summary>One of your pets was tapped in the village: the HUD opens its care bar (Pet / Feed).</summary>
+    public readonly struct PetTappedEvent : IGameEvent
+    {
+        public readonly string PetId;
+        public PetTappedEvent(string petId) => PetId = petId;
+    }
+
     /// <summary>The fishing pond was tapped (own village): the HUD opens the fishing mini-game.</summary>
     public readonly struct PondTappedEvent : IGameEvent { }
 

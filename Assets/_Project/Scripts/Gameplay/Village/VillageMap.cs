@@ -97,6 +97,7 @@ namespace NinjaVillage.Gameplay.Village
             EventBus<DecorationsChangedEvent>.Subscribe(OnDecorationsChanged);
             EventBus<RequestsChangedEvent>.Subscribe(OnRequestsChanged);
             EventBus<HousesChangedEvent>.Subscribe(OnHousesChanged);
+            EventBus<Systems.Pets.PetCaredEvent>.Subscribe(OnPetCared);
         }
 
         private void OnDisable()
@@ -105,6 +106,7 @@ namespace NinjaVillage.Gameplay.Village
             EventBus<DecorationsChangedEvent>.Unsubscribe(OnDecorationsChanged);
             EventBus<RequestsChangedEvent>.Unsubscribe(OnRequestsChanged);
             EventBus<HousesChangedEvent>.Unsubscribe(OnHousesChanged);
+            EventBus<Systems.Pets.PetCaredEvent>.Unsubscribe(OnPetCared);
         }
 
         private void Start()
@@ -140,6 +142,7 @@ namespace NinjaVillage.Gameplay.Village
             _requestRoot.SetParent(transform, false);
 
             if (IsOwnVillage) gameObject.AddComponent<DecorationPlacer>();
+            gameObject.AddComponent<VillageAtmosphere>(); // day / night by the phone's clock, weather, lantern glow
             FrameCamera();
             Redraw();
         }
@@ -375,9 +378,12 @@ namespace NinjaVillage.Gameplay.Village
             return sb.ToString();
         }
 
+        private readonly Dictionary<string, VillageResident> _pets = new();
+
         private void BuildResidents()
         {
             foreach (Transform child in _residentRoot) Destroy(child.gameObject);
+            _pets.Clear();
 
             Transform leader = null;
             var yard = VillageLayout.HeroYard;
@@ -403,15 +409,35 @@ namespace NinjaVillage.Gameplay.Village
             {
                 var set = CharacterSpriteLibrary.Find(CharacterSpriteLibrary.PetKey(pet.Id));
                 var spawn = new Vector2(Random.Range(meadow.xMin, meadow.xMax), Random.Range(meadow.yMin, meadow.yMax));
+                string petId = pet.Id;
                 var resident = VillageResident.Spawn(_residentRoot, $"Pet_{pet.Id}", set, spawn, meadow, 1.3f)
-                    .Says(() => $"{PetName(pet.Id)} · Lv {pet.Level}")
-                    .OnTap(() => TappedDisplay(VillageDisplayKind.Pets));
+                    .Says(() => $"{PetName(petId)} · Lv {pet.Level}")
+                    .OnTap(() => TappedPet(petId));
+                _pets[petId] = resident;
+                if (IsOwnVillage && _art != null && Systems.Pets.PetCareService.IsHappy(petId)) resident.SetBadge(_art.Heart);
                 if (pet.Id == Snapshot.ActivePetId && leader != null)
                 {
                     resident.transform.position = (Vector2)leader.position + new Vector2(-1f, -0.3f);
                     resident.Follow(leader, new Vector2(-1f, -0.3f));
                 }
             }
+        }
+
+        /// <summary>Tapping one of your pets opens its care bar (visitors just see it say its name).</summary>
+        private void TappedPet(string petId)
+        {
+            if (!IsOwnVillage) return;
+            EventBus<PetTappedEvent>.Raise(new PetTappedEvent(petId));
+        }
+
+        public VillageResident FindPet(string petId) => _pets.TryGetValue(petId, out var pet) ? pet : null;
+
+        private void OnPetCared(Systems.Pets.PetCaredEvent evt)
+        {
+            var pet = FindPet(evt.PetId);
+            if (pet == null || _art == null) return;
+            pet.Cheer(_art.Heart);
+            pet.SetBadge(_art.Heart);
         }
 
         private static string PetName(string petId)

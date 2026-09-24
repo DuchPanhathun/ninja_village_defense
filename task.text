@@ -551,8 +551,8 @@ into battles. Order = build order; each phase ends with a phone playtest and a c
 
 ## Phase 7 — Atmosphere & pets
 
-- [ ]  Day / night + weather   <!-- follows the phone's time; lanterns glow at night; occasional rain or snow -->
-- [ ]  Pet care   <!-- pet or feed your pets for a small daily bonus and happy animations -->
+- [x]  Day / night + weather   <!-- VillageAtmosphere: sky tint by the phone's local clock (dawn/day/dusk/night), warm glows on lanterns, fire pits, tents, houses, Kitchen, Castle when dark, fireflies at night; rain (snow Dec-Feb) in ~18% of 3-hour blocks, drawn as falling drops/flakes; rain waters growing crops ("It's raining: N crops watered"); tests pin the clock -->
+- [x]  Pet care   <!-- tap a pet → care bar: Pet (+5%) and Feed (+10%, uses fish/shrimp/carrot/radish/rice) once a day → the active pet's power in today's battles; hop + floating hearts, heart badge on happy pets; VillageLifeTests + Village_RainyNightLanterns_AndPetCare -->
 
 ## Phase 8 — Plaza mini-games
 

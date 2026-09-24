@@ -68,6 +68,7 @@ namespace NinjaVillage.Core.Events
         public const string HouseBuilt = "house_built";              // a house was built or grew a level
         public const string FishCaught = "fish_caught";              // Amount = fish landed
         public const string BarsMined = "bars_mined";                // Amount = metal bars collected from the mine
+        public const string PetCared = "pet_cared";                  // a pet was petted or fed; Subject = pet id
 
         // Engagement / monetization
         public const string DailyLoginClaimed = "daily_login_claimed";

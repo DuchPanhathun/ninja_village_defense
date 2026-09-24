@@ -167,7 +167,8 @@ namespace NinjaVillage.EditorTools.Generators
                 ("pondRipples", Frames("Village/pond_ripple_").Cast<object>().ToList()),
                 ("fish", new[] { "fish_red", "fish_white", "fish_yellow" }.Select(n => (object)Sprite("Village/" + n)).Where(x => x != null).ToList()),
                 ("mineCrane", Sprite("Village/mine_crane")),
-                ("bars", new[] { "iron", "gold", "mithril" }.Select(m => (object)AssetDatabase.LoadAssetAtPath<Sprite>($"{Sprites}UI/Icons/item_{m}_bar.png")).ToList()));
+                ("bars", new[] { "iron", "gold", "mithril" }.Select(m => (object)AssetDatabase.LoadAssetAtPath<Sprite>($"{Sprites}UI/Icons/item_{m}_bar.png")).ToList()),
+                ("heart", AssetDatabase.LoadAssetAtPath<Sprite>($"{Sprites}UI/Bars/bar_heart_icon.png")));
         }
 
         private static void BuildDecorations()

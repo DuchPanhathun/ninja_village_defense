@@ -32,6 +32,8 @@ namespace NinjaVillage.Gameplay.Village
         private float _bubbleHideAt;
         private TextMeshPro _alert;
         private float _alertPhase;
+        private SpriteRenderer _badge;
+        private float _hopUntil, _hop;
 
         public static VillageResident Spawn(Transform parent, string name, CharacterSpriteSet set, Vector2 position, Rect area, float speed)
         {
@@ -128,6 +130,39 @@ namespace NinjaVillage.Gameplay.Village
 
         public bool HasAlert => _alert != null && _alert.gameObject.activeSelf;
 
+        /// <summary>A small picture over the head (a heart on a happy pet); null hides it.</summary>
+        public VillageResident SetBadge(Sprite sprite)
+        {
+            if (sprite == null)
+            {
+                if (_badge != null) _badge.enabled = false;
+                return this;
+            }
+            if (_badge == null)
+            {
+                _badge = new GameObject("Badge").AddComponent<SpriteRenderer>();
+                _badge.transform.SetParent(transform, false);
+                _badge.sortingOrder = VillageSorting.Labels + 4;
+            }
+            _badge.sprite = sprite;
+            _badge.enabled = true;
+            _badge.transform.localScale = Vector3.one * (0.45f / Mathf.Max(0.01f, sprite.bounds.size.x));
+            return this;
+        }
+
+        public bool HasBadge => _badge != null && _badge.enabled;
+
+        /// <summary>A happy little hop with hearts floating up (petting, feeding).</summary>
+        public void Cheer(Sprite heart)
+        {
+            _hopUntil = Time.time + 0.7f;
+            _idleUntil = Time.time + 2f;
+            if (heart == null) return;
+            float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.5f;
+            for (int i = 0; i < 4; i++)
+                FloatingHeart.Spawn(transform.position + new Vector3((i - 1.5f) * 0.3f, top + 0.2f, 0f), heart, i * 0.12f);
+        }
+
         private void Update()
         {
             Vector2 pos = transform.position;
@@ -160,9 +195,21 @@ namespace NinjaVillage.Gameplay.Village
             }
 
             if (moving && Mathf.Abs(toGoal.x) > 0.01f) _renderer.flipX = toGoal.x < 0f; // sprites face right
+            // A cheer: two quick hops (added on top of wherever it stands; the renderer is on this object).
+            float hop = Time.time < _hopUntil ? Mathf.Abs(Mathf.Sin((_hopUntil - Time.time) * 9f)) * 0.35f : 0f;
+            if (!Mathf.Approximately(hop, _hop))
+            {
+                transform.position += new Vector3(0f, hop - _hop, 0f);
+                _hop = hop;
+            }
             _renderer.sortingOrder = VillageSorting.Order(VillageSorting.Feet(transform.position, _renderer.sprite));
             if (_bubble != null && _bubble.activeSelf && Time.time >= _bubbleHideAt) _bubble.SetActive(false);
-            if (_alert != null && _alert.gameObject.activeSelf)
+            if (_badge != null && _badge.enabled)
+            {
+                float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f;
+                _badge.transform.localPosition = new Vector3(0f, top + 0.45f + Mathf.Sin(Time.time * 3f + _alertPhase) * 0.06f, 0f);
+            }
+                        if (_alert != null && _alert.gameObject.activeSelf)
             {
                 float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f;
                 bool bubble = _bubble != null && _bubble.activeSelf;
@@ -205,6 +252,40 @@ namespace NinjaVillage.Gameplay.Village
             _bubbleText.text = text;
             _bubble.SetActive(true);
             _bubbleHideAt = Time.time + 3.5f;
+        }
+    }
+
+    /// <summary>A heart that drifts up, sways and fades (pet care).</summary>
+    public class FloatingHeart : MonoBehaviour
+    {
+        private SpriteRenderer _renderer;
+        private float _age, _delay, _phase;
+
+        public static void Spawn(Vector3 position, Sprite sprite, float delay)
+        {
+            var go = new GameObject("Heart");
+            go.transform.position = position;
+            var heart = go.AddComponent<FloatingHeart>();
+            heart._renderer = go.AddComponent<SpriteRenderer>();
+            heart._renderer.sprite = sprite;
+            heart._renderer.sortingOrder = VillageSorting.Labels + 12;
+            heart._renderer.enabled = false;
+            heart._delay = delay;
+            heart._phase = UnityEngine.Random.value * 6f;
+            go.transform.localScale = Vector3.one * (0.4f / Mathf.Max(0.01f, sprite.bounds.size.x));
+        }
+
+        private void Update()
+        {
+            _age += Time.deltaTime;
+            if (_age < _delay) return;
+            float t = _age - _delay;
+            _renderer.enabled = true;
+            transform.position += new Vector3(Mathf.Sin(t * 5f + _phase) * 0.6f * Time.deltaTime, 1.1f * Time.deltaTime, 0f);
+            var c = _renderer.color;
+            c.a = Mathf.Clamp01(1.3f - t);
+            _renderer.color = c;
+            if (t > 1.3f) Destroy(gameObject);
         }
     }
 }

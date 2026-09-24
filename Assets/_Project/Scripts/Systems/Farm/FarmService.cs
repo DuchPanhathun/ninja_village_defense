@@ -116,6 +116,19 @@ namespace NinjaVillage.Systems.Farm
             return FarmResult.Success;
         }
 
+        /// <summary>Rain on the village: every growing crop that isn't watered yet gets watered. Returns how many.</summary>
+        public static int WaterAllByRain()
+        {
+            int watered = 0;
+            for (int plot = 0; plot < UnlockedPlots; plot++)
+            {
+                var state = Data.Get(plot);
+                if (state == null || state.Watered || Stage(plot) == CropStage.Ripe) continue;
+                if (Water(plot) == FarmResult.Success) watered++;
+            }
+            return watered;
+        }
+
         /// <summary>Harvests a ripe plot into the storehouse; <paramref name="harvest"/>/<paramref name="amount"/> say what came out.</summary>
         public static FarmResult Harvest(int plot, out GoodsDefinition harvest, out int amount)
         {

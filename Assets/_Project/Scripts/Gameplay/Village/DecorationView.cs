@@ -14,6 +14,7 @@ namespace NinjaVillage.Gameplay.Village
     public class DecorationView : MonoBehaviour, IVillageTappable
     {
         public int Uid { get; private set; }
+        public string DecorationId { get; private set; }
         public SpriteRenderer Renderer { get; private set; }
 
         public static DecorationView Create(Transform parent, DecorationDefinition definition, PlacedDecoration placed)
@@ -22,6 +23,7 @@ namespace NinjaVillage.Gameplay.Village
             go.transform.SetParent(parent, false);
             var view = go.AddComponent<DecorationView>();
             view.Uid = placed.Uid;
+            view.DecorationId = definition.Id;
             view.Renderer = Draw(go, definition, placed.Flip);
             view.MoveTo(new Vector2(placed.X, placed.Y));
             var collider = go.GetComponent<CircleCollider2D>();

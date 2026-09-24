@@ -7,7 +7,8 @@ namespace NinjaVillage.Systems.Pets
 {
     /// <summary>
     /// Brings the active pet into the battle: applies its passive owner bonus (XP, luck, gold, pickup
-    /// radius, speed) to the player and spawns it next to them with its level and equipped gear.
+    /// radius, speed) to the player and spawns it next to them with its level and equipped gear — stronger if
+    /// it was petted / fed in the village today.
     /// Pets without a prefab are built from placeholders by <see cref="PetFactory"/>, so this works
     /// before any pet art exists.
     /// </summary>
@@ -29,7 +30,9 @@ namespace NinjaVillage.Systems.Pets
             LayerMask enemyMask = context.AutoAttack != null ? context.AutoAttack.EnemyMask : default;
             Vector2 position = (Vector2)owner.position + new Vector2(-1f, 0.5f);
 
-            var controller = PetFactory.Spawn(pet, level, PetService.GetGear(pet.Id), 1f, owner, context.Stats, enemyMask, position);
+            // A pet petted / fed in the village today is a little stronger (EPIC 24 Phase 7).
+            float care = PetCareService.PowerScale(save, pet.Id);
+            var controller = PetFactory.Spawn(pet, level, PetService.GetGear(pet.Id), care, owner, context.Stats, enemyMask, position);
             if (controller != null) controller.name = $"Pet_{pet.Id}";
         }
 

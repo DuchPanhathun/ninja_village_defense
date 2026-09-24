@@ -38,6 +38,10 @@ namespace NinjaVillage.Tests
             SaveService.Data.Wallet.Add(CurrencyType.Gems, 5000);
             SaveService.SaveNow();
             Time.timeScale = 1f;
+            // A clear noon, whatever the real clock says, so rain never waters crops mid-test.
+            var noon = new System.DateTime(2026, 6, 1, 12, 0, 0, System.DateTimeKind.Local);
+            while (AtmosphereRules.WeatherAt(noon) != Weather.Clear) noon = noon.AddDays(1);
+            NinjaVillage.Gameplay.Village.VillageAtmosphere.OverrideLocalTime = () => noon;
             yield return null;
         }
 
@@ -45,6 +49,7 @@ namespace NinjaVillage.Tests
         public IEnumerator TearDown()
         {
             Time.timeScale = 1f;
+            NinjaVillage.Gameplay.Village.VillageAtmosphere.OverrideLocalTime = null;
             yield return null;
             SaveSystem.OverrideDirectory = null;
             SaveService.Load();
@@ -621,6 +626,71 @@ namespace NinjaVillage.Tests
             {
                 VillageVisit.ReturnHome();
                 NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
+        }
+
+        /// <summary>
+        /// Phase 7: on a rainy night (phone clock pinned) the map is tinted blue, a lantern and the castle glow, rain
+        /// falls and waters the crops; a pet can be petted and fed from its care bar (hearts, a heart badge, +15% today);
+        /// at noon the tint and glows are gone.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Village_RainyNightLanterns_AndPetCare()
+        {
+            var night = new System.DateTime(2026, 6, 1, 22, 0, 0, System.DateTimeKind.Local);
+            while (AtmosphereRules.WeatherAt(night) != Weather.Rain) night = night.AddDays(1);
+            var clock = night;
+            NinjaVillage.Gameplay.Village.VillageAtmosphere.OverrideLocalTime = () => clock;
+            try
+            {
+                var pet = NinjaVillage.Systems.Pets.PetService.GetSortedPets().FirstOrDefault();
+                Assert.IsNotNull(pet, "pet catalog missing");
+                SaveService.Data.Pets.Owned.SetLevel(pet.Id, 1);
+                SaveService.Data.Pets.ActivePetId = pet.Id;
+                SaveService.Data.Village.Decorations.Add(new PlacedDecoration { Uid = 90, Id = "lantern_post", X = -4f, Y = 6f });
+                NinjaVillage.Systems.Farm.FarmService.Plant(0, NinjaVillage.Systems.Farm.FarmService.GetCrop("rice"));
+                NinjaVillage.Systems.Farm.GoodsService.Add("fish", 1);
+
+                yield return LoadScene(SceneNames.Village);
+                yield return new WaitForSecondsRealtime(0.5f);
+                var sky = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Village.VillageAtmosphere>();
+                Assert.IsNotNull(sky, "the village has an atmosphere");
+                Assert.AreEqual(Weather.Rain, sky.CurrentWeather);
+                Assert.Greater(sky.Darkness, 0.9f);
+                Assert.Greater(sky.SkyTint.a, 0.3f, "night tint");
+                Assert.GreaterOrEqual(sky.GlowCount, 2, "the lantern and the castle");
+                Assert.IsTrue(sky.Glows.All(g => g.color.a > 0.3f), "glowing in the dark");
+                Assert.GreaterOrEqual(GameObject.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None).Count(r => r.name == "Raindrop"), 100);
+                Assert.IsTrue(NinjaVillage.Systems.Farm.FarmService.GetPlot(0).Watered, "the rain watered the rice");
+
+                var resident = NinjaVillage.Gameplay.Village.VillageMap.Instance.FindPet(pet.Id);
+                Assert.IsNotNull(resident, "the pet lives in the village");
+                resident.OnTapped();
+                yield return null;
+                Assert.IsTrue(GameObject.Find("PetBar") != null && GameObject.Find("PetBar").activeInHierarchy, "its care bar opens");
+                UnityEngine.UI.Button Starting(string text) => Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.interactable && (b.GetComponentInChildren<TMPro.TMP_Text>()?.text ?? "").StartsWith(text));
+                Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .First(b => b.isActiveAndEnabled && b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Pet").onClick.Invoke(); // not "Pets"
+                yield return null;
+                Assert.IsFalse(NinjaVillage.Systems.Pets.PetCareService.CanPet(pet.Id));
+                Assert.Greater(Object.FindObjectsByType<NinjaVillage.Gameplay.Village.FloatingHeart>(FindObjectsSortMode.None).Length, 0, "hearts float up");
+                Assert.IsTrue(resident.HasBadge, "a happy pet wears a heart");
+                Starting("Feed").onClick.Invoke();
+                Assert.AreEqual(0, NinjaVillage.Systems.Farm.GoodsService.Count("fish"), "it ate the fish");
+                Assert.AreEqual(1.15f, NinjaVillage.Systems.Pets.PetCareService.PowerScale(SaveService.Data, pet.Id), 0.0001f);
+
+                clock = new System.DateTime(2026, 6, 1, 12, 0, 0, System.DateTimeKind.Local);
+                while (AtmosphereRules.WeatherAt(clock) != Weather.Clear) clock = clock.AddDays(1);
+                yield return null;
+                yield return null;
+                Assert.AreEqual(0f, sky.SkyTint.a, 0.001f, "noon: no tint");
+                Assert.IsTrue(sky.Glows.All(g => g.color.a < 0.01f), "lanterns off by day");
+                Assert.AreEqual(0, GameObject.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None).Count(r => r.name == "Raindrop"), "the rain stopped");
+            }
+            finally
+            {
+                NinjaVillage.Gameplay.Village.VillageAtmosphere.OverrideLocalTime = null;
             }
         }
 
