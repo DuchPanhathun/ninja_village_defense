@@ -57,6 +57,9 @@ namespace NinjaVillage.Systems.Save
         public List<PlacedDecoration> Decorations = new();
         public int NextDecorationUid = 1;
 
+        /// <summary>Decorations given as rewards (villager requests) and not placed yet: id → how many.</summary>
+        public List<IdLevelEntry> GiftedDecorations = new();
+
         public int GetBuildingLevel(string buildingId) => Buildings.GetLevel(buildingId);
 
         public int GetBlessingRank(string blessingId) => Blessings.GetLevel(blessingId);

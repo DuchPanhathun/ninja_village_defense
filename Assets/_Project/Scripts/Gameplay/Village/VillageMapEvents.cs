@@ -53,6 +53,13 @@ namespace NinjaVillage.Gameplay.Village
         public DecorationTappedEvent(int uid) => Uid = uid;
     }
 
+    /// <summary>A villager with a request was tapped (own village): the HUD opens the requests, that one first.</summary>
+    public readonly struct VillagerRequestTappedEvent : IGameEvent
+    {
+        public readonly int Index;
+        public VillagerRequestTappedEvent(int index) => Index = index;
+    }
+
     /// <summary>A farm plot that isn't ripe was tapped (own village): the HUD shows its seed picker or status.</summary>
     public readonly struct FarmPlotTappedEvent : IGameEvent
     {

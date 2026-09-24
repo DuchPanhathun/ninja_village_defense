@@ -4,6 +4,7 @@ using NinjaVillage.Core.Events;
 using NinjaVillage.Core.Utilities;
 using NinjaVillage.Gameplay.Animation;
 using NinjaVillage.Systems.Heroes;
+using NinjaVillage.Systems.Requests;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
 using UnityEngine;
@@ -17,7 +18,8 @@ namespace NinjaVillage.Gameplay.Village
     /// <see cref="BuildingView"/> per building, the heroes you own training by the Dojo (the selected one
     /// tagged, with the active pet at heel), the other pets in the meadow by the Pet House, the Armory rack
     /// with your gear, the Talent Tree, your bought decorations, and townsfolk and farm animals whose numbers
-    /// grow with the village. <see cref="RefreshFromSave"/> redraws only what changed.
+    /// grow with the village, plus today's request-givers on the plaza with a "!" over their heads.
+    /// <see cref="RefreshFromSave"/> redraws only what changed.
     /// </summary>
     public class VillageMap : MonoBehaviour
     {
@@ -68,7 +70,8 @@ namespace NinjaVillage.Gameplay.Village
         private readonly Dictionary<string, BuildingView> _buildings = new();
         private readonly Dictionary<int, DecorationView> _decorations = new();
         private readonly List<VillageResident> _townsfolk = new();
-        private Transform _residentRoot, _townRoot, _decorationRoot;
+        private Transform _residentRoot, _townRoot, _decorationRoot, _requestRoot;
+        private string _requestsKey;
         private ArmoryDisplay _armory;
         private TalentTreeDisplay _talentTree;
         private ProfileBoardDisplay _profileBoard;
@@ -88,12 +91,14 @@ namespace NinjaVillage.Gameplay.Village
         {
             EventBus<BuildingUpgradedEvent>.Subscribe(OnBuildingUpgraded);
             EventBus<DecorationsChangedEvent>.Subscribe(OnDecorationsChanged);
+            EventBus<RequestsChangedEvent>.Subscribe(OnRequestsChanged);
         }
 
         private void OnDisable()
         {
             EventBus<BuildingUpgradedEvent>.Unsubscribe(OnBuildingUpgraded);
             EventBus<DecorationsChangedEvent>.Unsubscribe(OnDecorationsChanged);
+            EventBus<RequestsChangedEvent>.Unsubscribe(OnRequestsChanged);
         }
 
         private void Start()
@@ -124,6 +129,8 @@ namespace NinjaVillage.Gameplay.Village
             _residentRoot.SetParent(transform, false);
             _townRoot = new GameObject("Townsfolk").transform;
             _townRoot.SetParent(transform, false);
+            _requestRoot = new GameObject("RequestGivers").transform;
+            _requestRoot.SetParent(transform, false);
 
             if (IsOwnVillage) gameObject.AddComponent<DecorationPlacer>();
             FrameCamera();
@@ -140,6 +147,7 @@ namespace NinjaVillage.Gameplay.Village
 
         private void OnBuildingUpgraded(BuildingUpgradedEvent evt) => RefreshFromSave();
         private void OnDecorationsChanged(DecorationsChangedEvent evt) => RefreshFromSave();
+        private void OnRequestsChanged(RequestsChangedEvent evt) => SyncRequestGivers();
 
         private void Redraw()
         {
@@ -172,6 +180,7 @@ namespace NinjaVillage.Gameplay.Village
                 _profileBoard.Show(_art, Snapshot);
             }
             SyncTownsfolk();
+            SyncRequestGivers();
         }
 
         // ------------------------------------------------------------------ ground, roads, forest
@@ -383,6 +392,74 @@ namespace NinjaVillage.Gameplay.Village
         {
             if (!IsOwnVillage) return;
             EventBus<VillageDisplayTappedEvent>.Raise(new VillageDisplayTappedEvent(kind));
+        }
+
+        // ------------------------------------------------------------------ villager requests
+
+        private readonly List<VillageResident> _requestGivers = new();
+        private float _nextRequestCheck;
+
+        public IReadOnlyList<VillageResident> RequestGivers => _requestGivers;
+
+        /// <summary>
+        /// Today's request-givers on the plaza: a gold "!" while the favour is open, a green one once it can be
+        /// handed in, nothing after. Only in your own village; rebuilt when requests are posted.
+        /// </summary>
+        private void SyncRequestGivers()
+        {
+            if (_requestRoot == null || !IsOwnVillage) return;
+            var active = RequestService.Active;
+            var key = new StringBuilder();
+            foreach (var state in active) key.Append(state.Id).Append(':').Append(state.VillagerKey).Append(',');
+            if (key.ToString() != _requestsKey)
+            {
+                _requestsKey = key.ToString();
+                foreach (var giver in _requestGivers) if (giver != null) Destroy(giver.gameObject);
+                _requestGivers.Clear();
+                var square = VillageLayout.RequestSquare;
+                for (int i = 0; i < active.Count; i++)
+                {
+                    var state = active[i];
+                    int index = i;
+                    var spawn = new Vector2(Mathf.Lerp(square.xMin, square.xMax, (i + 0.5f) / active.Count), Random.Range(square.yMin, square.yMax));
+                    var giver = VillageResident.Spawn(_requestRoot, $"Requester_{state.VillagerKey}", CharacterSpriteLibrary.Find(state.VillagerKey),
+                            spawn, square, 0.6f)
+                        .Says(() => RequestLine(index))
+                        .OnTap(() => TappedRequest(index));
+                    _requestGivers.Add(giver);
+                }
+            }
+            for (int i = 0; i < _requestGivers.Count && i < active.Count; i++)
+            {
+                var state = active[i];
+                if (state.Delivered) _requestGivers[i].SetAlert(null, Color.white);
+                else if (RequestService.CanDeliver(state)) _requestGivers[i].SetAlert("!", new Color(0.55f, 1f, 0.45f));
+                else _requestGivers[i].SetAlert("!", new Color(1f, 0.82f, 0.25f));
+            }
+        }
+
+        private static string RequestLine(int index)
+        {
+            var active = RequestService.Active;
+            if (index < 0 || index >= active.Count) return null;
+            var state = active[index];
+            if (state.Delivered) return "Thank you so much!";
+            var request = RequestService.Get(state.Id);
+            return request != null ? request.Line : null;
+        }
+
+        private void TappedRequest(int index)
+        {
+            if (!IsOwnVillage) return;
+            EventBus<VillagerRequestTappedEvent>.Raise(new VillagerRequestTappedEvent(index));
+        }
+
+        private void Update()
+        {
+            // Storehouse counts and the day change don't raise request events: re-check the marks now and then.
+            if (!IsOwnVillage || Time.unscaledTime < _nextRequestCheck) return;
+            _nextRequestCheck = Time.unscaledTime + 1f;
+            SyncRequestGivers();
         }
 
         // ------------------------------------------------------------------ townsfolk

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa020cbfce0096773959a6dfe4d46268, type: 3}
+  m_Name: Request_clear_chapter
+  m_EditorClassIdentifier: 
+  id: clear_chapter
+  displayName: Clear Chapter {0}
+  description: Our scouts say a great evil lurks beyond. Clear the way!
+  icon: {fileID: 0}
+  kind: 2
+  goods: {fileID: 0}
+  statId: 
+  amount: 1
+  line: Our scouts say a great evil lurks beyond. Clear the way!
+  villagers:
+  - npc_master
+  - npc_oldman
+  requiredCastleLevel: 1
+  requiredKitchenLevel: 0
+  weight: 0.8
+  rewardCoins: 400
+  rewardGems: 10
+  rewardDecoration: {fileID: 11400000, guid: 7e192969e5f452242b0e14c3ed60079f, type: 2}

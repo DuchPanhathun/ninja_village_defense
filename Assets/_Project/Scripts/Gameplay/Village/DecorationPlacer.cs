@@ -40,6 +40,7 @@ namespace NinjaVillage.Gameplay.Village
             End(raise: false);
             Definition = definition;
             MovingUid = uid;
+            IsGift = false;
             _flip = flip;
             _hidden = original;
             if (_hidden != null) _hidden.gameObject.SetActive(false);
@@ -49,6 +50,14 @@ namespace NinjaVillage.Gameplay.Village
             _ghost = go.AddComponent<Ghost>();
             _ghost.Build(this, definition, flip);
             MoveTo(start);
+            EventBus<DecorationPlacementEvent>.Raise(new DecorationPlacementEvent(true));
+        }
+
+        /// <summary>Starts placing a gifted decoration: free, and it uses up one gift once placed.</summary>
+        public void BeginGift(DecorationDefinition definition, Vector2 start)
+        {
+            Begin(definition, start);
+            IsGift = true;
             EventBus<DecorationPlacementEvent>.Raise(new DecorationPlacementEvent(true));
         }
 
@@ -74,8 +83,8 @@ namespace NinjaVillage.Gameplay.Village
             error = null;
             if (_ghost == null) return false;
             Vector2 feet = _ghost.transform.position;
-            bool ok = MovingUid != 0
-                ? DecorationService.TryMove(MovingUid, feet, _flip, out error)
+            bool ok = MovingUid != 0 ? DecorationService.TryMove(MovingUid, feet, _flip, out error)
+                : IsGift ? DecorationService.TryPlaceGift(Definition, feet, _flip, out error)
                 : DecorationService.TryBuy(Definition, feet, _flip, out error);
             if (ok)
             {
@@ -96,10 +105,14 @@ namespace NinjaVillage.Gameplay.Village
             bool wasActive = Definition != null;
             Definition = null;
             MovingUid = 0;
+            IsGift = false;
             if (raise && wasActive) EventBus<DecorationPlacementEvent>.Raise(new DecorationPlacementEvent(false));
         }
 
-        public Price? PriceToPay => Definition != null && MovingUid == 0 ? Definition.Price : null;
+        public Price? PriceToPay => Definition != null && MovingUid == 0 && !IsGift ? Definition.Price : null;
+
+        /// <summary>Placing a villager's gift (free) rather than buying or moving.</summary>
+        public bool IsGift { get; private set; }
 
         /// <summary>The draggable preview.</summary>
         private class Ghost : MonoBehaviour, IVillageDraggable

@@ -28,6 +28,7 @@ namespace NinjaVillage.UI.Common
         public const string Storehouse = "storehouse";     // village goods (harvest)
         public const string Kitchen = "kitchen";           // cook meals from the harvest
         public const string Meals = "meals";               // pick the meals to eat before a battle
+        public const string Requests = "requests";         // today's villager requests
         public const string Building = "building";         // generic building detail/upgrade menu
         public const string Forge = "forge";
         public const string Shrine = "shrine";

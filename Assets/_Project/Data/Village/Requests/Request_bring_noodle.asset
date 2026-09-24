@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa020cbfce0096773959a6dfe4d46268, type: 3}
+  m_Name: Request_bring_noodle
+  m_EditorClassIdentifier: 
+  id: bring_noodle
+  displayName: Bring a {1}
+  description: Nothing beats hot noodles on a cold evening.
+  icon: {fileID: 21300000, guid: 47af92ade27ec89aca7884ce1ca29d36, type: 3}
+  kind: 0
+  goods: {fileID: 11400000, guid: b7132b6298a681f8e9576c5ba7c04849, type: 2}
+  statId: 
+  amount: 1
+  line: Nothing beats hot noodles on a cold evening.
+  villagers:
+  - npc_oldman
+  - npc_villager4
+  requiredCastleLevel: 2
+  requiredKitchenLevel: 1
+  weight: 0.9
+  rewardCoins: 200
+  rewardGems: 0
+  rewardDecoration: {fileID: 0}

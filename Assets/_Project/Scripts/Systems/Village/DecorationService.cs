@@ -112,6 +112,58 @@ namespace NinjaVillage.Systems.Village
             return true;
         }
 
+        // ------------------------------------------------------------------ gifts (villager request rewards)
+
+        /// <summary>Unplaced gifted decorations of this kind.</summary>
+        public static int GiftCount(DecorationDefinition definition) =>
+            definition != null ? Data.GiftedDecorations.GetLevel(definition.Id) : 0;
+
+        public static bool HasGifts()
+        {
+            foreach (var entry in Data.GiftedDecorations)
+                if (entry != null && entry.Level > 0) return true;
+            return false;
+        }
+
+        /// <summary>Every gifted decoration still waiting to be placed, in shop order.</summary>
+        public static List<(DecorationDefinition definition, int count)> Gifts()
+        {
+            var list = new List<(DecorationDefinition, int)>();
+            foreach (var item in GetShopItems())
+            {
+                int count = GiftCount(item);
+                if (count > 0) list.Add((item, count));
+            }
+            return list;
+        }
+
+        public static void Gift(DecorationDefinition definition, int count)
+        {
+            if (definition == null || count <= 0) return;
+            Data.GiftedDecorations.SetLevel(definition.Id, GiftCount(definition) + count);
+            Changed();
+        }
+
+        /// <summary>Places a gifted decoration for free (uses up one gift). Fails if the spot is blocked or there's no gift.</summary>
+        public static bool TryPlaceGift(DecorationDefinition definition, Vector2 position, bool flip, out string error)
+        {
+            error = null;
+            if (definition == null) { error = "Unknown decoration."; return false; }
+            int gifts = GiftCount(definition);
+            if (gifts <= 0) { error = "No gift of that kind left."; return false; }
+            position = DecorationRules.Snap(position);
+            var blocker = CheckPlacement(definition, position);
+            if (blocker != PlacementBlocker.None) { error = DecorationRules.Describe(blocker); return false; }
+
+            Data.GiftedDecorations.SetLevel(definition.Id, gifts - 1);
+            Data.Decorations.Add(new PlacedDecoration
+            {
+                Uid = Data.NextDecorationUid++, Id = definition.Id, X = position.x, Y = position.y, Flip = flip,
+            });
+            Changed();
+            return true;
+        }
+
         public static bool TryMove(int uid, Vector2 position, bool flip, out string error)
         {
             error = null;

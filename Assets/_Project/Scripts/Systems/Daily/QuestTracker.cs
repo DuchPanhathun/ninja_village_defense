@@ -21,7 +21,8 @@ namespace NinjaVillage.Systems.Daily
     /// comes from <see cref="ProgressStatEvent"/>.</item>
     /// </list>
     /// Completing a quest reports <see cref="ProgressStatIds.QuestCompleted"/> (for achievements and
-    /// the battle pass). Writes are batched with SaveService.MarkDirty.
+    /// the battle pass). Villager requests (<see cref="Requests.RequestService"/>) get every stat too.
+    /// Writes are batched with SaveService.MarkDirty.
     /// </summary>
     public class QuestTracker : MonoBehaviour
     {
@@ -84,6 +85,7 @@ namespace NinjaVillage.Systems.Daily
             QuestService.EnsureRolled();
 
             bool isMax = DailyRules.IsMaxStat(statId);
+            Requests.RequestService.Record(statId, amount, isMax); // villager requests count the same stats
             bool changed = false;
             _completedBuffer.Clear();
 

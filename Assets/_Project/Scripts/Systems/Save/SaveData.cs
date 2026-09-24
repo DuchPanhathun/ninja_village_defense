@@ -46,6 +46,7 @@ namespace NinjaVillage.Systems.Save
         public FarmSaveData Farm = new();
         public GoodsSaveData Goods = new();
         public KitchenSaveData Kitchen = new();
+        public RequestSaveData Requests = new();
 
         /// <summary>
         /// Fills sections that are null (JsonUtility leaves a class field null only when
@@ -75,6 +76,9 @@ namespace NinjaVillage.Systems.Save
             Kitchen ??= new KitchenSaveData();
             Kitchen.Jobs ??= new System.Collections.Generic.List<CookingJob>();
             Kitchen.SelectedMeals ??= new System.Collections.Generic.List<string>();
+            Requests ??= new RequestSaveData();
+            Requests.Active ??= new System.Collections.Generic.List<VillagerRequestState>();
+            Village.GiftedDecorations ??= new System.Collections.Generic.List<IdLevelEntry>();
             Chapters ??= new ChapterSaveData();
             Chapters.BestWaves ??= new System.Collections.Generic.List<IdLevelEntry>();
 

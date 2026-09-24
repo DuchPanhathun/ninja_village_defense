@@ -12,6 +12,7 @@ namespace NinjaVillage.Gameplay.Village
     /// drawn with its animated pack sprites. It wanders between random spots in its area (or trots after
     /// another resident: the active pet follows the selected hero), faces where it walks, sorts by depth,
     /// and on tap either runs its action (heroes/pets open their screen) and/or says something in a bubble.
+    /// A villager with a request wears a bobbing "!" (<see cref="SetAlert"/>).
     /// </summary>
     [RequireComponent(typeof(CircleCollider2D))]
     public class VillageResident : MonoBehaviour, IVillageTappable
@@ -29,6 +30,8 @@ namespace NinjaVillage.Gameplay.Village
         private GameObject _bubble;
         private TextMeshPro _bubbleText;
         private float _bubbleHideAt;
+        private TextMeshPro _alert;
+        private float _alertPhase;
 
         public static VillageResident Spawn(Transform parent, string name, CharacterSpriteSet set, Vector2 position, Rect area, float speed)
         {
@@ -96,6 +99,35 @@ namespace NinjaVillage.Gameplay.Village
             return this;
         }
 
+        /// <summary>A big bobbing mark over the head ("!" = has a request); null or empty hides it.</summary>
+        public VillageResident SetAlert(string text, Color color)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                if (_alert != null) _alert.gameObject.SetActive(false);
+                return this;
+            }
+            if (_alert == null)
+            {
+                _alert = new GameObject("Alert").AddComponent<TextMeshPro>();
+                _alert.transform.SetParent(transform, false);
+                _alert.alignment = TextAlignmentOptions.Center;
+                _alert.fontSize = 6f;
+                _alert.fontStyle = FontStyles.Bold;
+                _alert.outlineWidth = 0.3f;
+                _alert.outlineColor = new Color32(20, 27, 27, 255);
+                _alert.rectTransform.sizeDelta = new Vector2(2f, 1.5f);
+                _alert.sortingOrder = VillageSorting.Labels + 5;
+                _alertPhase = UnityEngine.Random.value * 6f;
+            }
+            _alert.gameObject.SetActive(true);
+            _alert.text = text;
+            _alert.color = color;
+            return this;
+        }
+
+        public bool HasAlert => _alert != null && _alert.gameObject.activeSelf;
+
         private void Update()
         {
             Vector2 pos = transform.position;
@@ -130,6 +162,12 @@ namespace NinjaVillage.Gameplay.Village
             if (moving && Mathf.Abs(toGoal.x) > 0.01f) _renderer.flipX = toGoal.x < 0f; // sprites face right
             _renderer.sortingOrder = VillageSorting.Order(VillageSorting.Feet(transform.position, _renderer.sprite));
             if (_bubble != null && _bubble.activeSelf && Time.time >= _bubbleHideAt) _bubble.SetActive(false);
+            if (_alert != null && _alert.gameObject.activeSelf)
+            {
+                float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f;
+                bool bubble = _bubble != null && _bubble.activeSelf;
+                _alert.transform.localPosition = new Vector3(0f, top + (bubble ? 2.4f : 0.75f) + Mathf.Abs(Mathf.Sin(Time.time * 4f + _alertPhase)) * 0.25f, 0f);
+            }
         }
 
         private void PickTarget() =>

@@ -5,6 +5,7 @@ using NinjaVillage.Systems.Economy;
 using NinjaVillage.Systems.Farm;
 using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Kitchen;
+using NinjaVillage.Systems.Requests;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Village;
 using NinjaVillage.UI.Common;
@@ -21,7 +22,8 @@ namespace NinjaVillage.UI.Village
     /// hero, pet, the Armory or the Talent Tree opens that screen; tapping a decoration offers Move / Sell;
     /// while a decoration is being placed a bar offers Flip / Cancel / Place. The Farm button glides the view
     /// to the field ("!" when something is ripe); tapping a bed opens the seed picker or its status (Water,
-    /// Dig up). The Kitchen button glides to the Kitchen and opens it ("!" when a meal is done). Visiting someone else's village
+    /// Dig up). The Kitchen button glides to the Kitchen and opens it ("!" when a meal is done); Requests (or tapping
+    /// a villager with a "!") opens today's villager requests. Visiting someone else's village
     /// hides everything that would change it, and the back button returns to your own village.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
@@ -33,7 +35,7 @@ namespace NinjaVillage.UI.Village
         private const float TabBarHeight = 210f;
 
         private TextMeshProUGUI _title, _stage, _coins, _gems;
-        private GameObject _decorate, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _tabBar;
+        private GameObject _decorate, _decorateBadge, _visit, _farm, _farmBadge, _kitchen, _kitchenBadge, _requests, _requestsBadge, _tabBar;
         private RectTransform _placeBar, _decoBar;
         private Image _placeIcon;
         private TextMeshProUGUI _placeName, _placeHint, _decoName;
@@ -112,6 +114,7 @@ namespace NinjaVillage.UI.Village
             var icon = decorate.Button.transform.Find("Icon")?.GetComponent<Image>();
             if (picture != null && icon != null) icon.sprite = picture.Icon;
             _decorate = decorate.Root.gameObject;
+            _decorateBadge = decorate.Badge; // a villager's gift is waiting to be placed
 
             var visit = UIStyle.Icon(parent, "menu_leaderboard", "Visit", () => Open(ScreenIds.Neighbours), 140f);
             UIStyle.Place(visit.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -380f), visit.Root.sizeDelta);
@@ -126,6 +129,11 @@ namespace NinjaVillage.UI.Village
             UIStyle.Place(kitchen.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -780f), kitchen.Root.sizeDelta);
             _kitchen = kitchen.Root.gameObject;
             _kitchenBadge = kitchen.Badge;
+
+            var requests = UIStyle.Icon(parent, "icon_item_scroll", "Requests", () => RequestsScreen.Open(-1), 140f);
+            UIStyle.Place(requests.Root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -980f), requests.Root.sizeDelta);
+            _requests = requests.Root.gameObject;
+            _requestsBadge = requests.Badge;
         }
 
         /// <summary>Glides to the Kitchen and opens it — or its build menu while it isn't built yet.</summary>
@@ -275,6 +283,8 @@ namespace NinjaVillage.UI.Village
             _nextFarmRefresh = Time.unscaledTime + 0.5f;
             _farmBadge.SetActive(!VillageVisit.IsVisiting && FarmService.RipeCount() > 0);
             if (_kitchenBadge != null) _kitchenBadge.SetActive(!VillageVisit.IsVisiting && KitchenService.ReadyCount() > 0);
+            if (_requestsBadge != null) _requestsBadge.SetActive(!VillageVisit.IsVisiting && RequestService.DeliverableCount() > 0);
+            if (_decorateBadge != null) _decorateBadge.SetActive(!VillageVisit.IsVisiting && DecorationService.HasGifts());
             if (_selectedPlot >= 0) RefreshFarmBar(); // live countdown
         }
 
@@ -401,6 +411,7 @@ namespace NinjaVillage.UI.Village
             EventBus<DecorationTappedEvent>.Subscribe(OnDecorationTapped);
             EventBus<DecorationPlacementEvent>.Subscribe(OnPlacement);
             EventBus<FarmPlotTappedEvent>.Subscribe(OnPlotTapped);
+            EventBus<VillagerRequestTappedEvent>.Subscribe(OnRequestTapped);
             EventBus<FarmChangedEvent>.Subscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Subscribe(OnCurrencyChanged);
         }
@@ -412,6 +423,7 @@ namespace NinjaVillage.UI.Village
             EventBus<DecorationTappedEvent>.Unsubscribe(OnDecorationTapped);
             EventBus<DecorationPlacementEvent>.Unsubscribe(OnPlacement);
             EventBus<FarmPlotTappedEvent>.Unsubscribe(OnPlotTapped);
+            EventBus<VillagerRequestTappedEvent>.Unsubscribe(OnRequestTapped);
             EventBus<FarmChangedEvent>.Unsubscribe(OnFarmChanged);
             EventBus<CurrencyChangedEvent>.Unsubscribe(OnCurrencyChanged);
         }
@@ -425,6 +437,14 @@ namespace NinjaVillage.UI.Village
             SelectDecoration(0);
             SelectPlot(-1);
             BuildingScreen.Open(evt.BuildingId);
+        }
+
+        private void OnRequestTapped(VillagerRequestTappedEvent evt)
+        {
+            if (!IsCurrent || DecorationPlacer.IsActive || VillageVisit.IsVisiting) return;
+            SelectDecoration(0);
+            SelectPlot(-1);
+            RequestsScreen.Open(evt.Index);
         }
 
         private void OnPlotTapped(FarmPlotTappedEvent evt)
@@ -533,13 +553,15 @@ namespace NinjaVillage.UI.Village
             _tabBar.SetActive(!active);
             _decorate.SetActive(!active && !VillageVisit.IsVisiting);
             _kitchen.SetActive(!active && !VillageVisit.IsVisiting);
+            _requests.SetActive(!active && !VillageVisit.IsVisiting);
             _visit.SetActive(!active);
             if (!active) return;
 
             var definition = placer.Definition;
             _placeIcon.sprite = definition.Icon;
             var price = placer.PriceToPay;
-            _placeName.text = price.HasValue ? $"{definition.NameOrId}  <color=#FFD24D>{price.Value}</color>" : $"Move {definition.NameOrId}";
+            _placeName.text = price.HasValue ? $"{definition.NameOrId}  <color=#FFD24D>{price.Value}</color>"
+                : placer.IsGift ? $"{definition.NameOrId}  <color=#9CFF8A>gift</color>" : $"Move {definition.NameOrId}";
             _placeHint.text = placer.Fits ? "Drag it, or tap where it should go." : $"<color=#FF8A7A>{DecorationRules.Describe(placer.Blocker)}</color>";
             UIBuilder.SetEnabled(_placeConfirm, placer.Fits && (!price.HasValue || CurrencyService.CanAfford(price.Value)));
         }
@@ -570,6 +592,7 @@ namespace NinjaVillage.UI.Village
             bool visiting = VillageVisit.IsVisiting;
             _decorate.SetActive(!visiting && !DecorationPlacer.IsActive);
             _kitchen.SetActive(!visiting && !DecorationPlacer.IsActive);
+            _requests.SetActive(!visiting && !DecorationPlacer.IsActive);
             _tabBar.SetActive(!visiting && !DecorationPlacer.IsActive);
         }
     }

@@ -147,7 +147,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
@@ -346,6 +346,72 @@ namespace NinjaVillage.Tests
                     "onigiri: +10% max health this run");
                 Assert.AreEqual(run.FinalMaxHealth, PlayerReference.Instance.GetComponent<NinjaVillage.Core.Combat.Health>().MaxHealth, 0.01f);
                 Assert.IsNotNull(GameObject.Find("Meal_onigiri"), "the meal shows on the skill bar");
+            }
+            finally
+            {
+                NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = null;
+            }
+        }
+
+        /// <summary>
+        /// Phase 3: villagers with a "!" stand on the plaza; tapping one opens their request; delivering pays out,
+        /// stat requests count through the quest feed, and a decoration reward can be placed for free.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Village_VillagersAskForFavours()
+        {
+            var now = new System.DateTime(2026, 9, 24, 12, 0, 0, System.DateTimeKind.Utc);
+            NinjaVillage.Core.Utilities.GameClock.OverrideUtcNow = () => now;
+            try
+            {
+                var requests = SaveService.Data.Requests;
+                requests.Day = NinjaVillage.Core.Utilities.GameClock.Today;
+                requests.Active.Clear();
+                requests.Active.Add(new VillagerRequestState { Id = "bring_rice", VillagerKey = "npc_villager", Target = 6 });
+                requests.Active.Add(new VillagerRequestState { Id = "harvest_crops", VillagerKey = "npc_villager3", Target = 12 });
+                requests.Active.Add(new VillagerRequestState { Id = "clear_chapter", VillagerKey = "npc_master", Target = 1, Chapter = 1 });
+
+                yield return LoadScene(SceneNames.Village);
+                yield return null;
+                var givers = NinjaVillage.Gameplay.Village.VillageMap.Instance.RequestGivers;
+                Assert.AreEqual(3, givers.Count, "three villagers with requests on the plaza");
+                Assert.IsTrue(givers.All(g => g.HasAlert), "each wears a !");
+
+                givers[0].OnTapped();
+                yield return null;
+                Assert.AreEqual(ScreenIds.Requests, UIScreenNavigator.Instance.Current.ScreenId, "tapping a villager opens the requests");
+                UnityEngine.UI.Button Deliver() => Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None)
+                    .FirstOrDefault(b => b.isActiveAndEnabled && b.interactable && b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Deliver");
+                Assert.IsNull(Deliver(), "no rice yet");
+
+                NinjaVillage.Systems.Farm.GoodsService.Add("rice", 6);
+                UIScreenNavigator.Instance.Current.Refresh();
+                int coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                Deliver().onClick.Invoke();
+                Assert.AreEqual(0, NinjaVillage.Systems.Farm.GoodsService.Count("rice"), "the rice was handed over");
+                Assert.Greater(SaveService.Data.Wallet.Get(CurrencyType.Coins), coins, "and paid for");
+                Assert.IsTrue(requests.Active[0].Delivered);
+                Assert.IsFalse(givers[0].HasAlert, "no more ! once it's done");
+
+                NinjaVillage.Core.Events.Progress.Report(NinjaVillage.Core.Events.ProgressStatIds.CropsHarvested, 12); // via the quest tracker
+                Assert.IsTrue(NinjaVillage.Systems.Requests.RequestService.CanDeliver(requests.Active[1]), "harvests count towards the request");
+
+                SaveService.Data.Chapters.HighestCleared = 1;
+                Assert.IsTrue(NinjaVillage.Systems.Requests.RequestService.Deliver(requests.Active[2], out var reward));
+                Assert.IsNotNull(reward.Decoration, "clearing a chapter earns a decoration");
+
+                UIScreenNavigator.Instance.Back();
+                var placer = NinjaVillage.Gameplay.Village.DecorationPlacer.Instance;
+                int placed = DecorationService.Placed.Count;
+                coins = SaveService.Data.Wallet.Get(CurrencyType.Coins);
+                placer.BeginGift(reward.Decoration, new Vector2(-8f, 9f));
+                Assert.IsTrue(placer.Fits, placer.Blocker.ToString());
+                Assert.IsNull(placer.PriceToPay, "gifts are free");
+                Assert.IsTrue(placer.Confirm(out var error), error);
+                Assert.AreEqual(placed + 1, DecorationService.Placed.Count);
+                Assert.AreEqual(coins, SaveService.Data.Wallet.Get(CurrencyType.Coins));
+                Assert.AreEqual(0, DecorationService.GiftCount(reward.Decoration));
+                yield return new WaitForSecondsRealtime(0.3f);
             }
             finally
             {

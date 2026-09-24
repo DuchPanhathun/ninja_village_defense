@@ -10,7 +10,8 @@ namespace NinjaVillage.UI.Village
 {
     /// <summary>
     /// The Decorate shop: every decoration by category with its picture and price. "Buy" closes the shop and
-    /// starts placing it at the middle of the view — it's only paid for once it's placed.
+    /// starts placing it at the middle of the view — it's only paid for once it's placed. Decorations villagers
+    /// gave as rewards are listed first and placed for free.
     /// </summary>
     [SceneScreen(SceneNames.Village)]
     public class DecorationShopScreen : UIListScreen
@@ -33,6 +34,18 @@ namespace NinjaVillage.UI.Village
             {
                 UIBuilder.Text(content, "No decorations found. Run Ninja Village → Generate Default Content.", UITheme.BodySize);
                 return;
+            }
+            var gifts = DecorationService.Gifts();
+            if (gifts.Count > 0)
+            {
+                UIBuilder.SectionHeader(content, "Gifts from villagers");
+                foreach (var (item, count) in gifts)
+                {
+                    var actions = UIBuilder.ActionCard(content, $"{item.NameOrId}   ×{count}",
+                        $"{item.Description}\n<color=#9CFF8A>A thank-you gift. Placing it is free.</color>", out _, out _, UITheme.Gold, item.Icon);
+                    var gift = item;
+                    UIBuilder.SmallButton(actions.transform, "Place", () => PlaceGift(gift), UITheme.Button, 260f);
+                }
             }
             foreach (var (category, title) in Sections)
             {
@@ -70,6 +83,17 @@ namespace NinjaVillage.UI.Village
             var cam = UnityEngine.Camera.main;
             Vector2 start = cam != null ? (Vector2)cam.transform.position : Vector2.zero;
             placer.Begin(item, FreeSpotNear(item, start));
+        }
+
+        private static void PlaceGift(DecorationDefinition item)
+        {
+            var placer = DecorationPlacer.Instance;
+            if (placer == null) return;
+            Sfx.Play(AudioCueIds.UiClick);
+            UIScreenNavigator.Instance.Back();
+            var cam = UnityEngine.Camera.main;
+            Vector2 start = cam != null ? (Vector2)cam.transform.position : Vector2.zero;
+            placer.BeginGift(item, FreeSpotNear(item, start));
         }
 
         /// <summary>The nearest spot to <paramref name="start"/> where <paramref name="item"/> fits (spiralling out), else the start.</summary>

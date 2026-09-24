@@ -529,9 +529,9 @@ into battles. Order = build order; each phase ends with a phone playtest and a c
 
 ## Phase 3 — Villager requests
 
-- [ ]  Request generator   <!-- "Bring 5 carrots", "Cook 2 onigiri", "Clear Chapter 2"...; 3 active, refresh daily -->
-- [ ]  "!" bubble on villagers   <!-- tap → request card → Deliver → coins / gems / decoration rewards -->
-- [ ]  Progress hooks   <!-- reuse the quest/progress stats already tracked -->
+- [x]  Request generator   <!-- RequestGenerator: 18 requests — 10 deliveries (crops + meals), 7 "do" tasks (enemies, bosses, battles, harvest, cook, ultimate, chests), Clear next Chapter; castle/kitchen-gated; 3 a day from 3 different villagers (seeded per player/day), replaced at the daily reset -->
+- [x]  "!" bubble on villagers   <!-- 9 named villagers; today's 3 stand on the plaza with a bobbing ! (gold = open, green = ready); tap → RequestsScreen (that one first) → Deliver/Claim; coins grow +20%/castle level, some gems, decorations become free "Gifts" in the Decorate shop; HUD Requests button + ! badges -->
+- [x]  Progress hooks   <!-- QuestTracker.Record feeds RequestService.Record (same stats as quests); deliveries read the storehouse, chapter requests the chapter save; request_delivered stat reported; RequestTests (EditMode) + Village_VillagersAskForFavours (PlayMode) -->
 
 ## Phase 4 — Treasury & houses
 

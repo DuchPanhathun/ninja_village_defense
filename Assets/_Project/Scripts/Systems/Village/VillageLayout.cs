@@ -44,6 +44,9 @@ namespace NinjaVillage.Systems.Village
         public static Vector2 FarmPlot(int plot) => new(-13.8f + (plot % 2) * 2.5f, 4.4f + (plot / 2) * 2.4f);
         public static readonly Rect PetMeadow = new(4.8f, -9.6f, 7.6f, 2.4f);
 
+        /// <summary>Where the villagers with today's requests hang around: the plaza.</summary>
+        public static readonly Rect RequestSquare = new(-2.2f, -2.5f, 4.4f, 2.8f);
+
         /// <summary>Round spots decorations can't cover: the displays.</summary>
         public static IEnumerable<(Vector2 center, float radius)> ReservedSpots()
         {
