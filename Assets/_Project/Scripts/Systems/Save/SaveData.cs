@@ -42,6 +42,7 @@ namespace NinjaVillage.Systems.Save
         public SettingsSaveData Settings = new();
         public LiveOpsSaveData LiveOps = new();
         public StoreSaveData Store = new();
+        public ChapterSaveData Chapters = new();
 
         /// <summary>
         /// Fills sections that are null (JsonUtility leaves a class field null only when
@@ -63,6 +64,8 @@ namespace NinjaVillage.Systems.Save
             LiveOps ??= new LiveOpsSaveData();
             LiveOps.BattlePass ??= new BattlePassSaveData();
             Store ??= new StoreSaveData();
+            Chapters ??= new ChapterSaveData();
+            Chapters.BestWaves ??= new System.Collections.Generic.List<IdLevelEntry>();
 
             if (Version < 2)
             {

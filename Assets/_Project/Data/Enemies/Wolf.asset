@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Wolf
   m_EditorClassIdentifier: 
   id: Wolf
-  displayName: 
+  displayName: Wolf
   description: 
   icon: {fileID: 0}
   maxHealth: 40
   moveSpeed: 3.2
   damage: 12
-  attackRange: 1.0
+  attackRange: 1
   attackCooldown: 0.9
   xpReward: 6
   coinReward: 1

@@ -9,6 +9,7 @@ namespace NinjaVillage.UI.Common
     {
         // Main Menu
         public const string Home = "home";
+        public const string Chapters = "chapters";
         public const string Settings = "settings";
         public const string Profile = "profile";
 

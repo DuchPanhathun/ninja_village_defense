@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6cb257db829dd633a2600a3e112e68c, type: 3}
+  m_Name: Chapter05
+  m_EditorClassIdentifier: 
+  id: chapter_05
+  displayName: Demon Gate
+  description: The oni horde pours out of the demon realm. Close the gate for good.
+  icon: {fileID: 0}
+  number: 5
+  waves:
+  - {fileID: 11400000, guid: a64e307cd5d361b8d89ea4cc0acb1110, type: 2}
+  - {fileID: 11400000, guid: 77a91816bb3fd3451a9ef9eb363a3616, type: 2}
+  - {fileID: 11400000, guid: 6206f92ae1dd9dfd38d542af995520e2, type: 2}
+  - {fileID: 11400000, guid: 4fe8176aeb2984f8482a08be02284dae, type: 2}
+  - {fileID: 11400000, guid: 294de290e4d78250cb13b6168f891300, type: 2}
+  - {fileID: 11400000, guid: c70a8ce9effdad709b75a270f11a5432, type: 2}
+  - {fileID: 11400000, guid: 64cffd738d6042446874341bdf2390c8, type: 2}
+  - {fileID: 11400000, guid: bf89efc2e75aeefb682f985f78ed1d9e, type: 2}
+  - {fileID: 11400000, guid: 6010eef637cd3eb6d921ba4678f93d03, type: 2}
+  - {fileID: 11400000, guid: 2810b7ff2de06d0feb90c819a04ed45a, type: 2}
+  difficulty: 3.6
+  ground: {fileID: 21300000, guid: ad5ba1a89c2ad5049908a70b084ff7b5, type: 3}
+  groundTint: {r: 1, g: 1, b: 1, a: 1}
+  skyColor: {r: 0.3, g: 0.16, b: 0.14, a: 1}
+  props:
+  - {fileID: 21300000, guid: 7d6dd92939a2cf2dc88d01616d54b294, type: 3}
+  - {fileID: 21300000, guid: 45c6b4f7706568631a0129692684ff3e, type: 3}
+  - {fileID: 21300000, guid: a14016dc70eed77c890e9b11676e0e08, type: 3}
+  - {fileID: 21300000, guid: 2011384492b4d4838b8c8449af52d6d9, type: 3}
+  - {fileID: 21300000, guid: 68325944b84d2e09198255026984b55e, type: 3}
+  - {fileID: 21300000, guid: 72d3e75c3c4458effa19884f2afb6307, type: 3}
+  propDensity: 0.28
+  themeColor: {r: 1, g: 0.42, b: 0.35, a: 1}
+  clearCoins: 1500
+  clearGems: 60

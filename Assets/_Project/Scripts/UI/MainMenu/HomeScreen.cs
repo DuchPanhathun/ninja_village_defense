@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NinjaVillage.Core.Audio;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Animation;
+using NinjaVillage.Systems.Chapters;
 using NinjaVillage.Systems.Economy;
 using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Heroes;
@@ -18,8 +19,8 @@ namespace NinjaVillage.UI.MainMenu
     /// <summary>
     /// The Main Menu's home screen (EPIC 17 "Home"), laid out like a modern mobile action game:
     /// a top bar (hero portrait, name, gems, coins), a battle-pass season banner, icon columns on both
-    /// sides, the selected hero animated in the middle, a big START button between Heroes and Village,
-    /// and a bottom tab bar. Every link opens its screen; screens with something to claim
+    /// sides, the selected hero animated in the middle, the chapter picker (START plays that chapter), a big
+    /// START button between Heroes and Village, and a bottom tab bar. Every link opens its screen; screens with something to claim
     /// (<see cref="ScreenBadges"/>) show a red "!" badge, and links whose screen isn't in this scene hide.
     /// Art comes from <see cref="UIArt"/> (Ninja Adventure pack + generated icons).
     /// </summary>
@@ -60,8 +61,10 @@ namespace NinjaVillage.UI.MainMenu
         };
 
         private readonly List<(UIStyle.IconButton button, string screenId)> _links = new();
-        private TextMeshProUGUI _playerName, _heroLine, _gems, _coins, _seasonTitle, _seasonProgress, _tier, _heroName, _stats;
-        private Image _portrait, _seasonFill, _heroImage;
+        private TextMeshProUGUI _playerName, _heroLine, _gems, _coins, _seasonTitle, _seasonProgress, _tier, _heroName;
+        private TextMeshProUGUI _chapterNumber, _chapterName, _chapterStatus;
+        private Image _portrait, _seasonFill, _heroImage, _chapterBoss;
+        private Button _chapterPrev, _chapterNext;
         private UIImageAnimator _heroAnimator;
         private GameObject _seasonBadge, _heroesBadge;
         private string _shownHeroKey;
@@ -241,8 +244,96 @@ namespace NinjaVillage.UI.MainMenu
             _heroName = UIStyle.Label(ribbon.transform, "", 46f);
             UIBuilder.Stretch(_heroName.rectTransform, 10f);
 
-            _stats = UIStyle.Label(area, "", 30f, UIStyle.Cream, TextAlignmentOptions.Center, 0.2f);
-            UIStyle.Place(_stats.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, -382f), new Vector2(700f, 44f));
+            BuildChapterPicker(area);
+        }
+
+        // ------------------------------------------------------------------ chapter picker
+
+        private void BuildChapterPicker(RectTransform area)
+        {
+            var panel = UIStyle.Frame(area, "Chapter", "panel_map", () => Open(ScreenIds.Chapters), new Color(0.95f, 0.7f, 0.3f));
+            var rt = (RectTransform)panel.transform;
+            UIStyle.Place(rt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, -384f), new Vector2(500f, 146f));
+
+            var tile = UIStyle.Sprite(rt, "BossTile", "panel_tint", new Color(0.16f, 0.11f, 0.08f));
+            tile.color = new Color(0.16f, 0.11f, 0.08f, 1f);
+            tile.raycastTarget = false;
+            UIStyle.Place(tile.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(114f, 114f));
+            _chapterBoss = UIBuilder.Image(tile.transform, "Boss", Color.white);
+            _chapterBoss.raycastTarget = false;
+            _chapterBoss.preserveAspect = true;
+            UIBuilder.Stretch(_chapterBoss.rectTransform, 10f);
+
+            _chapterNumber = UIStyle.Label(rt, "", 26f, UITheme.Gold, TextAlignmentOptions.Left, 0.25f);
+            UIStyle.Place(_chapterNumber.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(146f, -14f), new Vector2(340f, 34f));
+            _chapterName = UIStyle.Label(rt, "", 38f, Color.white, TextAlignmentOptions.Left, 0.25f);
+            _chapterName.enableAutoSizing = true;
+            _chapterName.fontSizeMin = 24f;
+            _chapterName.fontSizeMax = 38f;
+            UIStyle.Place(_chapterName.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(146f, 2f), new Vector2(340f, 48f));
+            _chapterStatus = UIStyle.Label(rt, "", 24f, UIStyle.Cream, TextAlignmentOptions.Left, 0.25f);
+            UIStyle.Place(_chapterStatus.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(146f, 12f), new Vector2(340f, 32f));
+
+            _chapterPrev = ChapterArrow(area, "<", -300f, -1);
+            _chapterNext = ChapterArrow(area, ">", 300f, +1);
+        }
+
+        private Button ChapterArrow(RectTransform area, string label, float x, int step)
+        {
+            var arrow = UIStyle.Frame(area, step < 0 ? "ChapterPrev" : "ChapterNext", "button_normal", () => StepChapter(step), UITheme.Button);
+            UIStyle.Place((RectTransform)arrow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(x, -398f), new Vector2(84f, 118f));
+            var text = UIStyle.Label(arrow.transform, label, 60f, Color.white, TextAlignmentOptions.Center, 0.28f);
+            UIBuilder.Stretch(text.rectTransform);
+            return arrow;
+        }
+
+        /// <summary>Moves the selection to the previous/next unlocked chapter.</summary>
+        private void StepChapter(int step)
+        {
+            var chapters = ChapterService.GetChapters();
+            int index = chapters.IndexOf(ChapterService.Selected);
+            for (int i = index + step; i >= 0 && i < chapters.Count; i += step)
+            {
+                if (!ChapterService.IsUnlocked(chapters[i])) continue;
+                Sfx.Play(AudioCueIds.UiClick);
+                ChapterService.TrySelect(chapters[i]);
+                RefreshChapter();
+                return;
+            }
+        }
+
+        private void RefreshChapter()
+        {
+            var chapters = ChapterService.GetChapters();
+            var chapter = ChapterService.Selected;
+            if (chapter == null)
+            {
+                _chapterNumber.text = "";
+                _chapterName.text = "Endless battle";
+                _chapterStatus.text = "";
+                _chapterBoss.enabled = false;
+                _chapterPrev.gameObject.SetActive(false);
+                _chapterNext.gameObject.SetActive(false);
+                return;
+            }
+
+            int index = chapters.IndexOf(chapter);
+            _chapterNumber.text = $"CHAPTER {chapter.Number}/{chapters.Count}";
+            _chapterName.text = chapter.DisplayName;
+            int best = Mathf.Min(ChapterService.BestWave(chapter), chapter.WaveCount);
+            _chapterStatus.text = ChapterService.IsCleared(chapter) ? "<color=#FFD24D>CLEARED</color>  ·  replay"
+                : best > 0 ? $"Best: wave {best}/{chapter.WaveCount}" : $"{chapter.WaveCount} waves  ·  final boss";
+            _chapterBoss.sprite = UIIcons.Enemy(chapter.FinalBoss);
+            _chapterBoss.enabled = _chapterBoss.sprite != null;
+
+            bool CanStep(int step)
+            {
+                for (int i = index + step; i >= 0 && i < chapters.Count; i += step)
+                    if (ChapterService.IsUnlocked(chapters[i])) return true;
+                return false;
+            }
+            _chapterPrev.gameObject.SetActive(CanStep(-1));
+            _chapterNext.gameObject.SetActive(CanStep(+1));
         }
 
         // ------------------------------------------------------------------ START row
@@ -340,6 +431,7 @@ namespace NinjaVillage.UI.MainMenu
             _playerName.text = profile.DisplayName;
             RefreshCurrencies();
             RefreshHero(profile);
+            RefreshChapter();
             RefreshSeason();
 
             var navigator = UIScreenNavigator.Instance;
@@ -361,9 +453,6 @@ namespace NinjaVillage.UI.MainMenu
 
             _heroName.text = $"{heroName.ToUpperInvariant()}  <size=70%>Lv {level}</size>";
             _heroLine.text = $"{heroName} · Lv {level}";
-            _stats.text = profile.TotalRuns > 0
-                ? $"Best wave {profile.HighestWaveReached}  ·  {profile.TotalKills} demons defeated"
-                : "Your village needs you!";
 
             // The equipped skin's frames when it has its own art, else the hero's.
             string heroKey = CharacterSpriteLibrary.HeroKey(heroId ?? "assassin");

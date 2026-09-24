@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: SkeletonNinja
   m_EditorClassIdentifier: 
   id: SkeletonNinja
-  displayName: 
+  displayName: Skeleton Ninja
   description: 
   icon: {fileID: 0}
   maxHealth: 60
-  moveSpeed: 3.0
+  moveSpeed: 3
   damage: 16
   attackRange: 1.1
   attackCooldown: 0.8

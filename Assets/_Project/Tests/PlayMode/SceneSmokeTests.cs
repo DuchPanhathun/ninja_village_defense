@@ -83,7 +83,7 @@ namespace NinjaVillage.Tests
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,
                 ScreenIds.DailyLogin, ScreenIds.Quests, ScreenIds.Achievements, ScreenIds.BattlePass, ScreenIds.Events,
-                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, "leaderboard", "account");
+                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, "leaderboard", "account");
             yield return new WaitForSecondsRealtime(0.5f);
         }
 
@@ -176,6 +176,55 @@ namespace NinjaVillage.Tests
             yield return new WaitForSecondsRealtime(1f);
         }
 #endif
+
+        [UnityTest]
+        public IEnumerator Battle_ChapterSetsUpItsMapWavesAndHud()
+        {
+            var chapters = NinjaVillage.Systems.Chapters.ChapterService.GetChapters();
+            Assert.GreaterOrEqual(chapters.Count, 2, "chapter catalog missing — run the content generator");
+            SaveService.Data.Chapters.HighestCleared = 1;
+            var second = chapters[1];
+            Assert.IsTrue(NinjaVillage.Systems.Chapters.ChapterService.TrySelect(second));
+
+            yield return LoadScene(SceneNames.Battle);
+            Assert.AreEqual(second, NinjaVillage.Systems.Chapters.ChapterDirector.Current);
+
+            var waves = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Waves.WaveManager>();
+            Assert.IsFalse(waves.Endless, "chapters end with their final boss");
+            Assert.AreEqual(second.WaveCount, waves.Waves.Count);
+            Assert.IsTrue(waves.Waves[waves.Waves.Count - 1].IsBossWave, "the last wave is the final boss");
+
+            var ground = Object.FindAnyObjectByType<NinjaVillage.Gameplay.World.InfiniteGround>();
+            Assert.AreEqual(second.Ground, ground.GetComponent<SpriteRenderer>().sprite);
+            Assert.IsNotNull(Object.FindAnyObjectByType<NinjaVillage.UI.Battle.WaveRoadmapUI>(), "roadmap missing from the HUD");
+            Assert.IsNotNull(Object.FindAnyObjectByType<NinjaVillage.UI.Battle.MinimapUI>(), "minimap missing from the HUD");
+
+            yield return new WaitForSecondsRealtime(1f);
+            var props = Object.FindAnyObjectByType<NinjaVillage.Gameplay.World.PropScatter>();
+            Assert.Greater(props.GetComponentsInChildren<SpriteRenderer>().Length, 0, "no scenery scattered around the player");
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_BeatingTheFinalWaveClearsTheChapter()
+        {
+            var chapters = NinjaVillage.Systems.Chapters.ChapterService.GetChapters();
+            yield return LoadScene(SceneNames.Battle);
+            Assert.AreEqual(chapters[0], NinjaVillage.Systems.Chapters.ChapterDirector.Current, "a new player starts at chapter 1");
+            int gems = SaveService.Data.Wallet.Get(CurrencyType.Gems);
+
+            EventBus<NinjaVillage.Gameplay.Waves.AllWavesCompleteEvent>.Raise(new NinjaVillage.Gameplay.Waves.AllWavesCompleteEvent());
+            yield return null;
+
+            var result = NinjaVillage.Systems.Chapters.ChapterService.LastResult;
+            Assert.IsTrue(result != null && result.Victory && result.FirstClear);
+            Assert.AreEqual(1, SaveService.Data.Chapters.HighestCleared);
+            Assert.AreEqual(gems + chapters[0].ClearGems, SaveService.Data.Wallet.Get(CurrencyType.Gems));
+            Assert.AreEqual(chapters[1], NinjaVillage.Systems.Chapters.ChapterService.Selected, "START moves on to chapter 2");
+            Assert.AreEqual(chapters[0].Id, SaveService.Data.Profile.RecentRuns[0].ChapterId);
+
+            var title = GameObject.Find("GameOverPanel").transform.Find("TitleText").GetComponent<TMPro.TMP_Text>();
+            StringAssert.Contains("CLEAR", title.text);
+        }
 
         [UnityTest]
         public IEnumerator Battle_DeathOffersReviveThenRecordsTheRun()

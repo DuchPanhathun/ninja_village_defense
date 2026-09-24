@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CursedSamurai
   m_EditorClassIdentifier: 
   id: CursedSamurai
-  displayName: 
+  displayName: Cursed Samurai
   description: 
   icon: {fileID: 0}
   maxHealth: 250

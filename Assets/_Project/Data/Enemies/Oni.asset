@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Oni
   m_EditorClassIdentifier: 
   id: Oni
-  displayName: 
+  displayName: Oni
   description: 
   icon: {fileID: 0}
   maxHealth: 90

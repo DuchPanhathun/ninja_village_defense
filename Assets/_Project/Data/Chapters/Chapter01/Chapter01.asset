@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6cb257db829dd633a2600a3e112e68c, type: 3}
+  m_Name: Chapter01
+  m_EditorClassIdentifier: 
+  id: chapter_01
+  displayName: Village Outskirts
+  description: Bandits and wolves raid the fields around the village.
+  icon: {fileID: 0}
+  number: 1
+  waves:
+  - {fileID: 11400000, guid: aa88886758739467396201ea92042d09, type: 2}
+  - {fileID: 11400000, guid: a78dbfe36b9676b0fbf9a4a61100675f, type: 2}
+  - {fileID: 11400000, guid: 32f3b1b7fb0d9cb6a892e30982ab2efa, type: 2}
+  - {fileID: 11400000, guid: 38028317edbae758f9b89a21c5526407, type: 2}
+  - {fileID: 11400000, guid: 964d77f35103c60a1aafb148535e533b, type: 2}
+  - {fileID: 11400000, guid: 7bf731a869bef9335b807f6dfd22e9c2, type: 2}
+  - {fileID: 11400000, guid: e71d5c2fbb41c77ef8104a4ccff1bc24, type: 2}
+  - {fileID: 11400000, guid: 7a2e3d2e419bd4de6a2745fba3eabaea, type: 2}
+  - {fileID: 11400000, guid: d36aac4fe4d0ac7f4b648f70b1d55c2b, type: 2}
+  - {fileID: 11400000, guid: a415770b058cdf160bd00148b98f45bf, type: 2}
+  difficulty: 1
+  ground: {fileID: 21300000, guid: 05e249401ef8279ae9ca86dc7ca97196, type: 3}
+  groundTint: {r: 1, g: 1, b: 1, a: 1}
+  skyColor: {r: 0.29, g: 0.45, b: 0.2, a: 1}
+  props:
+  - {fileID: 21300000, guid: a490c7534c517e60cad77a69b5f91b58, type: 3}
+  - {fileID: 21300000, guid: de3d28504f4d949dbaa790210536fa54, type: 3}
+  - {fileID: 21300000, guid: 4298f6258cc38c236b04e40af6355211, type: 3}
+  - {fileID: 21300000, guid: 6cedd2f379b807c4f9b3bee968dbe65a, type: 3}
+  - {fileID: 21300000, guid: 30c94e4fb3d900c37aa64fbf21a76ab2, type: 3}
+  - {fileID: 21300000, guid: 1eff27bf1fc43a3c0b1ac5b932e22338, type: 3}
+  - {fileID: 21300000, guid: 1e5299deae1ff4441b54e2876dabce1e, type: 3}
+  - {fileID: 21300000, guid: 581b2f7c211f0c3c390e7d5c39c127cd, type: 3}
+  - {fileID: 21300000, guid: ef0e2505506952e60bcc2c3c418d08ac, type: 3}
+  propDensity: 0.3
+  themeColor: {r: 0.55, g: 0.85, b: 0.35, a: 1}
+  clearCoins: 400
+  clearGems: 20

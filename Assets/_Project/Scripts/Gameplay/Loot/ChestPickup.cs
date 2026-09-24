@@ -50,6 +50,7 @@ namespace NinjaVillage.Gameplay.Loot
             trigger.isTrigger = true;
             trigger.size = new Vector2(1f, 0.8f);
 
+            NinjaVillage.Gameplay.World.MinimapMarker.Add(go, NinjaVillage.Gameplay.World.MinimapMarkerKind.Chest);
             var chest = go.AddComponent<ChestPickup>();
             chest.minCoins = minCoins;
             chest.maxCoins = maxCoins;

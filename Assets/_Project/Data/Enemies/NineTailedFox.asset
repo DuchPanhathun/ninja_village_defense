@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NineTailedFox
   m_EditorClassIdentifier: 
   id: NineTailedFox
-  displayName: 
+  displayName: Nine-Tailed Fox
   description: 
   icon: {fileID: 0}
   maxHealth: 550
   moveSpeed: 2.2
   damage: 22
   attackRange: 1.1
-  attackCooldown: 0.0
+  attackCooldown: 0
   xpReward: 95
   coinReward: 24
   isBoss: 1

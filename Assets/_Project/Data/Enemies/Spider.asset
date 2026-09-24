@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Spider
   m_EditorClassIdentifier: 
   id: Spider
-  displayName: 
+  displayName: Spider
   description: 
   icon: {fileID: 0}
   maxHealth: 45
   moveSpeed: 2.8
   damage: 13
-  attackRange: 1.0
+  attackRange: 1
   attackCooldown: 0.9
   xpReward: 12
   coinReward: 3

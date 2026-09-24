@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Giant
   m_EditorClassIdentifier: 
   id: Giant
-  displayName: 
+  displayName: Stone Giant
   description: 
   icon: {fileID: 0}
   maxHealth: 350

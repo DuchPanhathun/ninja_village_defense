@@ -2,6 +2,7 @@ using NinjaVillage.Core.Combat;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Player;
 using NinjaVillage.Gameplay.Animation;
+using NinjaVillage.Gameplay.World;
 using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Enemies
@@ -68,6 +69,8 @@ namespace NinjaVillage.Gameplay.Enemies
             _currentDamage = enemyDefinition.Damage * difficultyMultiplier * (_isElite ? 1.5f : 1f);
 
             PlayerTransform = PlayerReference.Instance != null ? PlayerReference.Instance.PlayerTransform : null;
+            MinimapMarker.Add(gameObject, enemyDefinition.IsBoss ? MinimapMarkerKind.Boss
+                : _isElite ? MinimapMarkerKind.Elite : MinimapMarkerKind.Enemy);
         }
 
         protected virtual void Update()
@@ -143,6 +146,7 @@ namespace NinjaVillage.Gameplay.Enemies
             // so death animation/VFX has time to play.
             Destroy(gameObject, 1.5f);
             enabled = false;
+            if (TryGetComponent<MinimapMarker>(out var marker)) marker.enabled = false; // off the map while the body fades
         }
     }
 }

@@ -400,8 +400,9 @@ namespace NinjaVillage.EditorTools.Generators
                 EditorUtility.SetDirty(scaler);
             }
 
-            Place(Find(scene, "HPBarBackground"), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -40f), new Vector2(520f, 52f));
-            Place(Find(scene, "XPBarBackground"), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -104f), new Vector2(520f, 40f));
+            // 470 wide: the chapter roadmap (ChapterGenerator) sits between the bars and the pause button.
+            Place(Find(scene, "HPBarBackground"), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -40f), new Vector2(470f, 52f));
+            Place(Find(scene, "XPBarBackground"), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -104f), new Vector2(470f, 40f));
             FillParent(Find(scene, "HPBarFill"), 8f);
             FillParent(Find(scene, "XPBarFill"), 6f);
             FillParent(Find(scene, "BossBarFill"), 8f);

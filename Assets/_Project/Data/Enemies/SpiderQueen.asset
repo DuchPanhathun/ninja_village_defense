@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SpiderQueen
   m_EditorClassIdentifier: 
   id: SpiderQueen
-  displayName: 
+  displayName: Spider Queen
   description: 
   icon: {fileID: 0}
   maxHealth: 600

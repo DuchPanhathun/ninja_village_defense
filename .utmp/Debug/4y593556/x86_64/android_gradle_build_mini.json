@@ -1,0 +1,35 @@
+{
+  "buildFiles": [
+    "/home/thun/Desktop/documents/Project/ninja_village_defense/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/CMakeLists.txt",
+    "/home/thun/Desktop/documents/Project/ninja_village_defense/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/FramePacing/CMakeLists.txt",
+    "/home/thun/Desktop/documents/Project/ninja_village_defense/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/GameActivity/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/thun/Unity/Hub/Editor/6000.0.84f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/thun/Desktop/documents/Project/ninja_village_defense/.utmp/Debug/4y593556/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/thun/Unity/Hub/Editor/6000.0.84f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/thun/Desktop/documents/Project/ninja_village_defense/.utmp/Debug/4y593556/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "game::@d02bb112ea9f9c2ed29f": {
+      "artifactName": "game",
+      "abi": "x86_64",
+      "output": "/home/thun/Desktop/documents/Project/ninja_village_defense/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y593556/obj/x86_64/libgame.so",
+      "runtimeFiles": []
+    },
+    "swappywrapper::@7e25bd1f32ce224db4e9": {
+      "artifactName": "swappywrapper",
+      "abi": "x86_64",
+      "output": "/home/thun/Desktop/documents/Project/ninja_village_defense/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/4y593556/obj/x86_64/libswappywrapper.so",
+      "runtimeFiles": []
+    }
+  }
+}

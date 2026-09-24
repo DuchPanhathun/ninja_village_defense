@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DemonKing
   m_EditorClassIdentifier: 
   id: DemonKing
-  displayName: 
+  displayName: Demon King
   description: 
   icon: {fileID: 0}
   maxHealth: 600

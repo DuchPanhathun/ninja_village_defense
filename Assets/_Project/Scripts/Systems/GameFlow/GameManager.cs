@@ -2,6 +2,7 @@ using NinjaVillage.Core.Events;
 using NinjaVillage.Gameplay.Combat;
 using NinjaVillage.Gameplay.Player;
 using NinjaVillage.Gameplay.Waves;
+using NinjaVillage.Systems.Chapters;
 using NinjaVillage.Systems.Meta;
 using NinjaVillage.Systems.Save;
 using UnityEngine;
@@ -10,8 +11,8 @@ namespace NinjaVillage.Systems.GameFlow
 {
     /// <summary>
     /// Battle-scene run orchestrator: tracks the current wave, ends the run on player
-    /// death or full clear, records the run into the profile, persists progress, and
-    /// restarts / exits cleanly.
+    /// death or full clear (a chapter's final boss beaten), records the run into the profile and
+    /// the chapter progress, persists progress, and restarts / exits cleanly.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -94,6 +95,9 @@ namespace NinjaVillage.Systems.GameFlow
 
             var save = SaveService.Data;
             var record = runStats.BuildRecord(victory, _currentWave);
+            var chapter = ChapterDirector.Current;
+            if (chapter != null) record.ChapterId = chapter.Id;
+            ChapterService.RecordRun(chapter, victory, _currentWave); // best wave, first-clear reward, next chapter
 
             save.Profile.RecordRun(record);
             // Legacy root fields, still read by older UI.

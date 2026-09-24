@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6cb257db829dd633a2600a3e112e68c, type: 3}
+  m_Name: Chapter03
+  m_EditorClassIdentifier: 
+  id: chapter_03
+  displayName: Scorched Dunes
+  description: Skeleton ninjas guard the desert road to the ruined shrine.
+  icon: {fileID: 0}
+  number: 3
+  waves:
+  - {fileID: 11400000, guid: ffaf11002692e78ae81b5ee7145c7892, type: 2}
+  - {fileID: 11400000, guid: 67044cc2aa4edf7bb85ad6a674418e6c, type: 2}
+  - {fileID: 11400000, guid: 1a3d2e003427561b9b04ef562e8bc0c7, type: 2}
+  - {fileID: 11400000, guid: cb02e714b082d0597b45e4caa06f11fd, type: 2}
+  - {fileID: 11400000, guid: e9c9a4d52e08debd897f1eade3b8f704, type: 2}
+  - {fileID: 11400000, guid: 66766f978111281b489b5d3f8fa731d6, type: 2}
+  - {fileID: 11400000, guid: aa1767586d1f2897dbfcdc2e3be0621c, type: 2}
+  - {fileID: 11400000, guid: b895350cd2cc25cd69f329604f3d93dc, type: 2}
+  - {fileID: 11400000, guid: d40b268256fc097b08a4ecb7b4bdbc9e, type: 2}
+  - {fileID: 11400000, guid: f6270e1c9aee918bebced9583bf88221, type: 2}
+  difficulty: 2.1
+  ground: {fileID: 21300000, guid: 244d636c78b36e51ca72f6c4b42e6e36, type: 3}
+  groundTint: {r: 1, g: 1, b: 1, a: 1}
+  skyColor: {r: 0.62, g: 0.52, b: 0.3, a: 1}
+  props:
+  - {fileID: 21300000, guid: 45c6b4f7706568631a0129692684ff3e, type: 3}
+  - {fileID: 21300000, guid: a14016dc70eed77c890e9b11676e0e08, type: 3}
+  - {fileID: 21300000, guid: 7d6dd92939a2cf2dc88d01616d54b294, type: 3}
+  - {fileID: 21300000, guid: 45c3a31c9533c73968225a14d7d9315b, type: 3}
+  - {fileID: 21300000, guid: 71fcbd5ae06cf47d3b9709fb943e1469, type: 3}
+  - {fileID: 21300000, guid: 72d3e75c3c4458effa19884f2afb6307, type: 3}
+  propDensity: 0.22
+  themeColor: {r: 1, g: 0.78, b: 0.35, a: 1}
+  clearCoins: 800
+  clearGems: 30

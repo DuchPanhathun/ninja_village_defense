@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: ShadowNinja
   m_EditorClassIdentifier: 
   id: ShadowNinja
-  displayName: 
+  displayName: Shadow Ninja
   description: 
   icon: {fileID: 0}
   maxHealth: 500
-  moveSpeed: 3.0
+  moveSpeed: 3
   damage: 20
-  attackRange: 1.0
-  attackCooldown: 0.0
+  attackRange: 1
+  attackCooldown: 0
   xpReward: 90
   coinReward: 22
   isBoss: 1

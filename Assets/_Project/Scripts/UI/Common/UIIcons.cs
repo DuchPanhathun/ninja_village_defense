@@ -32,6 +32,18 @@ namespace NinjaVillage.UI.Common
         }
 
         public static Sprite Pet(string petId) => Character(CharacterSpriteLibrary.PetKey(petId));
+
+        /// <summary>An enemy or boss: its portrait art if it has one, else its prefab's (animated) sprite.</summary>
+        public static Sprite Enemy(NinjaVillage.Gameplay.Enemies.EnemyDefinition enemy)
+        {
+            if (enemy == null) return null;
+            if (enemy.Icon != null) return enemy.Icon;
+            if (enemy.EnemyPrefab == null) return null;
+            var frames = enemy.EnemyPrefab.GetComponentInChildren<SpriteFrameAnimator>(true);
+            if (frames != null && frames.SpriteSet != null && frames.SpriteSet.DefaultSprite != null) return frames.SpriteSet.DefaultSprite;
+            var renderer = enemy.EnemyPrefab.GetComponentInChildren<SpriteRenderer>(true);
+            return renderer != null ? renderer.sprite : null;
+        }
         public static Sprite Skin(string skinId) => Character(skinId);
 
         private static Sprite Character(string key)

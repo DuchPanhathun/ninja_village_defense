@@ -27,6 +27,7 @@ namespace NinjaVillage.Gameplay.Loot
         {
             _definition = definition;
             EnsureVisual();
+            NinjaVillage.Gameplay.World.MinimapMarker.Add(gameObject, NinjaVillage.Gameplay.World.MinimapMarkerKind.Item);
         }
 
         /// <summary>Spawns a prefab-less pickup for <paramref name="definition"/>.</summary>

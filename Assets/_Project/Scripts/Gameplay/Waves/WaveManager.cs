@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using NinjaVillage.Core.Events;
 using UnityEngine;
 
@@ -8,7 +9,8 @@ namespace NinjaVillage.Gameplay.Waves
     /// Sequences the battle's waves: spawns each wave's enemies, waits for the
     /// arena to clear, then advances. After the last defined wave, either stops
     /// (raising <see cref="AllWavesCompleteEvent"/>) or loops the final wave with
-    /// rising difficulty if <see cref="endlessMode"/> is enabled.
+    /// rising difficulty if <see cref="endlessMode"/> is enabled. A chapter replaces the
+    /// scene's waves through <see cref="Configure"/> before the first wave starts.
     /// </summary>
     public class WaveManager : MonoBehaviour
     {
@@ -20,6 +22,7 @@ namespace NinjaVillage.Gameplay.Waves
         [SerializeField] private bool autoStart = true;
 
         private int _currentWaveIndex;
+        private float _baseDifficulty = 1f;
         private int _aliveCount;
         private bool _finishedSpawningCurrentWave;
         private bool _waveInProgress;
@@ -32,6 +35,25 @@ namespace NinjaVillage.Gameplay.Waves
         private void OnDisable()
         {
             EventBus<EnemyKilledEvent>.Unsubscribe(OnEnemyKilled);
+        }
+
+        /// <summary>The wave plan (for the roadmap). In endless mode the last wave repeats after these.</summary>
+        public IReadOnlyList<WaveDefinition> Waves => waves;
+        public bool Endless => endlessMode;
+        /// <summary>1-based number of the wave in progress (0 before the first starts).</summary>
+        public int CurrentWave { get; private set; }
+
+        /// <summary>
+        /// Replaces the scene's waves (a chapter's plan). Call before Start; <paramref name="baseDifficulty"/>
+        /// multiplies every wave's own ramp.
+        /// </summary>
+        public void Configure(IReadOnlyList<WaveDefinition> newWaves, bool endless, float baseDifficulty)
+        {
+            if (newWaves == null || newWaves.Count == 0) return;
+            waves = new WaveDefinition[newWaves.Count];
+            for (int i = 0; i < waves.Length; i++) waves[i] = newWaves[i];
+            endlessMode = endless;
+            _baseDifficulty = Mathf.Max(0.1f, baseDifficulty);
         }
 
         private void Start()
@@ -78,14 +100,21 @@ namespace NinjaVillage.Gameplay.Waves
             _waveInProgress = true;
             _finishedSpawningCurrentWave = false;
             _aliveCount = 0;
+            CurrentWave = waveNumber + 1;
 
-            EventBus<WaveStartedEvent>.Raise(new WaveStartedEvent(waveNumber + 1, wave.IsBossWave));
-            float difficultyMultiplier = 1f + difficultyRampPerWave * waveNumber;
+            var boss = wave.IsBossWave ? wave.BossDefinition : null;
+            EventBus<WaveStartedEvent>.Raise(new WaveStartedEvent(waveNumber + 1, wave.IsBossWave,
+                endlessMode ? 0 : waves.Length, boss != null ? boss.DisplayName : null));
+            float difficultyMultiplier = _baseDifficulty * (1f + difficultyRampPerWave * waveNumber);
 
-            foreach (var entry in wave.Spawns)
+            // Interleave the entries (A, B, C, A, B, C...) so a mixed wave arrives mixed, not type by type.
+            int longest = 0;
+            foreach (var entry in wave.Spawns) longest = Mathf.Max(longest, entry.Count);
+            for (int i = 0; i < longest; i++)
             {
-                for (int i = 0; i < entry.Count; i++)
+                foreach (var entry in wave.Spawns)
                 {
+                    if (i >= entry.Count || entry.EnemyDefinition == null) continue;
                     // Wait for room under the live-enemy cap instead of dropping the spawn.
                     while (!spawnManager.CanSpawn) yield return null;
                     if (spawnManager.Spawn(entry.EnemyDefinition, spawnManager.GetSpawnPositionAroundPlayer(), difficultyMultiplier) != null)

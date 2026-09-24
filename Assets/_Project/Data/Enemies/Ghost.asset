@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Ghost
   m_EditorClassIdentifier: 
   id: Ghost
-  displayName: 
+  displayName: Ghost
   description: 
   icon: {fileID: 0}
   maxHealth: 50
   moveSpeed: 2.4
   damage: 14
-  attackRange: 1.0
-  attackCooldown: 1.0
+  attackRange: 1
+  attackCooldown: 1
   xpReward: 12
   coinReward: 3
   isBoss: 0

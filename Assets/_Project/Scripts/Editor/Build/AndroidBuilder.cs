@@ -12,13 +12,16 @@ namespace NinjaVillage.EditorTools.Build
     /// <c>unity run . -- -executeMethod NinjaVillage.EditorTools.Build.AndroidBuilder.BuildDevApkBatch</c>.
     /// Enforces the settings the game depends on before every build: IL2CPP + ARM64, portrait only, the
     /// Firebase Gradle templates (the External Dependency Manager writes Firebase's libraries into them, and
-    /// Unity ignores them unless these flags are on), and the debug keystore for development builds.
+    /// Unity ignores them unless these flags are on), the debug keystore for development builds, and the
+    /// app icon (<c>Art/AppIcon</c>, made by <c>Tools/art_import/make_app_icon.py</c>). Development APKs also
+    /// include x86_64 so they run on the Android emulator.
     /// </summary>
     public static class AndroidBuilder
     {
         public const string ApplicationId = "com.thun.ninjavillagedefense";
         public const string ProductName = "Ninja Village Defense";
         public const string DevApkPath = "Builds/Android/NinjaVillage-dev.apk";
+        public const string AppIconFolder = "Assets/_Project/Art/AppIcon";
 
         [MenuItem("Ninja Village/Build/Android Development APK", priority = 30)]
         public static void BuildDevApkMenu() => BuildDevApk();
@@ -28,6 +31,8 @@ namespace NinjaVillage.EditorTools.Build
         public static bool BuildDevApk()
         {
             ApplyAndroidSettings();
+            // Phones are ARM64; the x86_64 slice lets the same APK run natively on the desktop emulator.
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android &&
                 !EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android))
             {
@@ -94,7 +99,61 @@ namespace NinjaVillage.EditorTools.Build
                 else Debug.LogWarning($"[AndroidBuilder] PlayerSettings has no '{flag}'.");
             }
             playerSettings.ApplyModifiedPropertiesWithoutUndo();
+            ApplyAppIcons();
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// Adaptive (background + foreground layers), round and legacy Android icons, plus the default icon
+        /// for every other platform. Icon textures are imported uncompressed and point-filtered so the pixel
+        /// art stays crisp when Unity rescales it to each launcher density.
+        /// </summary>
+        public static void ApplyAppIcons()
+        {
+            var background = LoadIcon("app_icon_background");
+            var foreground = LoadIcon("app_icon_foreground");
+            var legacy = LoadIcon("app_icon_legacy");
+            var round = LoadIcon("app_icon_round");
+            if (background == null || foreground == null || legacy == null || round == null)
+            {
+                Debug.LogWarning($"[AndroidBuilder] App icon textures missing in {AppIconFolder} — run Tools/art_import/make_app_icon.py.");
+                return;
+            }
+
+            PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { legacy }, IconKind.Application);
+            var android = NamedBuildTarget.Android;
+            // Kinds by name so this compiles without a direct reference to the Android editor extension.
+            foreach (var kind in PlayerSettings.GetSupportedIconKinds(android))
+            {
+                var icons = PlayerSettings.GetPlatformIcons(android, kind);
+                string name = kind.ToString();
+                foreach (var icon in icons)
+                {
+                    if (name.Contains("Adaptive")) icon.SetTextures(background, foreground);
+                    else if (name.Contains("Round")) icon.SetTexture(round);
+                    else icon.SetTexture(legacy);
+                }
+                PlayerSettings.SetPlatformIcons(android, kind, icons);
+            }
+        }
+
+        private static Texture2D LoadIcon(string name)
+        {
+            string path = $"{AppIconFolder}/{name}.png";
+            if (AssetImporter.GetAtPath(path) is TextureImporter importer &&
+                (importer.textureCompression != TextureImporterCompression.Uncompressed || importer.filterMode != FilterMode.Point ||
+                 importer.npotScale != TextureImporterNPOTScale.None || importer.mipmapEnabled))
+            {
+                importer.textureType = TextureImporterType.Default;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.filterMode = FilterMode.Point;
+                importer.npotScale = TextureImporterNPOTScale.None;
+                importer.mipmapEnabled = false;
+                foreach (var platform in new[] { "Android", "iPhone" })
+                    importer.ClearPlatformTextureSettings(platform);
+                importer.SaveAndReimport();
+            }
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
     }
 }

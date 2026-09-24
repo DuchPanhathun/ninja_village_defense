@@ -1,6 +1,8 @@
 using System.Collections;
 using NinjaVillage.Core.Events;
 using NinjaVillage.Core.Audio;
+using NinjaVillage.Gameplay.Waves;
+using NinjaVillage.Systems.Chapters;
 using NinjaVillage.Systems.Evolution;
 using NinjaVillage.UI.Common;
 using TMPro;
@@ -10,7 +12,8 @@ using UnityEngine.UI;
 namespace NinjaVillage.UI.Battle
 {
     /// <summary>
-    /// Big celebratory banner over the battle (EPIC 5 "Level animation", EPIC 7 "Unlock animation"):
+    /// Big celebratory banner over the battle (EPIC 5 "Level animation", EPIC 7 "Unlock animation", the
+    /// chapter title when a battle starts and the warning when a boss wave begins):
     /// a screen flash, then a title that punches in, holds and fades. Runs on unscaled time because
     /// level-ups immediately pause the game for the skill choice. Built in code on its own top canvas
     /// the first time it's needed in a scene; listens persistently so no scene wiring is required.
@@ -30,8 +33,25 @@ namespace NinjaVillage.UI.Battle
         {
             EventBus<LevelUpEvent>.UnsubscribePersistent(OnLevelUp);
             EventBus<EvolutionUnlockedEvent>.UnsubscribePersistent(OnEvolution);
+            EventBus<ChapterStartedEvent>.UnsubscribePersistent(OnChapterStarted);
+            EventBus<WaveStartedEvent>.UnsubscribePersistent(OnWaveStarted);
             EventBus<LevelUpEvent>.SubscribePersistent(OnLevelUp);
             EventBus<EvolutionUnlockedEvent>.SubscribePersistent(OnEvolution);
+            EventBus<ChapterStartedEvent>.SubscribePersistent(OnChapterStarted);
+            EventBus<WaveStartedEvent>.SubscribePersistent(OnWaveStarted);
+        }
+
+        private static void OnChapterStarted(ChapterStartedEvent evt)
+        {
+            if (evt.Chapter == null) return;
+            Show($"CHAPTER {evt.Chapter.Number}", evt.Chapter.DisplayName, UITheme.Gold, 1.8f, 0f);
+        }
+
+        private static void OnWaveStarted(WaveStartedEvent evt)
+        {
+            if (!evt.IsBossWave) return;
+            string boss = string.IsNullOrEmpty(evt.BossName) ? "A boss" : evt.BossName;
+            Show(evt.IsFinalWave ? "FINAL BOSS!" : "BOSS WAVE!", $"{boss} is coming", new Color(1f, 0.35f, 0.3f), 1.6f, 0.2f);
         }
 
         private static void OnLevelUp(LevelUpEvent evt) =>
@@ -74,6 +94,11 @@ namespace NinjaVillage.UI.Battle
             banner._title.rectTransform.anchorMin = new Vector2(0f, 0.35f);
             banner._title.rectTransform.anchorMax = Vector2.one;
             banner._title.rectTransform.offsetMin = banner._title.rectTransform.offsetMax = Vector2.zero;
+            banner._title.textWrappingMode = TextWrappingModes.NoWrap;
+            banner._title.enableAutoSizing = true; // "CHAPTER 5" is wider than "LEVEL UP!"
+            banner._title.fontSizeMin = 48f;
+            banner._title.fontSizeMax = UITheme.TitleSize * 1.5f;
+            banner._title.margin = new Vector4(40f, 0f, 40f, 0f);
             banner._title.outlineWidth = 0.25f;
             banner._title.outlineColor = new Color32(0, 0, 0, 220);
 

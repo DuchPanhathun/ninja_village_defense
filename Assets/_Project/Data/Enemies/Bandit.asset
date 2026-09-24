@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bandit
   m_EditorClassIdentifier: 
   id: Bandit
-  displayName: 
+  displayName: Bandit
   description: 
   icon: {fileID: 0}
   maxHealth: 30

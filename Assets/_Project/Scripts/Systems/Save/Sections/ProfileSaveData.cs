@@ -17,6 +17,8 @@ namespace NinjaVillage.Systems.Save
         public float DurationSeconds;
         public string HeroId;
         public string WeaponId;
+        /// <summary>Chapter played (empty for runs recorded before chapters existed).</summary>
+        public string ChapterId;
     }
 
     /// <summary>Player identity + lifetime stats (EPIC 16 "Player profile").</summary>

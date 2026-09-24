@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Dragon
   m_EditorClassIdentifier: 
   id: Dragon
-  displayName: 
+  displayName: Dragon
   description: 
   icon: {fileID: 0}
   maxHealth: 400
-  moveSpeed: 2.0
+  moveSpeed: 2
   damage: 35
   attackRange: 1.5
-  attackCooldown: 1.0
+  attackCooldown: 1
   xpReward: 60
   coinReward: 15
   isBoss: 1
