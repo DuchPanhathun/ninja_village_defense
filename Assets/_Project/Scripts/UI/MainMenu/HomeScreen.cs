@@ -20,7 +20,7 @@ namespace NinjaVillage.UI.MainMenu
     /// The Main Menu's home screen (EPIC 17 "Home"), laid out like a modern mobile action game:
     /// a top bar (hero portrait, name, gems, coins), a battle-pass season banner, icon columns on both
     /// sides, the selected hero animated in the middle, the chapter picker (START plays that chapter), a big
-    /// START button between Heroes and Village, and a bottom tab bar. Every link opens its screen; screens with something to claim
+    /// START button between two "Coming soon" slots (for the challenge modes still to come), and a bottom tab bar. Every link opens its screen; screens with something to claim
     /// (<see cref="ScreenBadges"/>) show a red "!" badge, and links whose screen isn't in this scene hide.
     /// Art comes from <see cref="UIArt"/> (Ninja Adventure pack + generated icons).
     /// </summary>
@@ -68,7 +68,7 @@ namespace NinjaVillage.UI.MainMenu
         private Image _portrait, _seasonFill, _heroImage, _chapterBoss;
         private Button _chapterPrev, _chapterNext;
         private UIImageAnimator _heroAnimator;
-        private GameObject _seasonBadge, _heroesBadge, _villageBadge;
+        private GameObject _seasonBadge, _villageBadge;
         private string _shownHeroKey;
 
         protected override void Build(RectTransform body)
@@ -354,14 +354,25 @@ namespace NinjaVillage.UI.MainMenu
             var startText = UIStyle.Label(start.transform, "START", 92f, Color.white, TextAlignmentOptions.Center, 0.28f);
             UIBuilder.Stretch(startText.rectTransform);
 
-            var heroes = UIStyle.Icon(row, "menu_heroes", "Heroes", () => Equipment.EquipmentScreen.Open(Equipment.EquipmentScreen.Tab.Heroes), 150f);
-            UIStyle.Place(heroes.Root, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(40f, 0f), heroes.Root.sizeDelta);
-            _heroesBadge = heroes.Badge;
-            _links.Add((heroes, ScreenIds.Heroes));
+            // Heroes and the Village live in the tab bar; these two slots wait for the challenge modes to come.
+            ComingSoon(row, "portrait_boss_giantoni", new Vector2(0f, 0.5f), new Vector2(40f, 0f));
+            ComingSoon(row, "portrait_boss_shadowninja", new Vector2(1f, 0.5f), new Vector2(-40f, 0f));
+        }
 
-            var village = UIStyle.Icon(row, "menu_village", "Village", () => SceneLoader.LoadVillage(), 150f, tile: false);
-            UIStyle.Place(village.Root, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-40f, 0f), village.Root.sizeDelta);
-            _villageBadge = village.Badge; // "!" when crops are ripe, a meal is cooked, a villager request can be handed in or the treasury is full
+        /// <summary>A locked mode slot: a dark boss silhouette under a gold "?", labelled "Coming soon".</summary>
+        private static void ComingSoon(RectTransform row, string teaser, Vector2 anchor, Vector2 offset)
+        {
+            var slot = UIStyle.Icon(row, teaser, "Coming soon", () =>
+            {
+                Sfx.Play(AudioCueIds.UiClick);
+                UIScreenNavigator.Instance.Toast("New challenge modes are coming soon!");
+            }, 150f);
+            slot.Root.name = "ComingSoon";
+            UIStyle.Place(slot.Root, anchor, anchor, offset, slot.Root.sizeDelta);
+            var icon = slot.Button.transform.Find("Icon").GetComponent<Image>();
+            icon.color = new Color(0.1f, 0.07f, 0.12f, 0.85f); // a silhouette: something's coming
+            var mark = UIStyle.Label(slot.Button.transform, "?", 84f, UITheme.Gold, TextAlignmentOptions.Center, 0.3f);
+            UIBuilder.Stretch(mark.rectTransform);
         }
 
         // ------------------------------------------------------------------ bottom tabs
@@ -395,6 +406,7 @@ namespace NinjaVillage.UI.MainMenu
                 var button = UIStyle.Icon(rt, icon, label, onClick, home ? 150f : 118f, tile);
                 UIStyle.Place(button.Root, new Vector2(x, 0f), new Vector2(0.5f, 0f), new Vector2(0f, home ? 30f : 22f), button.Root.sizeDelta);
                 if (!home && !village) _links.Add((button, id));
+                if (village) _villageBadge = button.Badge; // "!" when crops are ripe, a meal is cooked, a request can be handed in or the treasury/mine is full
             }
         }
 

@@ -85,6 +85,10 @@ namespace NinjaVillage.Tests
             var navigator = UIScreenNavigator.Instance;
             Assert.IsTrue(navigator.Has(ScreenIds.Home));
             Assert.AreEqual(ScreenIds.Home, navigator.Current.ScreenId, "Home is the root screen");
+            // Beside START: two "Coming soon" slots for future challenge modes (Heroes / Village are in the tab bar).
+            var actionRow = navigator.Current.Root.GetComponentsInChildren<RectTransform>().First(r => r.name == "ActionRow");
+            Assert.AreEqual(2, actionRow.Cast<Transform>().Count(t => t.name == "ComingSoon"), "two Coming soon slots");
+            Assert.IsFalse(actionRow.Cast<Transform>().Any(t => t.name == "Icon_Heroes" || t.name == "Icon_Village"), "no duplicate Heroes / Village");
 
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,

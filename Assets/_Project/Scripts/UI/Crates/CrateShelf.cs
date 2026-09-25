@@ -92,12 +92,12 @@ namespace NinjaVillage.UI.Crates
 
             // White rim, blue disc, white "?" (children draw over their parent).
             var help = UIBuilder.Image(tile, "Rates", Color.white, Core.Utilities.GeneratedSprites.Circle);
-            UIStyle.Place(help.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(12f, -12f), new Vector2(66f, 66f)); // top-left: clear of the title
+            UIStyle.Place(help.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(10f, -10f), new Vector2(46f, 46f)); // top-left: clear of the title
             help.gameObject.AddComponent<Button>().onClick.AddListener(() => ShowRates(crate));
             var disc = UIBuilder.Image(help.transform, "Disc", new Color(0.2f, 0.45f, 0.85f), Core.Utilities.GeneratedSprites.Circle);
             disc.raycastTarget = false;
-            UIBuilder.Stretch(disc.rectTransform, 5f);
-            var mark = UIStyle.Label(help.transform, "?", 44f, Color.white, TextAlignmentOptions.Center, 0.3f);
+            UIBuilder.Stretch(disc.rectTransform, 4f);
+            var mark = UIStyle.Label(help.transform, "?", 30f, Color.white, TextAlignmentOptions.Center, 0.3f);
             UIBuilder.Stretch(mark.rectTransform);
         }
 
