@@ -59,7 +59,7 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | hawk | AI (PixelLab): `pet_hawk_*` | `pet_hawk_idle_0..4`, `pet_hawk_walk_0..4` |
 | wolf | `Actor/Animal/DogBlack/SpriteSheet.png` (2-frame strip; idle = frame 0) | `pet_wolf_idle_0`, `pet_wolf_walk_0..1` |
 | monkey | `Actor/Animal/Monkey/SpriteSheetBrown.png` (2-frame strip; idle = frame 0) | `pet_monkey_idle_0`, `pet_monkey_walk_0..1` |
-| baby dragon | `Actor/Monster/DragonYellow/SpriteSheet.png` | `pet_babydragon_idle_0`, `pet_babydragon_walk_0..3` |
+| baby dragon | `Actor/Monster/DragonYellow/SpriteSheet.png` (front: column 0, for menus) | `pet_babydragon_idle_0`, `pet_babydragon_walk_0..3`, `pet_babydragon_front_0` |
 
 ## Portraits (extra)
 

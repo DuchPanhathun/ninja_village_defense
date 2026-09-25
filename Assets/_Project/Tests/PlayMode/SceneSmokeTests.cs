@@ -89,6 +89,10 @@ namespace NinjaVillage.Tests
             var actionRow = navigator.Current.Root.GetComponentsInChildren<RectTransform>().First(r => r.name == "ActionRow");
             Assert.AreEqual(2, actionRow.Cast<Transform>().Count(t => t.name == "ComingSoon"), "two Coming soon slots");
             Assert.IsFalse(actionRow.Cast<Transform>().Any(t => t.name == "Icon_Heroes" || t.name == "Icon_Village"), "no duplicate Heroes / Village");
+            // The hero in the middle faces you with their weapon in hand.
+            var homeHero = navigator.Current.Root.GetComponentsInChildren<UnityEngine.UI.Image>(true).First(i => i.name == "Sprite" && i.transform.parent.name == "Hero");
+            Assert.IsTrue(homeHero.sprite != null && homeHero.sprite.name.Contains("_front_"), "front view on Home");
+            Assert.IsTrue(homeHero.transform.Find("Weapon").gameObject.activeSelf, "weapon in hand on Home");
 
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,
@@ -119,12 +123,12 @@ namespace NinjaVillage.Tests
             var root = screen.Root;
             Assert.Greater(root.GetComponentsInChildren<UnityEngine.UI.Button>(true).Length, 10, "slots, tabs and tiles are built");
 
-            // The hero faces you with the loadout on show: the weapon in hand, the equipped ring floating beside them.
+            // The hero faces you, weapon in hand — and nothing else crowds the stage.
             var stage = root.GetComponentsInChildren<RectTransform>(true).First(r => r.name == "Stage");
             Assert.IsTrue(stage.Find("Hero/Sprite").GetComponent<UnityEngine.UI.Image>().sprite.name.Contains("_front_"), "the hero faces the camera");
-            Assert.IsTrue(stage.Find("Weapon").gameObject.activeSelf, "the weapon is in the hero's hand");
-            Assert.IsTrue(stage.Find("Charm0").gameObject.activeSelf, "the equipped ring floats beside the hero");
-            Assert.IsFalse(stage.Find("Charm1").gameObject.activeSelf, "only equipped gear shows");
+            Assert.IsTrue(stage.Find("Hero/Sprite/Weapon").gameObject.activeSelf, "the weapon is in the hero's hand");
+            Assert.IsFalse(stage.GetComponentsInChildren<Transform>(true).Any(t => t.name.StartsWith("Charm") || t.name == "Pet" || t.name == "Mount"),
+                "only the hero and their weapon on the stage");
 
             // Tapping a tile opens its card.
             var weaponTile = root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.name == "Tile");
@@ -157,8 +161,6 @@ namespace NinjaVillage.Tests
             yield return null;
             var mountTiles = root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().Where(b => b.name == "Tile").ToList();
             Assert.AreEqual(NinjaVillage.Systems.Mounts.MountService.GetSorted().Count, mountTiles.Count, "a tile per mount");
-            var showcaseMount = root.GetComponentsInChildren<UnityEngine.UI.Image>(true).First(i => i.name == "Mount");
-            Assert.IsFalse(showcaseMount.gameObject.activeSelf, "on foot at first");
             mountTiles[NinjaVillage.Systems.Mounts.MountService.GetSorted().IndexOf(horse)].onClick.Invoke();
             yield return null;
             var unlock = root.Find("Popup").GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.GetComponentInChildren<TMPro.TMP_Text>()?.text.StartsWith("Unlock") == true);
@@ -166,8 +168,6 @@ namespace NinjaVillage.Tests
             unlock.onClick.Invoke();
             yield return null;
             Assert.IsTrue(NinjaVillage.Systems.Mounts.MountService.IsActive(horse), "bought and ridden");
-            Assert.IsTrue(showcaseMount.gameObject.activeSelf, "the hero sits on the horse in the showcase");
-            Assert.AreEqual(horse.Frames[0], showcaseMount.sprite);
             yield return new WaitForSecondsRealtime(0.3f);
         }
 

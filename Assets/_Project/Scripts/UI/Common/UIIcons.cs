@@ -31,7 +31,14 @@ namespace NinjaVillage.UI.Common
             return UIArt.Get("portrait_" + key) ?? Character(key);
         }
 
-        public static Sprite Pet(string petId) => Character(CharacterSpriteLibrary.PetKey(petId));
+        /// <summary>A pet facing you when it has front-view art (the Baby Dragon), else side-on.</summary>
+        public static Sprite Pet(string petId)
+        {
+            string key = CharacterSpriteLibrary.PetKey(petId);
+            var set = key != null ? CharacterSpriteLibrary.Find(key) : null;
+            var front = set != null ? set.Frames(CharacterAnim.Front) : null;
+            return front != null && front.Length > 0 && front[0] != null ? front[0] : Character(key);
+        }
 
         /// <summary>An enemy or boss: its portrait art if it has one, else its prefab's (animated) sprite.</summary>
         public static Sprite Enemy(NinjaVillage.Gameplay.Enemies.EnemyDefinition enemy)

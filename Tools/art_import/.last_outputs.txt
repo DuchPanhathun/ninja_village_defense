@@ -382,6 +382,7 @@ Characters/Mounts/mount_lioness_0.png
 Characters/Mounts/mount_lioness_1.png
 Characters/Mounts/mount_nightmare_0.png
 Characters/Mounts/mount_nightmare_1.png
+Characters/Pets/pet_babydragon_front_0.png
 Characters/Pets/pet_babydragon_idle_0.png
 Characters/Pets/pet_babydragon_walk_0.png
 Characters/Pets/pet_babydragon_walk_1.png

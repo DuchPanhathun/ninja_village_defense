@@ -65,11 +65,10 @@ namespace NinjaVillage.UI.MainMenu
         private readonly List<(UIStyle.IconButton button, string screenId)> _links = new();
         private TextMeshProUGUI _playerName, _heroLine, _gems, _coins, _seasonTitle, _seasonProgress, _tier, _heroName;
         private TextMeshProUGUI _chapterNumber, _chapterName, _chapterStatus;
-        private Image _portrait, _seasonFill, _heroImage, _chapterBoss;
+        private Image _portrait, _seasonFill, _chapterBoss;
+        private HeroFigure _figure;
         private Button _chapterPrev, _chapterNext;
-        private UIImageAnimator _heroAnimator;
         private GameObject _seasonBadge, _villageBadge;
-        private string _shownHeroKey;
 
         protected override void Build(RectTransform body)
         {
@@ -234,11 +233,7 @@ namespace NinjaVillage.UI.MainMenu
             var heroButton = UIStyle.Frame(area, "Hero", null, () => Open(ScreenIds.Heroes), Color.clear);
             heroButton.image.color = new Color(1f, 1f, 1f, 0f);
             UIStyle.Place((RectTransform)heroButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(460f, 460f));
-            _heroImage = UIBuilder.Image(heroButton.transform, "Sprite", Color.white);
-            _heroImage.raycastTarget = false;
-            _heroImage.preserveAspect = true;
-            UIStyle.Place(_heroImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(430f, 430f));
-            _heroAnimator = _heroImage.gameObject.AddComponent<UIImageAnimator>();
+            _figure = new HeroFigure(heroButton.transform, 430f, new Vector2(0f, -10f)); // facing you, weapon in hand
 
             var ribbon = UIStyle.Sprite(area, "Ribbon", "panel_red", UITheme.Button);
             ribbon.raycastTarget = false;
@@ -492,28 +487,12 @@ namespace NinjaVillage.UI.MainMenu
             _heroName.text = $"{heroName.ToUpperInvariant()}  <size=70%>Lv {level}</size>";
             _heroLine.text = $"{heroName} · Lv {level}";
 
-            // The equipped skin's frames when it has its own art, else the hero's.
+            // The hero (their equipped skin when drawn) facing you with the weapon they fight with.
+            var weapon = NinjaVillage.Systems.Inventory.InventoryService.GetWeapon(NinjaVillage.Systems.Inventory.InventoryService.Data.EquippedWeaponId);
+            _figure.Refresh(hero, weapon != null ? weapon : hero != null ? hero.SignatureWeapon : null);
+
             string heroKey = CharacterSpriteLibrary.HeroKey(heroId ?? "assassin");
-            string key = heroKey;
-            if (heroId != null)
-            {
-                var skin = SkinService.Catalog != null ? SkinService.Catalog.Get(SkinService.EquippedSkinId(heroId)) : null;
-                if (skin != null && SkinService.Owns(skin) && CharacterSpriteLibrary.Find(skin.Id) != null) key = skin.Id;
-            }
-            if (key == _shownHeroKey) return;
-            _shownHeroKey = key;
-
-            var set = CharacterSpriteLibrary.Find(key);
-            if (set != null)
-            {
-                var frames = set.Frames(CharacterAnim.Idle);
-                var sprite = set.DefaultSprite;
-                // Pack heroes are drawn in 16 px cells, the Beast Ninja in 32 px ones: size by cell so bodies match.
-                float cells = sprite != null ? sprite.rect.width / 128f : 1f;
-                _heroImage.rectTransform.sizeDelta = Vector2.one * Mathf.Min(430f * cells, 860f);
-                _heroAnimator.Play(frames.Length > 0 ? frames : new[] { sprite }, set.Fps(CharacterAnim.Idle), frames.Length > 1 ? 0f : 14f);
-            }
-
+            var set = CharacterSpriteLibrary.Find(heroKey);
             var portrait = UIArt.Get($"portrait_hero_{heroKey.Substring("hero_".Length)}");
             _portrait.sprite = portrait != null ? portrait : set != null ? set.DefaultSprite : null;
             _portrait.color = _portrait.sprite != null ? Color.white : Color.clear;

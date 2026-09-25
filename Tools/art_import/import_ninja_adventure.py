@@ -411,8 +411,11 @@ def import_pets():
         out = save_frames(frames[:1], F, f"pet_{pet}_idle") + save_frames(frames, F, f"pet_{pet}_walk")
         record("Pets", pet, f"`{rel}` (2-frame strip; idle = frame 0)", out)
     s = monster_right("Actor/Monster/DragonYellow/SpriteSheet.png")
+    front = column(load("Actor/Monster/DragonYellow/SpriteSheet.png"), 0, 16, 16, range(1))   # column 0 faces the camera
     out = save_frames(s["idle"], F, "pet_babydragon_idle") + save_frames(s["walk"], F, "pet_babydragon_walk")
-    record("Pets", "baby dragon", "`Actor/Monster/DragonYellow/SpriteSheet.png`", out)
+    out += save_frames(front, F, "pet_babydragon_front")
+    record("Pets", "baby dragon", "`Actor/Monster/DragonYellow/SpriteSheet.png` (front: column 0, for menus)", out)
+    # The other pets have side-on art only (fox and hawk are AI; wolf and monkey are the pack's side strips).
 
 
 def import_portraits():
