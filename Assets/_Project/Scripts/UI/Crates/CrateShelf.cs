@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using NinjaVillage.Core.Audio;
 using NinjaVillage.Systems.Crates;
-using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Inventory;
 using NinjaVillage.Systems.Mounts;
 using NinjaVillage.UI.Common;
@@ -13,20 +12,24 @@ using UnityEngine.UI;
 namespace NinjaVillage.UI.Crates
 {
     /// <summary>
-    /// Supply crates — the place to open crates for weapons and gear: a free Wooden Crate every day, Silver Crates
-    /// and Surprise Boxes (the only source of S-class equipment, certain by the 30th box), each ×1 or ×10, with their
-    /// odds shown. Opening plays a reveal: the chest shakes, bursts open in a flash with light rays, and the items pop
-    /// out one by one in their grade's colour — S items with a gold "S". Below, the S-class collection.
+    /// Supply crates, as a shelf in the Shop: a free Wooden Crate every day, Silver Crates and Surprise Boxes (the only
+    /// source of S-class equipment and mounts, certain by the 30th box), each ×1 or ×10, with their odds shown. Opening
+    /// plays a reveal over the whole screen: the chest shakes, bursts open in a flash with light rays, and the items pop
+    /// out one by one in their grade's colour — S items with a gold "S". Every crate wears a "?" on its picture that
+    /// shows what's inside (<see cref="ShowRates"/>): grade odds, the S-class chance and pity, and every item it can
+    /// hold — S items, weapons and gear — with its picture and its own chance per box. The host screen adds the shelf with <see cref="Attach"/> and fills
+    /// it from its Populate.
     /// </summary>
-    [SceneScreen(SceneNames.MainMenu, SceneNames.Village)]
-    public class CratesScreen : UIListScreen
+    public sealed class CrateShelf : MonoBehaviour
     {
-        public override string ScreenId => ScreenIds.Crates;
-        protected override string Title => "Supply Crates";
-
         private static readonly Color Gold = new(1f, 0.82f, 0.3f);
 
-        private GameObject _overlay;
+        private UIScreen _host;
+
+        private GameObject _overlay, _rates;
+        private TextMeshProUGUI _ratesTitle;
+        private RectTransform _ratesContent;
+        private ScrollRect _ratesScroll;
         private Image _chest, _flash;
         private RectTransform _rays, _results;
         private TextMeshProUGUI _headline, _hint;
@@ -38,43 +41,29 @@ namespace NinjaVillage.UI.Crates
         public bool IsRevealing { get; private set; }
         public bool OverlayOpen => _overlay != null && _overlay.activeSelf;
         public IReadOnlyList<CrateDrop> LastDrops => _lastDrops;
+        /// <summary>The drop-rates popup is showing.</summary>
+        public bool RatesOpen => _rates != null && _rates.activeSelf;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void RegisterBadge() => ScreenBadges.Register(ScreenIds.Crates, () => CrateService.FreeAvailable);
-
-        protected override void Build(RectTransform body)
+        /// <summary>Adds a shelf (and its reveal overlay, over <paramref name="host"/>'s whole screen) to a built screen.</summary>
+        public static CrateShelf Attach(UIScreen host)
         {
-            base.Build(body);
-            BuildOverlay();
+            var shelf = host.gameObject.AddComponent<CrateShelf>();
+            shelf._host = host;
+            shelf.BuildOverlay(host.Root);
+            shelf.BuildRates(host.Root);
+            return shelf;
         }
 
         // ------------------------------------------------------------------ list
 
-        protected override void Populate(RectTransform content)
+        /// <summary>A "Supply crates" section: one card per crate with its odds and Open buttons.</summary>
+        public void AddCrates(RectTransform content)
         {
-            InfoText.text = "Open crates for weapons and gear at random grades. <color=#FFD24D>Surprise Boxes</color> hold S-class equipment and mounts!";
-            foreach (var crate in CrateRules.Crates) CrateCard(content, crate);
-
-            UIBuilder.SectionHeader(content, "S-class equipment & mounts");
-            UIBuilder.Text(content, "Found only in Surprise Boxes. Weapons and gear drop at Elite and merge up like any other piece; " +
-                               "a mount you already ride levels up instead.",
+            UIBuilder.SectionHeader(content, "Supply crates");
+            UIBuilder.Text(content, "Weapons and gear at random grades. <color=#FFD24D>Surprise Boxes</color> hold S-class equipment and mounts! " +
+                               "Tap <color=#7FB2FF>?</color> on a crate to see what's inside and the odds.",
                 UITheme.SmallSize, TextAlignmentOptions.Left, UITheme.TextMuted);
-            var grid = UIBuilder.Rect(content, "SClass").gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(176f, 210f);
-            grid.spacing = new Vector2(12f, 14f);
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 5;
-            grid.childAlignment = TextAnchor.UpperCenter;
-            var inv = InventoryService.Data;
-            foreach (var weapon in CrateService.SpecialWeapons())
-                ItemCard((RectTransform)grid.transform, Icon(true, weapon.Id), weapon.DisplayName, ItemGrade.Elite, true,
-                    inv.OwnsWeapon(weapon.Id) ? "Owned" : null, false);
-            foreach (var item in CrateService.SpecialGear())
-                ItemCard((RectTransform)grid.transform, Icon(false, item.Id), item.DisplayName, ItemGrade.Elite, true,
-                    inv.GetEquipmentCount(item.Id) > 0 ? "Owned" : null, false);
-            foreach (var mount in CrateService.SpecialMounts())
-                ItemCard((RectTransform)grid.transform, MountIcon(mount, mount.Id), mount.NameOrId, ItemGrade.Legendary, true,
-                    MountService.IsOwned(mount) ? $"Lv {MountService.Level(mount)}" : null, false, "Mount");
+            foreach (var crate in CrateRules.Crates) CrateCard(content, crate);
         }
 
         private void CrateCard(RectTransform content, CrateKind crate)
@@ -82,6 +71,7 @@ namespace NinjaVillage.UI.Crates
             string body = crate.Blurb + "\n" + CrateRules.DescribeOdds(crate);
             if (crate.Pity > 0) body += $"\n<color=#FFD24D>S-class certain within {CrateService.PityLeft(crate)} box{(CrateService.PityLeft(crate) == 1 ? "" : "es")}.</color>";
             var actions = UIBuilder.ActionCard(content, crate.Name, body, out _, out _, crate.Pity > 0 ? Gold : UITheme.Text, UIArt.Get(crate.ClosedIcon));
+            RatesButton(actions.transform.parent, crate);
             if (CrateService.CanOpenFree(crate))
                 UIBuilder.SmallButton(actions.transform, "Open FREE", () => Open(crate, 1, true), UITheme.Positive, 240f);
             var one = UIBuilder.SmallButton(actions.transform, $"Open {crate.Price}", () => Open(crate, 1, false), UITheme.Button, 260f);
@@ -89,6 +79,172 @@ namespace NinjaVillage.UI.Crates
             var ten = UIBuilder.SmallButton(actions.transform, $"×{CrateRules.MultiOpen} {CrateService.PriceFor(crate, CrateRules.MultiOpen)}",
                 () => Open(crate, CrateRules.MultiOpen, false), UITheme.Gold, 280f);
             UIBuilder.SetEnabled(ten, CrateService.Check(crate, CrateRules.MultiOpen, false) == CrateResult.Opened);
+        }
+
+        /// <summary>A round "?" on the crate's picture (the picture itself is tappable too) that shows what's inside and the odds.</summary>
+        private void RatesButton(Transform card, CrateKind crate)
+        {
+            var tile = card.Find("Row/IconTile");
+            if (tile == null) return;
+            var tileButton = tile.gameObject.AddComponent<Button>();
+            tileButton.transition = Selectable.Transition.None;
+            tileButton.onClick.AddListener(() => ShowRates(crate));
+
+            // White rim, blue disc, white "?" (children draw over their parent).
+            var help = UIBuilder.Image(tile, "Rates", Color.white, Core.Utilities.GeneratedSprites.Circle);
+            UIStyle.Place(help.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(12f, -12f), new Vector2(66f, 66f)); // top-left: clear of the title
+            help.gameObject.AddComponent<Button>().onClick.AddListener(() => ShowRates(crate));
+            var disc = UIBuilder.Image(help.transform, "Disc", new Color(0.2f, 0.45f, 0.85f), Core.Utilities.GeneratedSprites.Circle);
+            disc.raycastTarget = false;
+            UIBuilder.Stretch(disc.rectTransform, 5f);
+            var mark = UIStyle.Label(help.transform, "?", 44f, Color.white, TextAlignmentOptions.Center, 0.3f);
+            UIBuilder.Stretch(mark.rectTransform);
+        }
+
+        // ------------------------------------------------------------------ drop rates
+
+        private void BuildRates(RectTransform root)
+        {
+            var dim = UIBuilder.Image(root, "Rates", new Color(0f, 0f, 0f, 0.7f));
+            UIBuilder.Stretch(dim.rectTransform);
+            dim.gameObject.AddComponent<Button>().onClick.AddListener(CloseRates); // tap outside to close
+            _rates = dim.gameObject;
+
+            var card = UIStyle.Sprite(dim.transform, "Card", "panel_wood_bg", UITheme.Panel);
+            card.color = new Color(0.2f, 0.14f, 0.1f, 0.98f);
+            var cardRt = card.rectTransform;
+            UIStyle.Place(cardRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(1000f, 1200f)); // scrolls if the S list grows
+            card.gameObject.AddComponent<Button>().transition = Selectable.Transition.None; // swallow taps on the card
+
+            _ratesTitle = UIStyle.Label(cardRt, "", 50f, Gold, TextAlignmentOptions.Center, 0.3f);
+            UIStyle.Place(_ratesTitle.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(800f, 70f));
+
+            _ratesScroll = UIBuilder.ScrollList(cardRt, "Items", out _ratesContent, 16f);
+            var scrollRt = (RectTransform)_ratesScroll.transform;
+            scrollRt.anchorMin = Vector2.zero;
+            scrollRt.anchorMax = Vector2.one;
+            scrollRt.offsetMin = new Vector2(30f, 30f);
+            scrollRt.offsetMax = new Vector2(-30f, -130f);
+
+            var close = UIStyle.Frame(cardRt, "Close", "button_tint", CloseRates, new Color(0.75f, 0.3f, 0.28f));
+            close.image.color = new Color(0.75f, 0.3f, 0.28f);
+            UIStyle.Place((RectTransform)close.transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-20f, -20f), new Vector2(84f, 84f));
+            var x = UIStyle.Label(close.transform, "X", 44f);
+            UIBuilder.Stretch(x.rectTransform);
+
+            _rates.SetActive(false);
+        }
+
+        private static string Percent(float chance) => $"{chance * 100f:0.##}%";
+
+        /// <summary>
+        /// What's inside <paramref name="crate"/>: its grade odds, S-class chance and pity, the weapon/gear split, and every
+        /// item it can hold — S items, weapons and gear — with its picture and its own chance per box (and whether you own
+        /// it). Public so tests can drive it like a tap.
+        /// </summary>
+        public void ShowRates(CrateKind crate)
+        {
+            if (crate == null) return;
+            Sfx.Play(AudioCueIds.UiClick);
+            _rates.SetActive(true); // before filling: texts set up their materials when they wake
+            _rates.transform.SetAsLastSibling();
+            _ratesTitle.text = $"{crate.Name} — what's inside";
+            UIBuilder.ClearChildren(_ratesContent);
+
+            var pool = CrateService.SPool(crate);
+            var weapons = CrateService.RegularWeapons();
+            var gear = CrateService.RegularGear();
+            float weaponChance = CrateService.RegularItemChance(crate, true);
+            float gearChance = CrateService.RegularItemChance(crate, false);
+
+            string text = $"<b>Grade of every item:</b> {CrateRules.DescribeOdds(crate)}";
+            if (crate.Pity > 0 && pool.Count > 0)
+            {
+                int left = CrateService.PityLeft(crate);
+                text += $"\n<color=#FFD24D>Your next S-class item is certain within {left} box{(left == 1 ? "" : "es")}.</color>";
+            }
+            text += $"\n\n<b>Each box holds one item.</b> The percentage under each picture is its chance per box";
+            text += pool.Count > 0
+                ? $" — S-class {Percent(crate.SChance)} (each S item {Percent(CrateService.SItemChance(crate))}), " +
+                  $"weapons {Percent(weaponChance * weapons.Count)}, gear {Percent(gearChance * gear.Count)}."
+                : $" — weapons {Percent(weaponChance * weapons.Count)}, gear {Percent(gearChance * gear.Count)}. No S-class items in this crate.";
+            if (pool.Count > 0)
+                text += "\n<color=#AAAAB5>S weapons and gear come at Elite; an S mount you already own levels up instead.</color>";
+            var body = UIBuilder.Text(_ratesContent, text, UITheme.SmallSize + 2f, TextAlignmentOptions.Left, UITheme.Text);
+            body.richText = true;
+
+            var inv = InventoryService.Data;
+            if (pool.Count > 0)
+            {
+                var cells = RatesGrid(crate.SMounts ? "S-class equipment & mounts" : "S-class equipment", "SClass");
+                string each = Percent(CrateService.SItemChance(crate));
+                foreach (var (kind, id) in pool)
+                {
+                    switch (kind)
+                    {
+                        case CrateDropKind.Weapon:
+                            ItemCard(cells, Icon(true, id), WeaponName(id), ItemGrade.Elite, true, inv.OwnsWeapon(id) ? "Owned" : null, false, each);
+                            break;
+                        case CrateDropKind.Gear:
+                            ItemCard(cells, Icon(false, id), GearName(id), ItemGrade.Elite, true, inv.GetEquipmentCount(id) > 0 ? "Owned" : null, false, each);
+                            break;
+                        default:
+                            var mount = MountService.Get(id);
+                            ItemCard(cells, MountIcon(mount, id), mount != null ? mount.NameOrId : id, ItemGrade.Legendary, true,
+                                mount != null && MountService.IsOwned(mount) ? $"Lv {MountService.Level(mount)}" : null, false, each);
+                            break;
+                    }
+                }
+            }
+
+            // Regular items come at the rolled grade, so they wear a plain frame rather than a grade colour.
+            if (weaponChance > 0f)
+            {
+                var cells = RatesGrid("Weapons", "Weapons");
+                foreach (var weapon in weapons)
+                    ItemCard(cells, Icon(true, weapon.Id), WeaponName(weapon.Id), ItemGrade.Common, false,
+                        inv.OwnsWeapon(weapon.Id) ? "Owned" : null, false, Percent(weaponChance), Plain);
+            }
+            if (gearChance > 0f)
+            {
+                var cells = RatesGrid("Gear", "Gear");
+                foreach (var item in gear)
+                    ItemCard(cells, Icon(false, item.Id), GearName(item.Id), ItemGrade.Common, false,
+                        inv.GetEquipmentCount(item.Id) > 0 ? "Owned" : null, false, Percent(gearChance), Plain);
+            }
+
+            _ratesScroll.verticalNormalizedPosition = 1f;
+        }
+
+        private static readonly Color Plain = new(0.78f, 0.62f, 0.45f);
+
+        private RectTransform RatesGrid(string title, string name)
+        {
+            UIBuilder.SectionHeader(_ratesContent, title);
+            var grid = UIBuilder.Rect(_ratesContent, name).gameObject.AddComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(176f, 214f);
+            grid.spacing = new Vector2(10f, 14f);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 5;
+            grid.childAlignment = TextAnchor.UpperCenter;
+            return (RectTransform)grid.transform;
+        }
+
+        private static string WeaponName(string id)
+        {
+            var weapon = InventoryService.GetWeapon(id);
+            return weapon != null ? DefinitionNames.Of(weapon) : id;
+        }
+
+        private static string GearName(string id)
+        {
+            var item = InventoryService.GetEquipment(id);
+            return item != null ? DefinitionNames.Of(item) : id;
+        }
+
+        public void CloseRates()
+        {
+            if (_rates != null) _rates.SetActive(false);
         }
 
         /// <summary>Opens <paramref name="count"/> crates and plays the reveal. Public so tests can drive it like a tap.</summary>
@@ -99,7 +255,7 @@ namespace NinjaVillage.UI.Crates
             if (result != CrateResult.Opened)
             {
                 Sfx.Play(AudioCueIds.UiError);
-                Toast(CrateService.Describe(result, crate));
+                UIScreenNavigator.Instance.Toast(CrateService.Describe(result, crate));
                 return;
             }
             Sfx.Play(AudioCueIds.ChestOpen);
@@ -107,7 +263,7 @@ namespace NinjaVillage.UI.Crates
             _lastDrops.AddRange(drops);
             if (_reveal != null) StopCoroutine(_reveal);
             _reveal = StartCoroutine(Reveal(crate, drops));
-            Refresh();
+            _host.Refresh();
         }
 
         private static Sprite Icon(CrateDrop drop) =>
@@ -132,9 +288,9 @@ namespace NinjaVillage.UI.Crates
 
         /// <summary>A card for one item: grade-coloured frame, icon, name, grade, an "S" tag and a NEW / Owned tag.</summary>
         private static RectTransform ItemCard(RectTransform parent, Sprite icon, string name, ItemGrade grade, bool special, string tag, bool tagIsNew,
-            string gradeLabel = null)
+            string gradeLabel = null, Color? frameColor = null)
         {
-            var color = GradeColors.For(grade);
+            var color = frameColor ?? GradeColors.For(grade);
             var frame = UIStyle.Sprite(parent, "Item", "panel_wood_panel", color);
             frame.color = Color.Lerp(Color.white, color, 0.8f);
             frame.raycastTarget = false;
@@ -171,9 +327,9 @@ namespace NinjaVillage.UI.Crates
 
         // ------------------------------------------------------------------ reveal
 
-        private void BuildOverlay()
+        private void BuildOverlay(RectTransform root)
         {
-            var dim = UIBuilder.Image(Root, "Reveal", new Color(0.02f, 0.02f, 0.05f, 0.9f));
+            var dim = UIBuilder.Image(root, "Reveal", new Color(0.02f, 0.02f, 0.05f, 0.9f));
             UIBuilder.Stretch(dim.rectTransform);
             dim.gameObject.AddComponent<Button>().onClick.AddListener(OnOverlayTap);
             _overlay = dim.gameObject;
@@ -230,12 +386,7 @@ namespace NinjaVillage.UI.Crates
             _reveal = null;
             IsRevealing = false;
             if (_overlay != null) _overlay.SetActive(false);
-            Refresh();
-        }
-
-        protected override void OnHidden()
-        {
-            if (OverlayOpen) CloseReveal();
+            _host.Refresh();
         }
 
         private void Update()

@@ -48,7 +48,6 @@ namespace NinjaVillage.UI.MainMenu
         private static readonly (string icon, string label, string screenId, bool tile)[] RightColumn =
         {
             ("menu_quests", "Missions", ScreenIds.Quests, true),
-            ("chest_surprise_closed", "Crates", ScreenIds.Crates, true),
             ("menu_collection", "Collection", ScreenIds.Collection, true),
             ("menu_leaderboard", "Ranking", "leaderboard", true),
             ("menu_settings", "Settings", ScreenIds.Settings, false),

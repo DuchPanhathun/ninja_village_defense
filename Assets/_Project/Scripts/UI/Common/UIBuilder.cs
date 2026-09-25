@@ -237,7 +237,7 @@ namespace NinjaVillage.UI.Common
                 row.childForceExpandHeight = false;
                 var tile = Image(row.transform, "IconTile", new Color(0.16f, 0.11f, 0.08f, 1f));
                 UseWood(tile, "panel_tint");
-                SetPreferredSize(tile, 150f, 150f);
+                SetPreferredSize(tile, 150f, 150f).minWidth = 150f; // long card text must not squeeze the picture
                 var picture = Image(tile.transform, "Icon", iconTint ?? Color.white, icon);
                 picture.raycastTarget = false;
                 Stretch(picture.rectTransform, 18f);

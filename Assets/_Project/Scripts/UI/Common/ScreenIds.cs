@@ -11,7 +11,6 @@ namespace NinjaVillage.UI.Common
         public const string Home = "home";
         public const string Chapters = "chapters";
         public const string Equipment = "equipment";       // gear + heroes + pets with the loadout showcase
-        public const string Crates = "crates";             // supply crates / Surprise Boxes (S-class equipment)
         public const string Settings = "settings";
         public const string Profile = "profile";
 

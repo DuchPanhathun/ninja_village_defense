@@ -104,6 +104,42 @@ namespace NinjaVillage.Systems.Crates
             return list;
         }
 
+        /// <summary>
+        /// Everything an S roll of <paramref name="crate"/> can land on (S weapons and gear, plus S mounts where the crate
+        /// holds them), each equally likely; empty for crates without an S chance.
+        /// </summary>
+        public static List<(CrateDropKind kind, string id)> SPool(CrateKind crate)
+        {
+            var pool = new List<(CrateDropKind kind, string id)>();
+            if (crate == null || crate.SChance <= 0f) return pool;
+            foreach (var w in SpecialWeapons()) pool.Add((CrateDropKind.Weapon, w.Id));
+            foreach (var g in SpecialGear()) pool.Add((CrateDropKind.Gear, g.Id));
+            if (crate.SMounts)
+                foreach (var m in SpecialMounts()) pool.Add((CrateDropKind.Mount, m.Id));
+            return pool;
+        }
+
+        /// <summary>The chance per open of one particular S item (the S chance shared evenly by the pool).</summary>
+        public static float SItemChance(CrateKind crate)
+        {
+            int count = SPool(crate).Count;
+            return count > 0 ? crate.SChance / count : 0f;
+        }
+
+        /// <summary>
+        /// The chance per open of one particular regular (non-S) weapon or gear piece: the non-S share, split into the
+        /// weapon share and the gear share, each shared evenly (at a grade rolled separately).
+        /// </summary>
+        public static float RegularItemChance(CrateKind crate, bool weapon)
+        {
+            if (crate == null) return 0f;
+            int weapons = RegularWeapons().Count, gear = RegularGear().Count;
+            float regular = 1f - (SPool(crate).Count > 0 ? crate.SChance : 0f);
+            float weaponShare = weapons > 0 ? crate.WeaponShare : 0f; // no weapons: every roll is gear
+            if (weapon) return weapons > 0 ? regular * weaponShare / weapons : 0f;
+            return gear > 0 ? regular * (1f - weaponShare) / gear : 0f;
+        }
+
         // ------------------------------------------------------------------ opening
 
         public static CrateResult Check(CrateKind crate, int count, bool free)
@@ -128,11 +164,7 @@ namespace NinjaVillage.Systems.Crates
             rng ??= new System.Random();
             var gear = RegularGear();
             var weapons = RegularWeapons();
-            var specials = new List<(CrateDropKind kind, string id)>();
-            foreach (var w in SpecialWeapons()) specials.Add((CrateDropKind.Weapon, w.Id));
-            foreach (var g in SpecialGear()) specials.Add((CrateDropKind.Gear, g.Id));
-            if (crate.SMounts)
-                foreach (var m in SpecialMounts()) specials.Add((CrateDropKind.Mount, m.Id));
+            var specials = SPool(crate);
 
             for (int i = 0; i < count; i++)
             {

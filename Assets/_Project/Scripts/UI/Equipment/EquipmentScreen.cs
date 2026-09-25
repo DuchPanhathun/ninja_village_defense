@@ -464,7 +464,7 @@ namespace NinjaVillage.UI.Equipment
             var crates = UIBuilder.Button(top.transform, "Open crates", () =>
             {
                 Sfx.Play(AudioCueIds.UiClick);
-                UIScreenNavigator.Instance.Show(ScreenIds.Crates);
+                UIScreenNavigator.Instance.Show(ScreenIds.Store); // crates are sold in the Shop
             }, UITheme.ButtonSecondary, 100f, UITheme.BodySize);
             crates.name = "OpenCrates";
             int sets = MergeService.MergeableCount();
@@ -871,7 +871,7 @@ namespace NinjaVillage.UI.Equipment
                         {
                             Sfx.Play(AudioCueIds.UiClick);
                             HidePopup();
-                            UIScreenNavigator.Instance.Show(ScreenIds.Crates);
+                            UIScreenNavigator.Instance.Show(ScreenIds.Store); // crates are sold in the Shop
                         }, UITheme.Gold, 360f);
                         return;
                     }

@@ -52,6 +52,35 @@ namespace NinjaVillage.Tests
         }
 
         [Test]
+        public void TheSChance_IsSharedEvenlyByThePool_MountsOnlyInSurpriseBoxes()
+        {
+            var box = CrateRules.Get("surprise");
+            var silver = CrateRules.Get("silver");
+            var pool = CrateService.SPool(box);
+            Assume.That(pool.Count > 0, "S content missing — run the content generator");
+            Assert.AreEqual(box.SChance, CrateService.SItemChance(box) * pool.Count, 1e-6f);
+            Assert.IsTrue(pool.Exists(p => p.kind == CrateDropKind.Mount));
+            Assert.IsFalse(CrateService.SPool(silver).Exists(p => p.kind == CrateDropKind.Mount));
+            Assert.AreEqual(0, CrateService.SPool(CrateRules.Get("wood")).Count, "no S chance, no S pool");
+            Assert.AreEqual(0f, CrateService.SItemChance(CrateRules.Get("wood")));
+        }
+
+        [Test]
+        public void EveryItemsChance_AddsUpToOneItemPerBox_ForEveryCrate()
+        {
+            Assume.That(CrateService.RegularGear().Count > 0 && CrateService.RegularWeapons().Count > 0, "content missing — run the content generator");
+            foreach (var crate in CrateRules.Crates)
+            {
+                float total = CrateService.SPool(crate).Count * CrateService.SItemChance(crate)
+                              + CrateService.RegularWeapons().Count * CrateService.RegularItemChance(crate, true)
+                              + CrateService.RegularGear().Count * CrateService.RegularItemChance(crate, false);
+                Assert.AreEqual(1f, total, 1e-4f, crate.Id);
+            }
+            var wood = CrateRules.Get("wood");
+            Assert.AreEqual(wood.WeaponShare / CrateService.RegularWeapons().Count, CrateService.RegularItemChance(wood, true), 1e-6f);
+        }
+
+        [Test]
         public void Grades_FollowTheWeights()
         {
             var weights = new[] { 70f, 25f, 5f, 0f, 0f };

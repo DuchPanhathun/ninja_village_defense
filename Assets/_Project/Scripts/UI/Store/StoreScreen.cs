@@ -1,33 +1,55 @@
 using NinjaVillage.Core.Audio;
 using NinjaVillage.Core.Events;
+using NinjaVillage.Systems.Crates;
 using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Heroes;
 using NinjaVillage.Systems.LiveOps;
 using NinjaVillage.Systems.Monetization;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.UI.Common;
+using NinjaVillage.UI.Crates;
 using TMPro;
 using UnityEngine;
 
 namespace NinjaVillage.UI.Store
 {
     /// <summary>
-    /// The Shop (EPIC 21): gem packs, the one-time Starter Pack, Remove Ads and the premium Battle Pass
-    /// (real money through <see cref="StoreService"/>), free gems for watching ads (capped per day),
-    /// cosmetic skins and premium heroes (gems), plus Restore Purchases for store compliance.
-    /// Nothing sold here is required to progress.
+    /// The Shop (EPIC 21): supply crates first (<see cref="CrateShelf"/>: the free daily Wooden Crate, Silver Crates and
+    /// Surprise Boxes with their reveal), then gem packs, the one-time Starter Pack, Remove Ads and the premium Battle
+    /// Pass (real money through <see cref="StoreService"/>), free gems for watching ads (capped per day), cosmetic skins and premium heroes (gems), plus Restore Purchases for store compliance.
+    /// Nothing sold here is required to progress. Opens in the Main Menu and the Village.
     /// </summary>
-    [SceneScreen(SceneNames.MainMenu)]
+    [SceneScreen(SceneNames.MainMenu, SceneNames.Village)]
     public class StoreScreen : UIListScreen
     {
         public override string ScreenId => ScreenIds.Store;
         protected override string Title => "Shop";
 
         private bool _busy;
+        private CrateShelf _crates;
+
+        /// <summary>The crate shelf (tests open crates through it like a tap).</summary>
+        public CrateShelf Crates => _crates;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void RegisterBadge() => ScreenBadges.Register(ScreenIds.Store, () => CrateService.FreeAvailable); // free crate waiting
 
         private void OnEnable() => EventBus<PurchaseResultEvent>.Subscribe(OnPurchaseResult);
         private void OnDisable() => EventBus<PurchaseResultEvent>.Unsubscribe(OnPurchaseResult);
         private void OnPurchaseResult(PurchaseResultEvent evt) { if (IsVisible) Refresh(); }
+
+        protected override void Build(RectTransform body)
+        {
+            base.Build(body);
+            _crates = CrateShelf.Attach(this);
+        }
+
+        protected override void OnHidden()
+        {
+            if (_crates == null) return;
+            _crates.CloseRates();
+            if (_crates.OverlayOpen) _crates.CloseReveal();
+        }
 
         protected override void BuildBottom(RectTransform body)
         {
@@ -48,6 +70,8 @@ namespace NinjaVillage.UI.Store
                 ? "All purchases support the game — none are needed to progress."
                 : "Connecting to the store... (prices may show as estimates)";
             var store = SaveService.Data.Store;
+
+            _crates.AddCrates(content);
 
             UIBuilder.SectionHeader(content, "Special offers");
             if (!store.StarterPackPurchased) AddProduct(content, StoreProducts.StarterPack, UITheme.Gold);

@@ -89,7 +89,7 @@ namespace NinjaVillage.Tests
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,
                 ScreenIds.DailyLogin, ScreenIds.Quests, ScreenIds.Achievements, ScreenIds.BattlePass, ScreenIds.Events,
-                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, ScreenIds.Meals, ScreenIds.Crates, "leaderboard");
+                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, ScreenIds.Meals, "leaderboard");
             yield return new WaitForSecondsRealtime(0.5f);
         }
 
@@ -161,20 +161,52 @@ namespace NinjaVillage.Tests
         }
 
         /// <summary>
-        /// Supply crates: the free crate opens with a reveal (chest, flash, the item pops out) and lands in the
-        /// inventory; at the pity a Surprise Box hands out an S-class item, shown with its gold "S".
+        /// Supply crates live in the Shop: the free crate (badged on the Shop) opens with a reveal (chest, flash, the
+        /// item pops out) and lands in the inventory; at the pity a Surprise Box hands out an S-class item, shown with
+        /// its gold "S"; the Shop lists the S-class collection.
         /// </summary>
         [UnityTest]
-        public IEnumerator MainMenu_CratesOpenWithARevealAndSurpriseBoxesHoldSClass()
+        public IEnumerator MainMenu_ShopOpensCratesWithARevealAndSurpriseBoxesHoldSClass()
         {
             yield return LoadScene(SceneNames.MainMenu);
-            UIScreenNavigator.Instance.Show(ScreenIds.Crates);
+            Assert.IsTrue(ScreenBadges.Has(ScreenIds.Store), "the Shop shows a badge while today's free crate waits");
+            UIScreenNavigator.Instance.Show(ScreenIds.Store);
             yield return null;
-            var crates = (NinjaVillage.UI.Crates.CratesScreen)UIScreenNavigator.Instance.Current;
+            var shop = (NinjaVillage.UI.Store.StoreScreen)UIScreenNavigator.Instance.Current;
+            var crates = shop.Crates;
+            Assert.IsNotNull(crates, "the Shop has a crate shelf");
+            Assert.IsNull(shop.Root.GetComponentsInChildren<RectTransform>().FirstOrDefault(r => r.name == "SClass"), "no S-class list on the Shop page itself");
+
+            // Every crate wears a "?" showing what's inside: each item's picture with its own chance per box.
+            var rates = shop.Root.GetComponentsInChildren<UnityEngine.UI.Button>().Where(b => b.name == "Rates").ToList();
+            Assert.AreEqual(NinjaVillage.Systems.Crates.CrateRules.Crates.Length, rates.Count, "every crate wears a ?");
+            rates[0].onClick.Invoke(); // the Wooden Crate: weapons and gear, no S items
+            yield return null;
+            Assert.IsTrue(crates.RatesOpen, "the ? opens what's inside");
+            var popup = shop.Root.Find("Rates");
+            var wood = NinjaVillage.Systems.Crates.CrateRules.Get("wood");
+            var gearGrid = popup.GetComponentsInChildren<RectTransform>().First(r => r.name == "Gear");
+            Assert.AreEqual(NinjaVillage.Systems.Crates.CrateService.RegularGear().Count, gearGrid.childCount, "every gear piece is pictured");
+            Assert.AreEqual(NinjaVillage.Systems.Crates.CrateService.RegularWeapons().Count,
+                popup.GetComponentsInChildren<RectTransform>().First(r => r.name == "Weapons").childCount, "and every weapon");
+            string gearEach = $"{NinjaVillage.Systems.Crates.CrateService.RegularItemChance(wood, false) * 100f:0.##}%";
+            Assert.IsTrue(gearGrid.GetComponentsInChildren<TMPro.TMP_Text>().Any(t => t.text == gearEach), $"with its chance ({gearEach})");
+            Assert.IsNull(popup.GetComponentsInChildren<RectTransform>().FirstOrDefault(r => r.name == "SClass"), "no S items in a Wooden Crate");
+            crates.CloseRates();
+
+            var box0 = NinjaVillage.Systems.Crates.CrateRules.Get("surprise");
+            crates.ShowRates(box0);
+            yield return null;
+            var sclass = popup.GetComponentsInChildren<RectTransform>().First(r => r.name == "SClass");
+            Assert.AreEqual(NinjaVillage.Systems.Crates.CrateService.SPool(box0).Count, sclass.childCount, "every S item is listed");
+            string each = $"{NinjaVillage.Systems.Crates.CrateService.SItemChance(box0) * 100f:0.##}%";
+            Assert.IsTrue(sclass.GetComponentsInChildren<TMPro.TMP_Text>().Any(t => t.text == each), $"each shows its chance ({each})");
+            crates.CloseRates();
+            Assert.IsFalse(crates.RatesOpen);
             int gearBefore = NinjaVillage.Systems.Inventory.InventoryService.Data.Equipment.Sum(e => e.Count);
             int weaponsBefore = NinjaVillage.Systems.Inventory.InventoryService.Data.WeaponCopies.Sum(e => e.Count);
 
-            var free = crates.Root.GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Open FREE");
+            var free = shop.Root.GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Open FREE");
             Assert.IsNotNull(free, "a free crate a day");
             free.onClick.Invoke();
             Assert.IsTrue(crates.OverlayOpen && crates.IsRevealing, "the reveal plays");
@@ -186,16 +218,17 @@ namespace NinjaVillage.Tests
             int weaponsAfter = NinjaVillage.Systems.Inventory.InventoryService.Data.WeaponCopies.Sum(e => e.Count);
             Assert.AreEqual(gearBefore + weaponsBefore + 1, gearAfter + weaponsAfter, "the item is in the inventory");
             crates.CloseReveal();
+            Assert.IsFalse(ScreenBadges.Has(ScreenIds.Store), "badge gone once it's opened");
 
             var box = NinjaVillage.Systems.Crates.CrateRules.Get("surprise");
             SaveService.Data.Crates.SurprisePity = box.Pity - 1;
             crates.Open(box, 1, false);
             yield return null;
-            crates.Root.Find("Reveal").GetComponent<UnityEngine.UI.Button>().onClick.Invoke(); // tap to hurry it along
+            shop.Root.Find("Reveal").GetComponent<UnityEngine.UI.Button>().onClick.Invoke(); // tap to hurry it along
             deadline = Time.realtimeSinceStartup + 4f;
             while (crates.IsRevealing && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.IsTrue(crates.LastDrops[0].Special, "S-class at the pity");
-            Assert.IsNotNull(crates.Root.Find("Reveal/Results").GetComponentsInChildren<UnityEngine.UI.Image>().FirstOrDefault(i => i.name == "S"), "shown with its S");
+            Assert.IsNotNull(shop.Root.Find("Reveal/Results").GetComponentsInChildren<UnityEngine.UI.Image>().FirstOrDefault(i => i.name == "S"), "shown with its S");
             yield return new WaitForSecondsRealtime(0.2f);
         }
 
@@ -220,7 +253,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests, ScreenIds.House, ScreenIds.Fishing, ScreenIds.Crates);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests, ScreenIds.House, ScreenIds.Fishing, ScreenIds.Store);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
