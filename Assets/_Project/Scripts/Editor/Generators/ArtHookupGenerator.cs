@@ -48,7 +48,7 @@ namespace NinjaVillage.EditorTools.Generators
             ["SpiderQueen"] = "boss_spiderqueen", ["DemonKing"] = "boss_demonking",
         };
 
-        private static readonly Regex FramePattern = new(@"^(.+)_(idle|run|walk|attack|hurt|death)_(\d+)$");
+        private static readonly Regex FramePattern = new(@"^(.+)_(idle|run|walk|attack|hurt|death|front)_(\d+)$");
 
         [ContentGenerator("Art hookup: sprite import, character frames, prefabs", 80)]
         public static void Generate()
@@ -231,6 +231,7 @@ namespace NinjaVillage.EditorTools.Generators
                     "attack" => CharacterAnim.Attack,
                     "hurt" => CharacterAnim.Hurt,
                     "death" => CharacterAnim.Death,
+                    "front" => CharacterAnim.Front,
                     _ => CharacterAnim.Idle,
                 };
                 // Enemies and bosses are hit constantly: a hurt clip on every hit would freeze them in
@@ -253,7 +254,7 @@ namespace NinjaVillage.EditorTools.Generators
                 var set = ContentGen.CreateOrLoad<CharacterSpriteSet>($"{SetFolder}/{key}.asset");
                 ContentGen.Set(set, ("key", key), ("idle", Get(CharacterAnim.Idle)), ("move", Get(CharacterAnim.Move)),
                     ("attack", Get(CharacterAnim.Attack)), ("hurt", Get(CharacterAnim.Hurt)), ("death", Get(CharacterAnim.Death)),
-                    ("idleFps", boss ? 8f : 5f), ("moveFps", boss ? 8f : 9f));
+                    ("front", Get(CharacterAnim.Front)), ("idleFps", boss ? 8f : 5f), ("moveFps", boss ? 8f : 9f));
                 sets[key] = set;
             }
             Debug.Log($"[ArtHookup] {sets.Count} character sprite sets.");

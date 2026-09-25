@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace NinjaVillage.Gameplay.Animation
 {
-    public enum CharacterAnim { Idle, Move, Attack, Hurt, Death }
+    /// <summary>Front: facing the camera (menus such as the Equipment showcase); the rest face right.</summary>
+    public enum CharacterAnim { Idle, Move, Attack, Hurt, Death, Front }
 
     /// <summary>
     /// The frames of one character's animations — idle, move (walk/run), attack, hurt, death — built by
@@ -19,6 +20,8 @@ namespace NinjaVillage.Gameplay.Animation
         [SerializeField] private Sprite[] attack = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] hurt = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] death = Array.Empty<Sprite>();
+        [Tooltip("Facing the camera (idle), for menus. Empty when the art only exists side-on.")]
+        [SerializeField] private Sprite[] front = Array.Empty<Sprite>();
 
         [Header("Frames per second")]
         [SerializeField] private float idleFps = 5f;
@@ -39,6 +42,7 @@ namespace NinjaVillage.Gameplay.Animation
             CharacterAnim.Attack => attack,
             CharacterAnim.Hurt => hurt,
             CharacterAnim.Death => death,
+            CharacterAnim.Front => front,
             _ => idle,
         };
 
@@ -49,6 +53,7 @@ namespace NinjaVillage.Gameplay.Animation
             CharacterAnim.Attack => attackFps,
             CharacterAnim.Hurt => hurtFps,
             CharacterAnim.Death => deathFps,
+            CharacterAnim.Front => idleFps,
             _ => idleFps,
         };
 

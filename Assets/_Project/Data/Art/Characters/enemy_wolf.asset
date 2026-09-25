@@ -28,6 +28,7 @@ MonoBehaviour:
   attack: []
   hurt: []
   death: []
+  front: []
   idleFps: 5
   moveFps: 9
   attackFps: 14

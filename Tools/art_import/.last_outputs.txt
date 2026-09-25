@@ -184,6 +184,7 @@ Characters/Enemies/enemy_wolf_walk_3.png
 Characters/Enemies/enemy_wolf_walk_4.png
 Characters/Heroes/hero_assassin_attack_0.png
 Characters/Heroes/hero_assassin_death_0.png
+Characters/Heroes/hero_assassin_front_0.png
 Characters/Heroes/hero_assassin_hurt_0.png
 Characters/Heroes/hero_assassin_hurt_1.png
 Characters/Heroes/hero_assassin_hurt_2.png
@@ -199,6 +200,10 @@ Characters/Heroes/hero_beastninja_attack_2.png
 Characters/Heroes/hero_beastninja_attack_3.png
 Characters/Heroes/hero_beastninja_death_0.png
 Characters/Heroes/hero_beastninja_death_1.png
+Characters/Heroes/hero_beastninja_front_0.png
+Characters/Heroes/hero_beastninja_front_1.png
+Characters/Heroes/hero_beastninja_front_2.png
+Characters/Heroes/hero_beastninja_front_3.png
 Characters/Heroes/hero_beastninja_hurt_0.png
 Characters/Heroes/hero_beastninja_hurt_1.png
 Characters/Heroes/hero_beastninja_idle_0.png
@@ -235,6 +240,7 @@ Characters/Heroes/hero_mageninja_run_3.png
 Characters/Heroes/hero_mageninja_run_4.png
 Characters/Heroes/hero_monk_attack_0.png
 Characters/Heroes/hero_monk_death_0.png
+Characters/Heroes/hero_monk_front_0.png
 Characters/Heroes/hero_monk_hurt_0.png
 Characters/Heroes/hero_monk_hurt_1.png
 Characters/Heroes/hero_monk_hurt_2.png
@@ -246,6 +252,7 @@ Characters/Heroes/hero_monk_run_2.png
 Characters/Heroes/hero_monk_run_3.png
 Characters/Heroes/hero_samurai_attack_0.png
 Characters/Heroes/hero_samurai_death_0.png
+Characters/Heroes/hero_samurai_front_0.png
 Characters/Heroes/hero_samurai_hurt_0.png
 Characters/Heroes/hero_samurai_hurt_1.png
 Characters/Heroes/hero_samurai_hurt_2.png
@@ -257,6 +264,7 @@ Characters/Heroes/hero_samurai_run_2.png
 Characters/Heroes/hero_samurai_run_3.png
 Characters/Heroes/skin_assassin_crimson_attack_0.png
 Characters/Heroes/skin_assassin_crimson_death_0.png
+Characters/Heroes/skin_assassin_crimson_front_0.png
 Characters/Heroes/skin_assassin_crimson_hurt_0.png
 Characters/Heroes/skin_assassin_crimson_hurt_1.png
 Characters/Heroes/skin_assassin_crimson_hurt_2.png
@@ -268,6 +276,7 @@ Characters/Heroes/skin_assassin_crimson_run_2.png
 Characters/Heroes/skin_assassin_crimson_run_3.png
 Characters/Heroes/skin_assassin_sakura_attack_0.png
 Characters/Heroes/skin_assassin_sakura_death_0.png
+Characters/Heroes/skin_assassin_sakura_front_0.png
 Characters/Heroes/skin_assassin_sakura_hurt_0.png
 Characters/Heroes/skin_assassin_sakura_hurt_1.png
 Characters/Heroes/skin_assassin_sakura_hurt_2.png
@@ -283,6 +292,10 @@ Characters/Heroes/skin_beast_shadow_attack_2.png
 Characters/Heroes/skin_beast_shadow_attack_3.png
 Characters/Heroes/skin_beast_shadow_death_0.png
 Characters/Heroes/skin_beast_shadow_death_1.png
+Characters/Heroes/skin_beast_shadow_front_0.png
+Characters/Heroes/skin_beast_shadow_front_1.png
+Characters/Heroes/skin_beast_shadow_front_2.png
+Characters/Heroes/skin_beast_shadow_front_3.png
 Characters/Heroes/skin_beast_shadow_hurt_0.png
 Characters/Heroes/skin_beast_shadow_hurt_1.png
 Characters/Heroes/skin_beast_shadow_idle_0.png
@@ -319,6 +332,7 @@ Characters/Heroes/skin_mage_frost_run_3.png
 Characters/Heroes/skin_mage_frost_run_4.png
 Characters/Heroes/skin_monk_jade_attack_0.png
 Characters/Heroes/skin_monk_jade_death_0.png
+Characters/Heroes/skin_monk_jade_front_0.png
 Characters/Heroes/skin_monk_jade_hurt_0.png
 Characters/Heroes/skin_monk_jade_hurt_1.png
 Characters/Heroes/skin_monk_jade_hurt_2.png
@@ -330,6 +344,7 @@ Characters/Heroes/skin_monk_jade_run_2.png
 Characters/Heroes/skin_monk_jade_run_3.png
 Characters/Heroes/skin_samurai_gold_attack_0.png
 Characters/Heroes/skin_samurai_gold_death_0.png
+Characters/Heroes/skin_samurai_gold_front_0.png
 Characters/Heroes/skin_samurai_gold_hurt_0.png
 Characters/Heroes/skin_samurai_gold_hurt_1.png
 Characters/Heroes/skin_samurai_gold_hurt_2.png
@@ -341,6 +356,7 @@ Characters/Heroes/skin_samurai_gold_run_2.png
 Characters/Heroes/skin_samurai_gold_run_3.png
 Characters/Heroes/skin_samurai_oni_attack_0.png
 Characters/Heroes/skin_samurai_oni_death_0.png
+Characters/Heroes/skin_samurai_oni_front_0.png
 Characters/Heroes/skin_samurai_oni_hurt_0.png
 Characters/Heroes/skin_samurai_oni_hurt_1.png
 Characters/Heroes/skin_samurai_oni_hurt_2.png

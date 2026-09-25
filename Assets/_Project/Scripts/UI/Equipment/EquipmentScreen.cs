@@ -23,9 +23,10 @@ namespace NinjaVillage.UI.Equipment
 {
     /// <summary>
     /// Everything your ninja takes into battle, in one place (like Survivor.io's equipment screen): the
-    /// selected hero stands in the middle of a showcase with ATK / HP totals above and the loadout around
-    /// them — weapon and gear slots on the left and right, the pet in the last slot, and the hero on their mount if
-    /// they ride one — then Gear / Heroes / Pets / Mounts tabs over a grid of tiles framed in their grade's colour (Common → Rare → Elite → Epic → Legendary), each with
+    /// selected hero stands facing you in the middle of a showcase with ATK / HP totals above and the loadout on show:
+    /// the weapon in their hand, equipped gear floating beside them in its grade's glow, the pet at their feet and the
+    /// mount (if they ride one) at their side — plus weapon and gear slots on the left and right and the pet in the
+    /// last slot — then Gear / Heroes / Pets / Mounts tabs over a grid of tiles framed in their grade's colour (Common → Rare → Elite → Epic → Legendary), each with
     /// a small type badge (weapon, ring, amulet, armour, helmet, talisman, pet). Three copies of a grade merge into the
     /// next ("Merge all", or per item). Tapping a tile or slot opens its card with the right actions (Equip, Level
     /// up, Merge, Select, Take along, Upgrade, Unlock). Replaces separate Gear, Heroes and
@@ -57,9 +58,10 @@ namespace NinjaVillage.UI.Equipment
         private TextMeshProUGUI _attack, _health, _heroName;
         private Image _heroImage;
         private UIImageAnimator _heroAnimator;
-        private Image _mountImage;
-        private UIImageAnimator _mountAnimator;
-        private string _shownHeroKey;
+        private Image _mountImage, _petImage, _weaponImage;
+        private UIImageAnimator _mountAnimator, _petAnimator;
+        private readonly List<Charm> _charms = new();
+        private string _shownHeroKey, _shownPetKey;
         private RectTransform _list;
         private ScrollRect _scroll;
 
@@ -69,6 +71,14 @@ namespace NinjaVillage.UI.Equipment
         private TextMeshProUGUI _popupName, _popupSub, _popupBody;
         private RectTransform _popupActions;
         private System.Action _popupRefresh;
+
+        /// <summary>An equipped gear piece floating beside the hero in its grade's glow.</summary>
+        private sealed class Charm
+        {
+            public Image Glow, Disc, Icon;
+            public UIImageAnimator Bob;
+            public EquipmentDefinition Item;
+        }
 
         private sealed class Slot
         {
@@ -126,28 +136,36 @@ namespace NinjaVillage.UI.Equipment
             _attack = StatChip(showcase, "icon_spell_attack_upgrade", "ATK", new Vector2(-150f, -22f), UITheme.Text);
             _health = StatChip(showcase, "pickup_heart", "HP", new Vector2(150f, -22f), new Color(1f, 0.45f, 0.45f));
 
-            var heroButton = UIStyle.Frame(showcase, "Hero", null, () => ShowHero(HeroService.GetSelected()), Color.clear);
+            // The stage, centred on the hero: the mount behind at their side, the hero facing you, the weapon in their
+            // hand, the pet at their feet and the gear floating around them. Each opens its card.
+            var stage = UIBuilder.Rect(showcase, "Stage");
+            UIStyle.Place(stage, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(360f, 380f));
+            _mountImage = StageImage(stage, "Mount", () =>
+            {
+                var mount = MountService.Active;
+                if (mount != null) ShowMount(mount);
+            }, out _mountAnimator);
+
+            var heroButton = UIStyle.Frame(stage, "Hero", null, () => ShowHero(HeroService.GetSelected()), Color.clear);
             heroButton.image.color = new Color(1f, 1f, 1f, 0f);
-            UIStyle.Place((RectTransform)heroButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(360f, 380f));
+            UIBuilder.Stretch((RectTransform)heroButton.transform);
             _heroImage = UIBuilder.Image(heroButton.transform, "Sprite", Color.white);
             _heroImage.raycastTarget = false;
             _heroImage.preserveAspect = true;
             UIStyle.Place(_heroImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(320f, 320f));
             _heroAnimator = _heroImage.gameObject.AddComponent<UIImageAnimator>();
 
-            // The mount they ride, drawn over the rider's legs like in battle; tapping it opens its card.
-            _mountImage = UIBuilder.Image(heroButton.transform, "Mount", Color.white);
-            _mountImage.preserveAspect = true;
-            UIStyle.Place(_mountImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 200f));
-            var mountButton = _mountImage.gameObject.AddComponent<Button>();
-            mountButton.transition = Selectable.Transition.None;
-            mountButton.onClick.AddListener(() =>
+            _weaponImage = StageImage(stage, "Weapon", () =>
             {
-                var mount = MountService.Active;
-                if (mount != null) ShowMount(mount);
-            });
-            _mountAnimator = _mountImage.gameObject.AddComponent<UIImageAnimator>();
-            _mountImage.gameObject.SetActive(false);
+                var weapon = InventoryService.GetWeapon(InventoryService.Data.EquippedWeaponId);
+                if (weapon != null) ShowWeapon(weapon, InventoryService.WeaponGrade(weapon.Id));
+            }, out _);
+            _petImage = StageImage(stage, "Pet", () =>
+            {
+                var pet = PetService.GetActive();
+                if (pet != null) ShowPet(pet);
+            }, out _petAnimator);
+            for (int i = 0; i < GearSlots; i++) _charms.Add(BuildCharm(stage, i));
 
             var ribbon = UIStyle.Sprite(showcase, "Ribbon", "panel_red", UITheme.Button);
             ribbon.raycastTarget = false;
@@ -255,7 +273,7 @@ namespace NinjaVillage.UI.Equipment
 
             var hero = HeroService.GetSelected();
             _heroName.text = hero != null ? $"{hero.NameOrId.ToUpperInvariant()}  <size=70%>Lv {HeroService.GetLevel(hero)}</size>" : "NINJA";
-            ShowHeroSprite(hero);
+            RefreshStage(hero);
 
             var inv = InventoryService.Data;
             var weapon = InventoryService.GetWeapon(inv.EquippedWeaponId);
@@ -302,54 +320,132 @@ namespace NinjaVillage.UI.Equipment
             return badge;
         }
 
+        // ------------------------------------------------------------------ stage
+
+        /// <summary>Where the gear floats, from the hero's centre: beside the head, then beside the chest.</summary>
+        private static readonly Vector2[] CharmSpots = { new(-215f, 150f), new(215f, 150f), new(-250f, 50f), new(250f, 50f) };
+
+        private const float HeroFeet = -160f;   // the hero's 320 px sprite is centred on the stage
+
+        private static Image StageImage(RectTransform stage, string name, UnityEngine.Events.UnityAction onClick, out UIImageAnimator animator)
+        {
+            var image = UIBuilder.Image(stage, name, Color.white);
+            image.preserveAspect = true;
+            UIStyle.Place(image.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100f, 100f));
+            var button = image.gameObject.AddComponent<Button>();
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(onClick);
+            animator = image.gameObject.AddComponent<UIImageAnimator>();
+            image.gameObject.SetActive(false);
+            return image;
+        }
+
+        private Charm BuildCharm(RectTransform stage, int index)
+        {
+            var charm = new Charm();
+            // A grade-coloured glow around a dark token (so the icon reads on the bright showcase), the icon on top.
+            charm.Glow = UIBuilder.Image(stage, $"Charm{index}", Color.white, Core.Utilities.GeneratedSprites.Glow);
+            UIStyle.Place(charm.Glow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), CharmSpots[index], new Vector2(150f, 150f));
+            charm.Disc = UIBuilder.Image(charm.Glow.transform, "Disc", Color.white, Core.Utilities.GeneratedSprites.Circle);
+            charm.Disc.raycastTarget = false;
+            UIBuilder.Stretch(charm.Disc.rectTransform, 30f);
+            var inner = UIBuilder.Image(charm.Disc.transform, "Inner", new Color(0.2f, 0.12f, 0.08f, 0.92f), Core.Utilities.GeneratedSprites.Circle);
+            inner.raycastTarget = false;
+            UIBuilder.Stretch(inner.rectTransform, 5f);
+            charm.Icon = UIBuilder.Image(charm.Glow.transform, "Icon", Color.white);
+            charm.Icon.raycastTarget = false;
+            charm.Icon.preserveAspect = true;
+            UIBuilder.Stretch(charm.Icon.rectTransform, 40f);
+            var button = charm.Glow.gameObject.AddComponent<Button>();
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(() =>
+            {
+                if (charm.Item != null) ShowGear(charm.Item, InventoryService.GearGrade(charm.Item));
+            });
+            charm.Bob = charm.Glow.gameObject.AddComponent<UIImageAnimator>();
+            charm.Bob.SetPosition(CharmSpots[index]);
+            charm.Glow.gameObject.SetActive(false);
+            return charm;
+        }
+
+        private void RefreshStage(HeroDefinition hero)
+        {
+            ShowHeroSprite(hero);
+
+            // The weapon in the hand on the viewer's right, blade up.
+            var inv = InventoryService.Data;
+            var weapon = InventoryService.GetWeapon(inv.EquippedWeaponId);
+            var weaponIcon = weapon != null ? WeaponIcon(weapon) : null;
+            _weaponImage.gameObject.SetActive(weaponIcon != null);
+            if (weaponIcon != null)
+            {
+                _weaponImage.sprite = weaponIcon;
+                _weaponImage.rectTransform.sizeDelta = new Vector2(130f, 130f);
+                _weaponImage.rectTransform.anchoredPosition = new Vector2(138f, -30f);
+            }
+
+            // Equipped gear floats beside the hero, glowing in its grade's colour.
+            for (int i = 0; i < _charms.Count; i++)
+            {
+                var charm = _charms[i];
+                charm.Item = i < inv.EquippedEquipmentIds.Count ? InventoryService.GetEquipment(inv.EquippedEquipmentIds[i]) : null;
+                bool shown = charm.Item != null;
+                if (charm.Glow.gameObject.activeSelf != shown) charm.Glow.gameObject.SetActive(shown);
+                if (!shown) continue;
+                var color = GradeColors.For(InventoryService.GearGrade(charm.Item));
+                charm.Glow.color = new Color(color.r, color.g, color.b, 0.9f);
+                charm.Disc.color = color; // the token's rim
+                charm.Icon.sprite = GearIcon(charm.Item);
+                charm.Bob.Play(new[] { Core.Utilities.GeneratedSprites.Glow }, 1f, 10f);
+            }
+
+            // The pet sits at the hero's feet, in front on the viewer's left.
+            var pet = PetService.GetActive();
+            var petSet = pet != null ? CharacterSpriteLibrary.Find(CharacterSpriteLibrary.PetKey(pet.Id)) : null;
+            _petImage.gameObject.SetActive(petSet != null && petSet.DefaultSprite != null);
+            if (_petImage.gameObject.activeSelf && _shownPetKey != petSet.Key)
+            {
+                _shownPetKey = petSet.Key;
+                var petFrames = petSet.Frames(CharacterAnim.Idle);
+                float size = Mathf.Min(petSet.DefaultSprite.rect.width / 8f * 12f, 230f);
+                _petImage.rectTransform.sizeDelta = new Vector2(size, size);
+                _petAnimator.Play(petFrames.Length > 0 ? petFrames : new[] { petSet.DefaultSprite }, petSet.Fps(CharacterAnim.Idle), petFrames.Length > 1 ? 0f : 6f);
+                _petAnimator.SetPosition(new Vector2(-178f, HeroFeet - 18f + size * 0.5f));
+            }
+
+            // The mount stands behind the hero at their side, facing out so its head shows.
+            var mount = MountService.Active;
+            var mountSprite = mount != null && mount.Frames.Length > 0 ? mount.Frames[0] : null;
+            _mountImage.gameObject.SetActive(mountSprite != null);
+            if (mountSprite != null)
+            {
+                var mountSize = mountSprite.rect.size / 8f * 10f;       // textures are 8x the pack art
+                _mountImage.rectTransform.sizeDelta = mountSize;
+                _mountAnimator.Play(new[] { mountSprite }, 1f);
+                _mountAnimator.SetPosition(new Vector2(335f - mountSize.x * 0.5f, HeroFeet + 26f + mountSize.y * 0.5f)); // right edge by the slots
+            }
+        }
+
+        /// <summary>The hero (or their equipped skin) facing you, sized by cell so bodies match; side-on art as a fallback.</summary>
         private void ShowHeroSprite(HeroDefinition hero)
         {
-            string heroKey = CharacterSpriteLibrary.HeroKey(hero != null ? hero.Id : "assassin");
-            string key = heroKey;
+            string key = CharacterSpriteLibrary.HeroKey(hero != null ? hero.Id : "assassin");
             if (hero != null)
             {
                 var skin = SkinService.Catalog != null ? SkinService.Catalog.Get(SkinService.EquippedSkinId(hero.Id)) : null;
                 if (skin != null && SkinService.Owns(skin) && CharacterSpriteLibrary.Find(skin.Id) != null) key = skin.Id;
             }
-            var mount = MountService.Active;
-            if (mount != null && (mount.Frames.Length == 0 || mount.Frames[0] == null)) mount = null;
-            string shown = mount != null ? key + "|" + mount.Id : key;
-            if (shown == _shownHeroKey) return;
+            if (key == _shownHeroKey) return;
             var set = CharacterSpriteLibrary.Find(key);
             if (set == null) return;
-            _shownHeroKey = shown;
-            var frames = set.Frames(CharacterAnim.Idle);
-            var sprite = set.DefaultSprite;
-            _heroAnimator.Play(frames.Length > 0 ? frames : new[] { sprite }, set.Fps(CharacterAnim.Idle), frames.Length > 1 || mount != null ? 0f : 12f);
-            LayoutRider(sprite, mount);
-        }
-
-        /// <summary>
-        /// The hero alone, or seated on <paramref name="mount"/> exactly as <see cref="Gameplay.Mounts.MountVisual"/> seats
-        /// them in battle (mount's feet on the hero's feet, rider at the mount's rider offset), a bit smaller so it fits.
-        /// </summary>
-        private void LayoutRider(Sprite heroSprite, MountDefinition mount)
-        {
+            _shownHeroKey = key;
+            var anim = set.Has(CharacterAnim.Front) ? CharacterAnim.Front : CharacterAnim.Idle;
+            var frames = set.Frames(anim);
+            var sprite = frames.Length > 0 ? frames[0] : set.DefaultSprite;
             // Pack heroes are 16 px cells, the Beast Ninja 32 px: size by cell so bodies match.
-            float cells = heroSprite != null ? heroSprite.rect.width / 128f : 1f;
-            _mountImage.gameObject.SetActive(mount != null);
-            if (mount == null)
-            {
-                _heroImage.rectTransform.sizeDelta = Vector2.one * Mathf.Min(320f * cells, 640f);
-                _heroAnimator.SetPosition(Vector2.zero);
-                return;
-            }
-            float px = cells > 1.5f ? 10f : 15f;              // UI px per pack pixel (20 on foot)
-            const float feet = -175f;
-            float heroSize = 16f * px * cells;
-            _heroImage.rectTransform.sizeDelta = Vector2.one * heroSize;
-            var first = mount.Frames[0];
-            var mountSize = first.rect.size / 8f * px;        // textures are 8x the pack art
-            _mountImage.rectTransform.sizeDelta = mountSize;
-            _mountAnimator.Play(mount.Frames, mount.Fps * 0.5f);
-            _mountAnimator.SetPosition(new Vector2(0f, feet + mountSize.y * 0.5f));
-            var seat = mount.RiderOffset / 0.075f * px;       // world units → pack pixels → UI px
-            _heroAnimator.SetPosition(new Vector2(seat.x, feet + heroSize * 0.5f + seat.y));
+            float cells = sprite != null ? sprite.rect.width / 128f : 1f;
+            _heroImage.rectTransform.sizeDelta = Vector2.one * Mathf.Min(320f * cells, 640f);
+            _heroAnimator.Play(frames.Length > 0 ? frames : new[] { sprite }, set.Fps(CharacterAnim.Idle), frames.Length > 1 ? 0f : 12f);
         }
 
         private void OnSlot(int index)

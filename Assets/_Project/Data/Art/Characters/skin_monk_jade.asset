@@ -29,6 +29,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a93d69633cd25ff6799726312b177813, type: 3}
   death:
   - {fileID: 21300000, guid: 9e51a73df6c7c0cd5a64d76a5a58ff14, type: 3}
+  front:
+  - {fileID: 21300000, guid: b5335aa7bce5620c5a1fbbd76a89591c, type: 3}
   idleFps: 5
   moveFps: 9
   attackFps: 14

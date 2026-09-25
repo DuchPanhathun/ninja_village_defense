@@ -9,22 +9,22 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 
 | Item | Source | Output files |
 |---|---|---|
-| Assassin | `Actor/Character/NinjaDark` (recoloured purple); hurt: AI (PixelLab, animated from the pack sprite) | `hero_assassin_idle_0`, `hero_assassin_run_0..3`, `hero_assassin_attack_0`, `hero_assassin_hurt_0..3`, `hero_assassin_death_0` |
-| Samurai | `Actor/Character/SamuraiRed`; hurt: AI (PixelLab, animated from the pack sprite) | `hero_samurai_idle_0`, `hero_samurai_run_0..3`, `hero_samurai_attack_0`, `hero_samurai_hurt_0..3`, `hero_samurai_death_0` |
-| Monk | `Actor/Character/Monk2`; hurt: AI (PixelLab, animated from the pack sprite) | `hero_monk_idle_0`, `hero_monk_run_0..3`, `hero_monk_attack_0`, `hero_monk_hurt_0..3`, `hero_monk_death_0` |
-| Beast Ninja | `Actor/CharacterAnimated/NinjaGreen/Separate` (32x32 cells, so frames are 256 px) | `hero_beastninja_idle_0..3`, `hero_beastninja_run_0..3`, `hero_beastninja_attack_0..3`, `hero_beastninja_hurt_0..1`, `hero_beastninja_death_0..1` |
+| Assassin | `Actor/Character/NinjaDark` (recoloured purple); hurt: AI (PixelLab, animated from the pack sprite) | `hero_assassin_idle_0`, `hero_assassin_run_0..3`, `hero_assassin_attack_0`, `hero_assassin_hurt_0..3`, `hero_assassin_death_0`, `hero_assassin_front_0` |
+| Samurai | `Actor/Character/SamuraiRed`; hurt: AI (PixelLab, animated from the pack sprite) | `hero_samurai_idle_0`, `hero_samurai_run_0..3`, `hero_samurai_attack_0`, `hero_samurai_hurt_0..3`, `hero_samurai_death_0`, `hero_samurai_front_0` |
+| Monk | `Actor/Character/Monk2`; hurt: AI (PixelLab, animated from the pack sprite) | `hero_monk_idle_0`, `hero_monk_run_0..3`, `hero_monk_attack_0`, `hero_monk_hurt_0..3`, `hero_monk_death_0`, `hero_monk_front_0` |
+| Beast Ninja | `Actor/CharacterAnimated/NinjaGreen/Separate` (32x32 cells, so frames are 256 px) | `hero_beastninja_idle_0..3`, `hero_beastninja_run_0..3`, `hero_beastninja_attack_0..3`, `hero_beastninja_hurt_0..1`, `hero_beastninja_death_0..1`, `hero_beastninja_front_0..3` |
 | Mage Ninja | AI (PixelLab): `hero_mageninja_*` | `hero_mageninja_idle_0..4`, `hero_mageninja_run_0..4`, `hero_mageninja_attack_0..4`, `hero_mageninja_hurt_0..3`, `hero_mageninja_death_0..4` |
 
 ## Skins (recolours, no AI)
 
 | Item | Source | Output files |
 |---|---|---|
-| skin_assassin_crimson | hero `assassin` recoloured toward the tint in `Data/Store/Skins/Skin_skin_assassin_crimson.asset` | `skin_assassin_crimson_idle_0`, `skin_assassin_crimson_run_0..3`, `skin_assassin_crimson_attack_0`, `skin_assassin_crimson_hurt_0..3`, `skin_assassin_crimson_death_0` |
-| skin_assassin_sakura | hero `assassin` recoloured toward the tint in `Data/Store/Skins/Skin_skin_assassin_sakura.asset` | `skin_assassin_sakura_idle_0`, `skin_assassin_sakura_run_0..3`, `skin_assassin_sakura_attack_0`, `skin_assassin_sakura_hurt_0..3`, `skin_assassin_sakura_death_0` |
-| skin_samurai_oni | hero `samurai` recoloured toward the tint in `Data/Store/Skins/Skin_skin_samurai_oni.asset` | `skin_samurai_oni_idle_0`, `skin_samurai_oni_run_0..3`, `skin_samurai_oni_attack_0`, `skin_samurai_oni_hurt_0..3`, `skin_samurai_oni_death_0` |
-| skin_samurai_gold | hero `samurai` recoloured toward the tint in `Data/Store/Skins/Skin_skin_samurai_gold.asset` | `skin_samurai_gold_idle_0`, `skin_samurai_gold_run_0..3`, `skin_samurai_gold_attack_0`, `skin_samurai_gold_hurt_0..3`, `skin_samurai_gold_death_0` |
-| skin_monk_jade | hero `monk` recoloured toward the tint in `Data/Store/Skins/Skin_skin_monk_jade.asset` | `skin_monk_jade_idle_0`, `skin_monk_jade_run_0..3`, `skin_monk_jade_attack_0`, `skin_monk_jade_hurt_0..3`, `skin_monk_jade_death_0` |
-| skin_beast_shadow | hero `beastninja` recoloured toward the tint in `Data/Store/Skins/Skin_skin_beast_shadow.asset` | `skin_beast_shadow_idle_0..3`, `skin_beast_shadow_run_0..3`, `skin_beast_shadow_attack_0..3`, `skin_beast_shadow_hurt_0..1`, `skin_beast_shadow_death_0..1` |
+| skin_assassin_crimson | hero `assassin` recoloured toward the tint in `Data/Store/Skins/Skin_skin_assassin_crimson.asset` | `skin_assassin_crimson_idle_0`, `skin_assassin_crimson_run_0..3`, `skin_assassin_crimson_attack_0`, `skin_assassin_crimson_hurt_0..3`, `skin_assassin_crimson_death_0`, `skin_assassin_crimson_front_0` |
+| skin_assassin_sakura | hero `assassin` recoloured toward the tint in `Data/Store/Skins/Skin_skin_assassin_sakura.asset` | `skin_assassin_sakura_idle_0`, `skin_assassin_sakura_run_0..3`, `skin_assassin_sakura_attack_0`, `skin_assassin_sakura_hurt_0..3`, `skin_assassin_sakura_death_0`, `skin_assassin_sakura_front_0` |
+| skin_samurai_oni | hero `samurai` recoloured toward the tint in `Data/Store/Skins/Skin_skin_samurai_oni.asset` | `skin_samurai_oni_idle_0`, `skin_samurai_oni_run_0..3`, `skin_samurai_oni_attack_0`, `skin_samurai_oni_hurt_0..3`, `skin_samurai_oni_death_0`, `skin_samurai_oni_front_0` |
+| skin_samurai_gold | hero `samurai` recoloured toward the tint in `Data/Store/Skins/Skin_skin_samurai_gold.asset` | `skin_samurai_gold_idle_0`, `skin_samurai_gold_run_0..3`, `skin_samurai_gold_attack_0`, `skin_samurai_gold_hurt_0..3`, `skin_samurai_gold_death_0`, `skin_samurai_gold_front_0` |
+| skin_monk_jade | hero `monk` recoloured toward the tint in `Data/Store/Skins/Skin_skin_monk_jade.asset` | `skin_monk_jade_idle_0`, `skin_monk_jade_run_0..3`, `skin_monk_jade_attack_0`, `skin_monk_jade_hurt_0..3`, `skin_monk_jade_death_0`, `skin_monk_jade_front_0` |
+| skin_beast_shadow | hero `beastninja` recoloured toward the tint in `Data/Store/Skins/Skin_skin_beast_shadow.asset` | `skin_beast_shadow_idle_0..3`, `skin_beast_shadow_run_0..3`, `skin_beast_shadow_attack_0..3`, `skin_beast_shadow_hurt_0..1`, `skin_beast_shadow_death_0..1`, `skin_beast_shadow_front_0..3` |
 | skin_mage_frost | hero `mageninja` recoloured toward the tint in `Data/Store/Skins/Skin_skin_mage_frost.asset` | `skin_mage_frost_idle_0..4`, `skin_mage_frost_run_0..4`, `skin_mage_frost_attack_0..4`, `skin_mage_frost_hurt_0..3`, `skin_mage_frost_death_0..4` |
 
 ## Enemies

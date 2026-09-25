@@ -119,6 +119,13 @@ namespace NinjaVillage.Tests
             var root = screen.Root;
             Assert.Greater(root.GetComponentsInChildren<UnityEngine.UI.Button>(true).Length, 10, "slots, tabs and tiles are built");
 
+            // The hero faces you with the loadout on show: the weapon in hand, the equipped ring floating beside them.
+            var stage = root.GetComponentsInChildren<RectTransform>(true).First(r => r.name == "Stage");
+            Assert.IsTrue(stage.Find("Hero/Sprite").GetComponent<UnityEngine.UI.Image>().sprite.name.Contains("_front_"), "the hero faces the camera");
+            Assert.IsTrue(stage.Find("Weapon").gameObject.activeSelf, "the weapon is in the hero's hand");
+            Assert.IsTrue(stage.Find("Charm0").gameObject.activeSelf, "the equipped ring floats beside the hero");
+            Assert.IsFalse(stage.Find("Charm1").gameObject.activeSelf, "only equipped gear shows");
+
             // Tapping a tile opens its card.
             var weaponTile = root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.name == "Tile");
             Assert.IsNotNull(weaponTile, "the weapon grid has tiles");

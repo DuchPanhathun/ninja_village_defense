@@ -42,6 +42,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 338dabcc2b30905e08768061d5c4f6d2, type: 3}
   - {fileID: 21300000, guid: 3827e073343f7ba92b5b0dfc1350a889, type: 3}
   - {fileID: 21300000, guid: 9c6e45cdbeb3c59f7987f63b600440b7, type: 3}
+  front: []
   idleFps: 5
   moveFps: 9
   attackFps: 14

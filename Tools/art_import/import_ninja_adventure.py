@@ -246,7 +246,7 @@ def summarize(names):
 # Characters
 # --------------------------------------------------------------------------------------------------
 def std_right(char, sheet_file="SpriteSheet.png"):
-    """Right-facing frames of a standard 16x16 character (columns = down, up, left, RIGHT)."""
+    """Right-facing frames of a standard 16x16 character (columns = down, up, left, RIGHT), plus its front (down) idle."""
     base = f"Actor/Character/{char}"
     sep = os.path.join(PACK, base, "SeparateAnim")
     sheet = load(f"{base}/{sheet_file}")
@@ -256,7 +256,9 @@ def std_right(char, sheet_file="SpriteSheet.png"):
         else walk[:1]
     attack = [load(f"{base}/SeparateAnim/Attack.png").crop((48, 0, 64, 16))]
     dead = [load(f"{base}/SeparateAnim/Dead.png")] if os.path.exists(os.path.join(sep, "Dead.png")) else [sheet.crop((0, 96, 16, 112))]
-    return dict(idle=idle, walk=walk, attack=attack, dead=dead)
+    front = [load(f"{base}/SeparateAnim/Idle.png").crop((0, 0, 16, 16))] if os.path.exists(os.path.join(sep, "Idle.png")) \
+        else [sheet.crop((0, 0, 16, 16))]
+    return dict(idle=idle, walk=walk, attack=attack, dead=dead, front=front)
 
 
 def monster_right(rel):
@@ -275,7 +277,7 @@ def hero_frames():
         fix = tint or (lambda im: im)
         states = OrderedDict(idle=s["idle"], run=s["walk"], attack=s["attack"],
                              hurt=ai_frames(f"heroes/hero_{hero}_hurt", first=1),   # frame 0 is the pack's idle pose
-                             death=s["dead"])
+                             death=s["dead"], front=s["front"])   # front: facing the camera (Equipment showcase)
         states = OrderedDict((k, [fix(f) for f in v]) for k, v in states.items())
         note = " (recoloured purple)" if tint else ""
         heroes[hero] = (states, f"`Actor/Character/{char}`{note}; hurt: AI (PixelLab, animated from the pack sprite)")
@@ -285,7 +287,8 @@ def hero_frames():
     heroes["beastninja"] = (OrderedDict(
         idle=column(load(f"{base}/Idle.png"), 3, 32, 32), run=column(load(f"{base}/Walk.png"), 3, 32, 32),
         attack=column(load(f"{base}/Attack.png"), 3, 32, 32), hurt=column(load(f"{base}/Hit.png"), 3, 32, 32),
-        death=column(load(f"{base}/Dead.png"), 0, 32, 32)), f"`{base}` (32x32 cells, so frames are 256 px)")
+        death=column(load(f"{base}/Dead.png"), 0, 32, 32), front=column(load(f"{base}/Idle.png"), 0, 32, 32)),
+        f"`{base}` (32x32 cells, so frames are 256 px)")
 
     # Mage Ninja: AI (PixelLab); frame 0 of each animation is the base pose.
     heroes["mageninja"] = (OrderedDict(
