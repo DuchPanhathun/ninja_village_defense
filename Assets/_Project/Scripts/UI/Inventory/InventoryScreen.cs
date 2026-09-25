@@ -33,12 +33,12 @@ namespace NinjaVillage.UI.Inventory
                 if (entry == null) continue;
                 var weapon = InventoryService.GetWeapon(entry.Id);
                 string name = weapon != null ? DefinitionNames.Of(weapon) : DefinitionNames.Prettify(entry.Id);
-                string tier = ForgeService.TierName(inv.GetWeaponTier(entry.Id));
-                string title = $"{(string.IsNullOrEmpty(tier) ? string.Empty : tier + " ")}{name}   Lv {Mathf.Max(1, entry.Level)}";
+                var grade = InventoryService.WeaponGrade(entry.Id);
+                string title = $"{grade} {name}   Lv {Mathf.Max(1, entry.Level)}";
                 string body = weapon != null
                     ? $"Damage {weapon.GetDamage(Mathf.Max(1, entry.Level)):0.#} · {weapon.GetAttacksPerSecond(Mathf.Max(1, entry.Level)):0.##}/s"
                     : "Missing definition";
-                Color accent = weapon != null ? RarityColors.For(weapon.Rarity) : UITheme.Text;
+                Color accent = weapon != null ? GradeColors.For(grade) : UITheme.Text;
 
                 var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent, UIIcons.Weapon(entry.Id));
                 if (inv.EquippedWeaponId == entry.Id)
@@ -70,9 +70,10 @@ namespace NinjaVillage.UI.Inventory
         {
             EquipmentDefinition def = InventoryService.GetEquipment(stack.Id);
             string name = def != null ? DefinitionNames.Of(def) : DefinitionNames.Prettify(stack.Id);
-            string title = stack.Count > 1 ? $"{name}  ×{stack.Count}" : name;
-            string body = def != null ? (string.IsNullOrEmpty(def.Description) ? $"{def.Rarity}" : def.Description) : "Missing definition";
-            Color accent = def != null ? RarityColors.For(def.Rarity) : UITheme.Text;
+            var grade = GradeRules.Clamp(stack.Grade);
+            string title = stack.Count > 1 ? $"{grade} {name}  ×{stack.Count}" : $"{grade} {name}";
+            string body = def != null ? def.DescribeBonuses(" · ", GradeRules.StatScale(InventoryService.NativeGrade(def), grade)) : "Missing definition";
+            Color accent = GradeColors.For(grade);
 
             var actions = UIBuilder.ActionCard(content, title, body, out _, out _, accent, UIIcons.Equipment(stack.Id));
             bool equipped = inv.IsEquipmentEquipped(stack.Id);

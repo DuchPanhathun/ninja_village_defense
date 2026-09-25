@@ -6,7 +6,8 @@ namespace NinjaVillage.Systems.Inventory
     {
         WeaponAdded,
         WeaponUpgraded,
-        WeaponTierChanged,
+        WeaponMerged,
+        EquipmentMerged,
         WeaponEquipped,
         EquipmentAdded,
         EquipmentRemoved,

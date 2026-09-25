@@ -2,6 +2,8 @@ using System;
 using NinjaVillage.Core.Audio;
 using NinjaVillage.Core.Utilities;
 using NinjaVillage.Gameplay.Animation;
+using NinjaVillage.Gameplay.Mounts;
+using NinjaVillage.Systems.Mounts;
 using TMPro;
 using UnityEngine;
 
@@ -34,6 +36,10 @@ namespace NinjaVillage.Gameplay.Village
         private float _alertPhase;
         private SpriteRenderer _badge;
         private float _hopUntil, _hop;
+        private float _headroom;
+
+        /// <summary>Half its height plus any mount under it: where labels, badges and bubbles sit.</summary>
+        private float Top => (_renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f) + _headroom;
 
         public static VillageResident Spawn(Transform parent, string name, CharacterSpriteSet set, Vector2 position, Rect area, float speed)
         {
@@ -58,6 +64,19 @@ namespace NinjaVillage.Gameplay.Village
             resident._idleUntil = Time.time + UnityEngine.Random.Range(0f, 2f);
             resident.PickTarget();
             return resident;
+        }
+
+        /// <summary>Seats it on <paramref name="mount"/> (your selected hero rides your mount): labels move up, it trots quicker.</summary>
+        public VillageResident Riding(MountDefinition mount)
+        {
+            if (mount == null) return this;
+            var visual = gameObject.AddComponent<MountVisual>();
+            visual.Ride(mount);
+            if (!visual.IsMounted) return this;
+            _headroom = mount.RiderOffset.y;
+            _speed *= 1.4f;
+            GetComponent<CircleCollider2D>().radius = 0.9f;
+            return this;
         }
 
         public VillageResident Follow(Transform target, Vector2 offset)
@@ -97,7 +116,7 @@ namespace NinjaVillage.Gameplay.Village
             }
             _tag.text = text;
             _tag.color = color;
-            _tag.transform.localPosition = new Vector3(0f, (_renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f) + 0.35f, 0f);
+            _tag.transform.localPosition = new Vector3(0f, Top + 0.35f, 0f);
             return this;
         }
 
@@ -158,7 +177,7 @@ namespace NinjaVillage.Gameplay.Village
             _hopUntil = Time.time + 0.7f;
             _idleUntil = Time.time + 2f;
             if (heart == null) return;
-            float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.5f;
+            float top = Top;
             for (int i = 0; i < 4; i++)
                 FloatingHeart.Spawn(transform.position + new Vector3((i - 1.5f) * 0.3f, top + 0.2f, 0f), heart, i * 0.12f);
         }
@@ -206,12 +225,12 @@ namespace NinjaVillage.Gameplay.Village
             if (_bubble != null && _bubble.activeSelf && Time.time >= _bubbleHideAt) _bubble.SetActive(false);
             if (_badge != null && _badge.enabled)
             {
-                float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f;
+                float top = Top;
                 _badge.transform.localPosition = new Vector3(0f, top + 0.45f + Mathf.Sin(Time.time * 3f + _alertPhase) * 0.06f, 0f);
             }
                         if (_alert != null && _alert.gameObject.activeSelf)
             {
-                float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f;
+                float top = Top;
                 bool bubble = _bubble != null && _bubble.activeSelf;
                 _alert.transform.localPosition = new Vector3(0f, top + (bubble ? 2.4f : 0.75f) + Mathf.Abs(Mathf.Sin(Time.time * 4f + _alertPhase)) * 0.25f, 0f);
             }
@@ -247,7 +266,7 @@ namespace NinjaVillage.Gameplay.Village
                 _bubbleText.textWrappingMode = TextWrappingModes.Normal;
                 _bubbleText.sortingOrder = VillageSorting.Labels + 11;
             }
-            float top = _renderer.sprite != null ? _renderer.sprite.bounds.extents.y : 0.6f;
+            float top = Top;
             _bubble.transform.localPosition = new Vector3(0f, top + 1.2f, 0f);
             _bubbleText.text = text;
             _bubble.SetActive(true);

@@ -52,6 +52,9 @@ namespace NinjaVillage.Core.Events
         public const string BuildingUpgraded = "building_upgraded";
         public const string WeaponUpgraded = "weapon_upgraded";
         public const string WeaponCrafted = "weapon_crafted";
+        public const string ItemMerged = "item_merged";              // three weapons / gear pieces merged into a better grade
+        public const string CrateOpened = "crate_opened";            // Amount = crates opened; Subject = crate id
+        public const string MountUnlocked = "mount_unlocked";        // Subject = mount id
         public const string HeroUnlocked = "hero_unlocked";
         public const string HeroUpgraded = "hero_upgraded";
         public const string PetUnlocked = "pet_unlocked";

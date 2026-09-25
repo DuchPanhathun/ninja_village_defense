@@ -18,6 +18,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 623d8d6a4544533c3bd03f0b23c352ee, type: 3}
   rarity: 1
   element: 0
+  sClass: 0
   baseDamage: 14
   baseAttacksPerSecond: 0.9
   range: 11

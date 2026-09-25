@@ -79,6 +79,23 @@ namespace NinjaVillage.UI.Common
             return art != null ? art.BuildingSprite(buildingId, Mathf.Max(1, level)) : null;
         }
 
+        /// <summary>The small type badge on an equipment tile: what kind of thing it is (weapon, ring, amulet, armour...).</summary>
+        public static Sprite GearType(NinjaVillage.Gameplay.Loot.GearKind kind) => UIArt.Get(kind switch
+        {
+            NinjaVillage.Gameplay.Loot.GearKind.Ring => "icon_item_ring",
+            NinjaVillage.Gameplay.Loot.GearKind.Amulet => "icon_item_amulet",
+            NinjaVillage.Gameplay.Loot.GearKind.Armor => "icon_item_armor",
+            NinjaVillage.Gameplay.Loot.GearKind.Helmet => "icon_item_helmet",
+            NinjaVillage.Gameplay.Loot.GearKind.Talisman => "icon_item_scroll",
+            NinjaVillage.Gameplay.Loot.GearKind.Boots => "icon_item_boot",
+            _ => "icon_item_ring",
+        });
+
+        public static Sprite WeaponType => UIArt.Get("icon_item_guard"); // crossed swords
+        public static Sprite PetType => UIArt.Get("menu_pets");
+        public static Sprite Mount(string mountId) => Named("icon_mount_", mountId);
+        public static Sprite MountType => UIArt.Get("icon_mount_horse_brown");
+
         private static Sprite Named(string prefix, string id) => string.IsNullOrEmpty(id) ? null : UIArt.Get(prefix + id);
     }
 }

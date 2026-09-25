@@ -89,7 +89,7 @@ namespace NinjaVillage.Tests
             yield return ShowEveryRegisteredScreen(
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Talents, ScreenIds.Inventory, ScreenIds.Collection,
                 ScreenIds.DailyLogin, ScreenIds.Quests, ScreenIds.Achievements, ScreenIds.BattlePass, ScreenIds.Events,
-                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, ScreenIds.Meals, "leaderboard");
+                ScreenIds.Store, ScreenIds.Profile, ScreenIds.Settings, ScreenIds.Chapters, ScreenIds.Equipment, ScreenIds.Meals, ScreenIds.Crates, "leaderboard");
             yield return new WaitForSecondsRealtime(0.5f);
         }
 
@@ -122,13 +122,81 @@ namespace NinjaVillage.Tests
             yield return null;
             Assert.IsTrue(root.Find("Popup").gameObject.activeSelf, "a card opens");
 
+            // Every tile wears a small type badge; three of a grade merge into the next (here via "Merge all").
+            Assert.IsTrue(root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Image>().Any(i => i.name == "Type" && i.enabled), "type badges");
+            NinjaVillage.Systems.Inventory.InventoryService.AddEquipment("iron_ring", 2); // three Common rings with the equipped one
+            screen.Refresh();
+            var mergeAll = root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.name == "MergeAll");
+            Assert.IsNotNull(mergeAll, "a Merge all button when something can merge");
+            mergeAll.onClick.Invoke();
+            Assert.AreEqual(1, inv.GetEquipmentCount("iron_ring", (int)NinjaVillage.Systems.Inventory.ItemGrade.Rare), "3 Common → 1 Rare");
+            Assert.IsTrue(inv.IsEquipmentEquipped("iron_ring"), "still equipped, now Rare");
+
             // Heroes tab: selecting through the card works.
             NinjaVillage.UI.Equipment.EquipmentScreen.Open(NinjaVillage.UI.Equipment.EquipmentScreen.Tab.Heroes);
             yield return null;
             Assert.IsFalse(root.Find("Popup").gameObject.activeSelf, "reopening starts without a card");
             int heroes = NinjaVillage.Systems.Heroes.HeroService.GetSortedHeroes().Count;
             Assert.AreEqual(heroes, root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().Count(b => b.name == "Tile"));
+
+            // Mounts tab: buy the Brown Horse through its card — the showcase hero now sits on it.
+            var horse = NinjaVillage.Systems.Mounts.MountService.Get("horse_brown");
+            Assert.IsNotNull(horse, "mount catalog missing");
+            NinjaVillage.UI.Equipment.EquipmentScreen.Open(NinjaVillage.UI.Equipment.EquipmentScreen.Tab.Mounts);
+            yield return null;
+            var mountTiles = root.Find("Column").GetComponentsInChildren<UnityEngine.UI.Button>().Where(b => b.name == "Tile").ToList();
+            Assert.AreEqual(NinjaVillage.Systems.Mounts.MountService.GetSorted().Count, mountTiles.Count, "a tile per mount");
+            var showcaseMount = root.GetComponentsInChildren<UnityEngine.UI.Image>(true).First(i => i.name == "Mount");
+            Assert.IsFalse(showcaseMount.gameObject.activeSelf, "on foot at first");
+            mountTiles[NinjaVillage.Systems.Mounts.MountService.GetSorted().IndexOf(horse)].onClick.Invoke();
+            yield return null;
+            var unlock = root.Find("Popup").GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.GetComponentInChildren<TMPro.TMP_Text>()?.text.StartsWith("Unlock") == true);
+            Assert.IsNotNull(unlock, "the card sells the mount");
+            unlock.onClick.Invoke();
+            yield return null;
+            Assert.IsTrue(NinjaVillage.Systems.Mounts.MountService.IsActive(horse), "bought and ridden");
+            Assert.IsTrue(showcaseMount.gameObject.activeSelf, "the hero sits on the horse in the showcase");
+            Assert.AreEqual(horse.Frames[0], showcaseMount.sprite);
             yield return new WaitForSecondsRealtime(0.3f);
+        }
+
+        /// <summary>
+        /// Supply crates: the free crate opens with a reveal (chest, flash, the item pops out) and lands in the
+        /// inventory; at the pity a Surprise Box hands out an S-class item, shown with its gold "S".
+        /// </summary>
+        [UnityTest]
+        public IEnumerator MainMenu_CratesOpenWithARevealAndSurpriseBoxesHoldSClass()
+        {
+            yield return LoadScene(SceneNames.MainMenu);
+            UIScreenNavigator.Instance.Show(ScreenIds.Crates);
+            yield return null;
+            var crates = (NinjaVillage.UI.Crates.CratesScreen)UIScreenNavigator.Instance.Current;
+            int gearBefore = NinjaVillage.Systems.Inventory.InventoryService.Data.Equipment.Sum(e => e.Count);
+            int weaponsBefore = NinjaVillage.Systems.Inventory.InventoryService.Data.WeaponCopies.Sum(e => e.Count);
+
+            var free = crates.Root.GetComponentsInChildren<UnityEngine.UI.Button>().FirstOrDefault(b => b.GetComponentInChildren<TMPro.TMP_Text>()?.text == "Open FREE");
+            Assert.IsNotNull(free, "a free crate a day");
+            free.onClick.Invoke();
+            Assert.IsTrue(crates.OverlayOpen && crates.IsRevealing, "the reveal plays");
+            float deadline = Time.realtimeSinceStartup + 6f;
+            while (crates.IsRevealing && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsFalse(crates.IsRevealing, "the reveal finishes");
+            Assert.AreEqual(1, crates.LastDrops.Count);
+            int gearAfter = NinjaVillage.Systems.Inventory.InventoryService.Data.Equipment.Sum(e => e.Count);
+            int weaponsAfter = NinjaVillage.Systems.Inventory.InventoryService.Data.WeaponCopies.Sum(e => e.Count);
+            Assert.AreEqual(gearBefore + weaponsBefore + 1, gearAfter + weaponsAfter, "the item is in the inventory");
+            crates.CloseReveal();
+
+            var box = NinjaVillage.Systems.Crates.CrateRules.Get("surprise");
+            SaveService.Data.Crates.SurprisePity = box.Pity - 1;
+            crates.Open(box, 1, false);
+            yield return null;
+            crates.Root.Find("Reveal").GetComponent<UnityEngine.UI.Button>().onClick.Invoke(); // tap to hurry it along
+            deadline = Time.realtimeSinceStartup + 4f;
+            while (crates.IsRevealing && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsTrue(crates.LastDrops[0].Special, "S-class at the pity");
+            Assert.IsNotNull(crates.Root.Find("Reveal/Results").GetComponentsInChildren<UnityEngine.UI.Image>().FirstOrDefault(i => i.name == "S"), "shown with its S");
+            yield return new WaitForSecondsRealtime(0.2f);
         }
 
         [UnityTest]
@@ -152,7 +220,7 @@ namespace NinjaVillage.Tests
 
             yield return ShowEveryRegisteredScreen(ScreenIds.Forge, ScreenIds.Shrine, ScreenIds.Market,
                 ScreenIds.Heroes, ScreenIds.Pets, ScreenIds.Inventory, ScreenIds.Talents, ScreenIds.Decorations,
-                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests, ScreenIds.House, ScreenIds.Fishing);
+                ScreenIds.Neighbours, ScreenIds.Profile, ScreenIds.Storehouse, ScreenIds.Equipment, ScreenIds.Kitchen, ScreenIds.Requests, ScreenIds.House, ScreenIds.Fishing, ScreenIds.Crates);
 
             // Upgrading the Dojo exercises cost, save, event and map refresh paths.
             Assert.IsTrue(VillageService.TryUpgrade(VillageService.Get(BuildingIds.Dojo), out var blocker), $"Dojo upgrade blocked: {blocker}");
@@ -851,6 +919,55 @@ namespace NinjaVillage.Tests
             }
             Assert.Greater(body.position.x, start.x + 2.4f, "jumping carries you over it");
             Assert.IsFalse(player.GetComponent<JumpController>().IsJumping, "and you land again");
+        }
+
+        /// <summary>
+        /// Mounts: your hero rides the active mount into battle — faster, the mount covering their legs and jumping
+        /// with them — and around the village.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AndVillage_YouRideYourMount()
+        {
+            var steed = NinjaVillage.Systems.Mounts.MountService.Get("horse_black");
+            Assert.IsNotNull(steed, "mount catalog missing");
+            NinjaVillage.Systems.Heroes.HeroService.EnsureDefaults();
+            SaveService.Data.Mounts.Owned.SetLevel(steed.Id, 1);
+            SaveService.Data.Mounts.ActiveMountId = steed.Id;
+
+            yield return LoadScene(SceneNames.Battle);
+            var player = QuietPlayer();
+            var visual = player.GetComponent<NinjaVillage.Gameplay.Mounts.MountVisual>();
+            Assert.IsNotNull(visual, "you ride into battle");
+            Assert.IsTrue(visual.IsMounted);
+            Assert.AreEqual(steed, visual.Mount);
+            Assert.Greater(player.GetComponent<PlayerStats>().MoveSpeedMultiplier, 1.1f, "and you're faster");
+            Assert.Greater(visual.MountRenderer.sortingOrder, visual.RiderRenderer.sortingOrder);
+
+            var jump = player.GetComponent<JumpController>();
+            Assert.IsTrue(jump.TryJump());
+            float lift = 0f;
+            for (float end = Time.realtimeSinceStartup + 3f; Time.realtimeSinceStartup < end && jump.IsJumping;)
+            {
+                Time.timeScale = 1f;
+                lift = Mathf.Max(lift, visual.Lift);
+                yield return null;
+            }
+            Assert.Greater(lift, 0.2f, "the mount jumps with you");
+            yield return null;
+            Assert.AreEqual(0f, visual.Lift, 0.001f, "and lands");
+            Assert.IsTrue(visual.IsMounted, "still riding");
+            Assert.IsTrue(visual.RiderRenderer.enabled && visual.MountRenderer.enabled);
+
+            yield return LoadScene(SceneNames.Village);
+            yield return null;
+            var riders = Object.FindObjectsByType<NinjaVillage.Gameplay.Mounts.MountVisual>(FindObjectsSortMode.None);
+            Assert.AreEqual(1, riders.Length, "your selected hero rides in the village");
+            Assert.IsTrue(riders[0].name.StartsWith("Hero_") && riders[0].IsMounted);
+            NinjaVillage.Systems.Mounts.MountService.Dismount();
+            yield return null;
+            Assert.AreEqual(0, Object.FindObjectsByType<NinjaVillage.Gameplay.Mounts.MountVisual>(FindObjectsSortMode.None).Count(r => r.IsMounted),
+                "and walks again once you dismount");
+            yield return new WaitForSecondsRealtime(0.3f);
         }
 
         [UnityTest]

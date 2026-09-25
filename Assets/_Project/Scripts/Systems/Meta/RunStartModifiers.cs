@@ -23,6 +23,7 @@ namespace NinjaVillage.Systems.Meta
         public const int Village = 300;
         public const int Talents = 400;
         public const int Meals = 450;
+        public const int Mounts = 480;
         public const int Pets = 500;
         public const int LiveOps = 600;
         public const int Store = 700;

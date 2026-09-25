@@ -69,12 +69,12 @@ namespace NinjaVillage.Tests
         }
 
         [Test]
-        public void EachTier_ReforgesWithItsOwnBar()
+        public void EachGrade_HasItsOwnBar_ForAMissingCopy()
         {
-            Assert.AreEqual("iron_bar", PondMineRules.ReforgeBar(1));
-            Assert.AreEqual("gold_bar", PondMineRules.ReforgeBar(2));
-            Assert.AreEqual("mithril_bar", PondMineRules.ReforgeBar(3));
-            Assert.IsNull(PondMineRules.ReforgeBar(0));
+            Assert.AreEqual("iron_bar", NinjaVillage.Systems.Inventory.GradeRules.BarsFor(NinjaVillage.Systems.Inventory.ItemGrade.Rare).bar);
+            Assert.AreEqual("gold_bar", NinjaVillage.Systems.Inventory.GradeRules.BarsFor(NinjaVillage.Systems.Inventory.ItemGrade.Epic).bar);
+            Assert.AreEqual("mithril_bar", NinjaVillage.Systems.Inventory.GradeRules.BarsFor(NinjaVillage.Systems.Inventory.ItemGrade.Legendary).bar);
+            Assert.IsNull(NinjaVillage.Systems.Inventory.GradeRules.BarsFor(NinjaVillage.Systems.Inventory.ItemGrade.Common).bar);
         }
 
         // ------------------------------------------------------------------ services (temp save, fixed clock)
@@ -141,22 +141,19 @@ namespace NinjaVillage.Tests
             Assert.AreEqual(MineService.Capacity, haul.Iron);
             Assert.AreEqual(haul.Iron, GoodsService.Count("iron_bar"));
 
-            // Reforge Kunai to Steel with no spare gear: bars stand in for both pieces.
+            // Merge the Kunai with only two Common copies: iron bars from the mine make up the third.
             var kunai = InventoryService.GetWeapon(InventoryService.StarterWeaponId);
             Assume.That(kunai != null, "weapon catalog missing");
             var inv = InventoryService.Data;
-            inv.Equipment.Clear();
-            inv.Weapons.SetLevel(kunai.Id, 4);
-            village.Buildings.SetLevel(BuildingIds.Forge, 3);
-            SaveService.Data.Wallet.Add(CurrencyType.Coins, 5000);
-            GoodsService.TrySpend("iron_bar", GoodsService.Count("iron_bar"));
-            GoodsService.Add("iron_bar", 2 * PondMineRules.BarsPerMaterial - 1);
-            Assert.AreEqual(ForgeBlocker.NotEnoughMaterials, ForgeService.CheckReforge(kunai), "one bar short");
-            GoodsService.Add("iron_bar", 1);
-            Assert.AreEqual(ForgeBlocker.None, ForgeService.CheckReforge(kunai));
-            Assert.IsTrue(ForgeService.TryReforge(kunai, out _));
-            Assert.AreEqual(1, ForgeService.GetTier(kunai.Id), "Steel");
-            Assert.AreEqual(0, GoodsService.Count("iron_bar"), "the bars were used");
+            inv.AddWeaponCopies(kunai.Id, 1, 0); // the starter copy + one more
+            var (bar, amount) = NinjaVillage.Systems.Inventory.GradeRules.BarsFor(NinjaVillage.Systems.Inventory.ItemGrade.Rare);
+            GoodsService.TrySpend(bar, GoodsService.Count(bar));
+            GoodsService.Add(bar, amount - 1);
+            Assert.AreEqual(MergeResult.NotEnoughCopies, MergeService.CheckWeapon(kunai.Id, NinjaVillage.Systems.Inventory.ItemGrade.Common), "one bar short");
+            GoodsService.Add(bar, 1);
+            Assert.AreEqual(MergeResult.Merged, MergeService.MergeWeapon(kunai.Id, NinjaVillage.Systems.Inventory.ItemGrade.Common));
+            Assert.AreEqual(NinjaVillage.Systems.Inventory.ItemGrade.Rare, InventoryService.WeaponGrade(kunai.Id));
+            Assert.AreEqual(0, GoodsService.Count(bar), "the bars were used");
         }
     }
 }

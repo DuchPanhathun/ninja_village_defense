@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbbba26ce4cb35882b8b4bdee51d859d, type: 3}
+  m_Name: StormNinjaku
+  m_EditorClassIdentifier: 
+  id: StormNinjaku
+  displayName: Storm Ninjaku
+  description: 'S-class. A blade charged with lightning: huge sword arcs and brutal
+    critical hits.'
+  icon: {fileID: 21300000, guid: a7d45fee6296249f19b6c5db9749430f, type: 3}
+  rarity: 2
+  element: 0
+  sClass: 1
+  baseDamage: 34
+  baseAttacksPerSecond: 1.05
+  range: 2.8
+  baseCritChance: 0.25
+  baseCritMultiplier: 2.4
+  knockbackForce: 5
+  damagePerLevel: 5.5
+  attacksPerSecondPerLevel: 0.035
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 12
+  arcDegrees: 160

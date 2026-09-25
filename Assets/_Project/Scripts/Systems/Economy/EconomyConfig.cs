@@ -4,38 +4,9 @@ using UnityEngine;
 
 namespace NinjaVillage.Systems.Economy
 {
-    /// <summary>One step of the Forge's weapon tier ladder (Iron → Steel → Golden → Legendary Kunai).</summary>
-    [Serializable]
-    public class WeaponTierConfig
-    {
-        public string Name = "Iron";
-        [Tooltip("Added to PlayerStats attack damage multiplier while this weapon is equipped (+0.15 = +15%).")]
-        public float AttackBonus;
-        public int CoinCost;
-        public int RequiredForgeLevel;
-        [Tooltip("The weapon must be at least this Forge level before it can be reforged into this tier.")]
-        public int RequiredWeaponLevel;
-        [Tooltip("Equipment pieces consumed as crafting materials.")]
-        public int MaterialCount;
-        public Rarity MaterialMinRarity = Rarity.Common;
-
-        public WeaponTierConfig() { }
-
-        public WeaponTierConfig(string name, float attackBonus, int coinCost, int forgeLevel, int weaponLevel, int materials, Rarity materialRarity)
-        {
-            Name = name;
-            AttackBonus = attackBonus;
-            CoinCost = coinCost;
-            RequiredForgeLevel = forgeLevel;
-            RequiredWeaponLevel = weaponLevel;
-            MaterialCount = materials;
-            MaterialMinRarity = materialRarity;
-        }
-    }
-
     /// <summary>
     /// Every economy knob that isn't owned by a specific definition asset (EPIC 15 "Reward balancing"):
-    /// battle rewards on top of enemy drops, Forge prices and the weapon tier ladder. One asset at
+    /// battle rewards on top of enemy drops and Forge prices (weapon grades are in GradeRules). One asset at
     /// <c>Resources/Catalogs/EconomyConfig.asset</c>; when it's missing the field defaults below are
     /// used, so the game is balanced even before content is generated.
     ///
@@ -73,27 +44,16 @@ namespace NinjaVillage.Systems.Economy
         [Tooltip("Cost multiplier per weapon rarity: Common, Rare, Epic, Legendary.")]
         [SerializeField] private float[] upgradeCostRarityMultiplier = { 1f, 1.5f, 2.25f, 3.5f };
 
-        [Header("Forge — crafting weapons you don't own yet (per rarity: Common, Rare, Epic, Legendary)")]
+        [Header("Forge — crafting weapons (unlock, then copies to merge; per rarity: Common, Rare, Epic, Legendary)")]
         [SerializeField] private int[] craftCoinCostByRarity = { 300, 900, 2500, 6000 };
         [SerializeField] private int[] craftForgeLevelByRarity = { 1, 3, 5, 7 };
 
-        [Header("Forge — weapon tiers (index 0 is the tier every weapon starts at)")]
-        [SerializeField] private WeaponTierConfig[] weaponTiers = DefaultTiers();
 
         public int WaveClearBaseCoins => waveClearBaseCoins;
         public int WaveClearCoinsPerWave => waveClearCoinsPerWave;
         public int GemsPerBossKill => gemsPerBossKill;
         public int VictoryBonusCoins => victoryBonusCoins;
         public CostCurve WeaponUpgradeCost => weaponUpgradeCost;
-        public int TierCount => weaponTiers != null ? weaponTiers.Length : 0;
-
-        public static WeaponTierConfig[] DefaultTiers() => new[]
-        {
-            new WeaponTierConfig("Iron", 0f, 0, 0, 0, 0, Rarity.Common),
-            new WeaponTierConfig("Steel", 0.15f, 400, 3, 4, 2, Rarity.Common),
-            new WeaponTierConfig("Golden", 0.35f, 1500, 5, 7, 2, Rarity.Rare),
-            new WeaponTierConfig("Legendary", 0.60f, 5000, 9, 10, 2, Rarity.Epic),
-        };
 
         // ---- Lookups ----
 
@@ -110,9 +70,6 @@ namespace NinjaVillage.Systems.Economy
 
         public int CraftForgeLevel(Rarity rarity) => PickInt(craftForgeLevelByRarity, (int)rarity, 1);
 
-        /// <summary>Null when <paramref name="tier"/> is out of range.</summary>
-        public WeaponTierConfig GetTier(int tier) =>
-            weaponTiers != null && tier >= 0 && tier < weaponTiers.Length ? weaponTiers[tier] : null;
 
         // ---- Pure formulas (tested) ----
 

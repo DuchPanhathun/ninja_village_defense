@@ -106,7 +106,7 @@ namespace NinjaVillage.Gameplay.Loot
             var candidates = new List<EquipmentDefinition>();
             foreach (var def in pool)
             {
-                if (def != null && def.Rarity == rarity)
+                if (def != null && def.Rarity == rarity && !def.IsSpecial) // S-class only comes from Surprise Boxes
                     candidates.Add(def);
             }
 
@@ -114,7 +114,7 @@ namespace NinjaVillage.Gameplay.Loot
             if (candidates.Count == 0)
             {
                 foreach (var def in pool)
-                    if (def != null) candidates.Add(def);
+                    if (def != null && !def.IsSpecial) candidates.Add(def);
             }
 
             if (candidates.Count == 0) return;

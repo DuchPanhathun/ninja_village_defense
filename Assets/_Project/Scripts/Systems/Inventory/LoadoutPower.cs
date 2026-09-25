@@ -1,4 +1,5 @@
 using NinjaVillage.Systems.Heroes;
+using NinjaVillage.Systems.Mounts;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.Systems.Talents;
 using NinjaVillage.Systems.Village;
@@ -8,8 +9,8 @@ namespace NinjaVillage.Systems.Inventory
 {
     /// <summary>
     /// The headline numbers of the current loadout for the Equipment screen: damage per hit and max health,
-    /// adding up the same sources the run-start modifiers apply in battle — the equipped weapon (and its forge
-    /// tier), the selected hero, equipped gear, talents and village bonuses. (Skills picked during a run
+    /// adding up the same sources the run-start modifiers apply in battle — the equipped weapon (and its grade),
+    /// the selected hero, equipped gear (at its best grade), talents, the mount you ride and village bonuses. (Skills picked during a run
     /// come on top.)
     /// </summary>
     public static class LoadoutPower
@@ -29,6 +30,8 @@ namespace NinjaVillage.Systems.Inventory
             }
         }
 
+        private static ItemGrade BestGrade(int owned, ItemGrade fallback) => owned >= 0 ? GradeRules.Clamp(owned) : fallback;
+
         public static Totals Compute(SaveData save)
         {
             if (save == null) return new Totals((int)FallbackDamage, (int)BasePlayerHealth);
@@ -43,11 +46,13 @@ namespace NinjaVillage.Systems.Inventory
 
             float attack = heroStats.attackDamagePercent;
             float health = heroStats.maxHealthPercent;
-            if (weapon != null) attack += ForgeService.TierAttackBonus(weapon.Id);
+            if (weapon != null) attack += GradeRules.WeaponAttackBonus(BestGrade(save.Inventory.BestWeaponGrade(weapon.Id), InventoryService.NativeGrade(weapon)));
             foreach (var id in save.Inventory.EquippedEquipmentIds)
             {
                 var item = InventoryService.GetEquipment(id);
-                if (item != null) attack += item.AttackDamageBonus;
+                if (item == null) continue;
+                var native = InventoryService.NativeGrade(item);
+                attack += item.AttackDamageBonus * GradeRules.StatScale(native, BestGrade(save.Inventory.BestEquipmentGrade(id), native));
             }
 
             var talents = TalentService.Catalog;
@@ -60,6 +65,18 @@ namespace NinjaVillage.Systems.Inventory
                     if (talent.Stat == TalentStat.AttackDamage) attack += talent.ValueAt(rank);
                     else if (talent.Stat == TalentStat.MaxHealth) health += talent.ValueAt(rank);
                 }
+
+            // The mount you ride, at its level (MountRunModifier).
+            var mount = MountService.Get(save.Mounts.ActiveMountId);
+            if (mount != null && save.Mounts.Owned.ContainsId(mount.Id))
+            {
+                float scale = MountRules.LevelScale(save.Mounts.Owned.GetLevel(mount.Id));
+                foreach (var bonus in mount.Bonuses)
+                {
+                    if (bonus.Stat == TalentStat.AttackDamage) attack += bonus.Value * scale;
+                    else if (bonus.Stat == TalentStat.MaxHealth) health += bonus.Value * scale;
+                }
+            }
 
             var village = VillageService.ComputeBonuses(save);
             attack += village.AttackDamage;

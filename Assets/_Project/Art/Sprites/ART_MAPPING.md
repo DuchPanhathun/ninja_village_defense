@@ -306,6 +306,19 @@ Character sprites face right; the game flips them for left. `a_0..3` means files
 | frog (animal) | `Actor/Animal/Frog/SpriteSheet.png` (2-frame strip) | `animal_frog_idle_0`, `animal_frog_walk_0..1` |
 | cow (animal) | `Actor/Animal/Cow/SpriteSheetWhite.png` (2-frame strip) | `animal_cow_idle_0`, `animal_cow_walk_0..1` |
 
+## Icons
+
+| Item | Source | Output files |
+|---|---|---|
+| S-class equipment (Surprise Box) | pack weapons / AI equipment icons, recoloured + gold glow outline + sparkles | `icon_weapon_stormninjaku`, `icon_weapon_phoenixbow`, `icon_equip_phoenix_ring`, `icon_equip_oni_warband`, `icon_equip_dragon_mail`, `icon_equip_void_amulet` |
+| supply crates (closed / open) | `Items/Treasure` chests: wood recolour, silver as is, Surprise Box royal purple + gold glow | `chest_wood_closed`, `chest_wood_open`, `chest_silver_closed`, `chest_silver_open`, `chest_surprise_closed`, `chest_surprise_open` |
+
+## Characters
+
+| Item | Source | Output files |
+|---|---|---|
+| mounts (side-view gallop, 2 frames) + icons; S-class Golden Qilin and Nightmare Steed | `Actor/Animal/*Side.png` sheets; S mounts recoloured + gold glow outline | `mount_horse_brown_0..1`, `icon_mount_horse_brown`, `mount_horse_black_0..1`, `icon_mount_horse_black`, `mount_donkey_0..1`, `icon_mount_donkey`, `mount_lion_red_0..1`, `icon_mount_lion_red`, `mount_lion_frost_0..1`, `icon_mount_lion_frost`, `mount_lioness_0..1`, `icon_mount_lioness`, `mount_golden_qilin_0..1`, `icon_mount_golden_qilin`, `mount_nightmare_0..1`, `icon_mount_nightmare` |
+
 ## Backgrounds
 
 | Item | Source | Output files |

@@ -11,6 +11,7 @@ using NinjaVillage.Systems.GameFlow;
 using NinjaVillage.Systems.Heroes;
 using NinjaVillage.Systems.Inventory;
 using NinjaVillage.Systems.Monetization;
+using NinjaVillage.Systems.Mounts;
 using NinjaVillage.Systems.Pets;
 using NinjaVillage.Systems.Save;
 using NinjaVillage.UI.Common;
@@ -23,9 +24,11 @@ namespace NinjaVillage.UI.Equipment
     /// <summary>
     /// Everything your ninja takes into battle, in one place (like Survivor.io's equipment screen): the
     /// selected hero stands in the middle of a showcase with ATK / HP totals above and the loadout around
-    /// them — weapon and gear slots on the left and right, the pet in the last slot — then Gear / Heroes /
-    /// Pets tabs over a grid of rarity-framed tiles. Tapping a tile or slot opens its card with the right
-    /// actions (Equip, Level up, Select, Take along, Upgrade, Unlock). Replaces separate Gear, Heroes and
+    /// them — weapon and gear slots on the left and right, the pet in the last slot, and the hero on their mount if
+    /// they ride one — then Gear / Heroes / Pets / Mounts tabs over a grid of tiles framed in their grade's colour (Common → Rare → Elite → Epic → Legendary), each with
+    /// a small type badge (weapon, ring, amulet, armour, helmet, talisman, pet). Three copies of a grade merge into the
+    /// next ("Merge all", or per item). Tapping a tile or slot opens its card with the right actions (Equip, Level
+    /// up, Merge, Select, Take along, Upgrade, Unlock). Replaces separate Gear, Heroes and
     /// Pets entries in the menus; works in the Main Menu and the Village.
     /// </summary>
     [SceneScreen(SceneNames.MainMenu, SceneNames.Village)]
@@ -36,6 +39,7 @@ namespace NinjaVillage.UI.Equipment
             Gear,
             Heroes,
             Pets,
+            Mounts,
         }
 
         public override string ScreenId => ScreenIds.Equipment;
@@ -53,6 +57,8 @@ namespace NinjaVillage.UI.Equipment
         private TextMeshProUGUI _attack, _health, _heroName;
         private Image _heroImage;
         private UIImageAnimator _heroAnimator;
+        private Image _mountImage;
+        private UIImageAnimator _mountAnimator;
         private string _shownHeroKey;
         private RectTransform _list;
         private ScrollRect _scroll;
@@ -67,7 +73,7 @@ namespace NinjaVillage.UI.Equipment
         private sealed class Slot
         {
             public Button Button;
-            public Image Frame, Icon;
+            public Image Frame, Icon, Badge;
             public TextMeshProUGUI Label;
         }
 
@@ -129,6 +135,20 @@ namespace NinjaVillage.UI.Equipment
             UIStyle.Place(_heroImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(320f, 320f));
             _heroAnimator = _heroImage.gameObject.AddComponent<UIImageAnimator>();
 
+            // The mount they ride, drawn over the rider's legs like in battle; tapping it opens its card.
+            _mountImage = UIBuilder.Image(heroButton.transform, "Mount", Color.white);
+            _mountImage.preserveAspect = true;
+            UIStyle.Place(_mountImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 200f));
+            var mountButton = _mountImage.gameObject.AddComponent<Button>();
+            mountButton.transition = Selectable.Transition.None;
+            mountButton.onClick.AddListener(() =>
+            {
+                var mount = MountService.Active;
+                if (mount != null) ShowMount(mount);
+            });
+            _mountAnimator = _mountImage.gameObject.AddComponent<UIImageAnimator>();
+            _mountImage.gameObject.SetActive(false);
+
             var ribbon = UIStyle.Sprite(showcase, "Ribbon", "panel_red", UITheme.Button);
             ribbon.raycastTarget = false;
             UIStyle.Place(ribbon.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(420f, 90f));
@@ -150,6 +170,7 @@ namespace NinjaVillage.UI.Equipment
                 slot.Icon.raycastTarget = false;
                 slot.Icon.preserveAspect = true;
                 UIBuilder.Stretch(slot.Icon.rectTransform, 24f);
+                slot.Badge = TypeBadge(slot.Button.transform, 46f);
                 slot.Label = UIStyle.Label(slot.Button.transform, "", 24f, Color.white, TextAlignmentOptions.Center, 0.25f);
                 UIStyle.Place(slot.Label.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 1f), new Vector2(0f, -2f), new Vector2(SlotSize + 30f, 34f));
                 _slots.Add(slot);
@@ -175,16 +196,17 @@ namespace NinjaVillage.UI.Equipment
         {
             var row = UIBuilder.Horizontal(body, "Tabs", 12f);
             UIBuilder.SetPreferredSize(row, -1f, 110f);
-            foreach (var (tab, icon, label) in new[] { (Tab.Gear, "menu_gear", "Gear"), (Tab.Heroes, "menu_heroes", "Heroes"), (Tab.Pets, "menu_pets", "Pets") })
+            foreach (var (tab, icon, label) in new[]
+                     { (Tab.Gear, "menu_gear", "Gear"), (Tab.Heroes, "menu_heroes", "Heroes"), (Tab.Pets, "menu_pets", "Pets"), (Tab.Mounts, "icon_mount_horse_brown", "Mounts") })
             {
                 var t = tab;
                 var button = UIStyle.Frame(row.transform, label, "panel_wood_panel", () => SelectTab(t), UITheme.ButtonSecondary);
                 var image = UIBuilder.Image(button.transform, "Icon", Color.white, UIArt.Get(icon));
                 image.raycastTarget = false;
                 image.preserveAspect = true;
-                UIStyle.Place(image.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(18f, 0f), new Vector2(76f, 76f));
-                var text = UIStyle.Label(button.transform, label, 36f);
-                UIStyle.Place(text.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(34f, 0f), new Vector2(200f, 60f));
+                UIStyle.Place(image.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(12f, 0f), new Vector2(68f, 68f));
+                var text = UIStyle.Label(button.transform, label, 32f);
+                UIStyle.Place(text.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(32f, 0f), new Vector2(170f, 60f));
                 _tabButtons[tab] = button;
             }
         }
@@ -193,10 +215,12 @@ namespace NinjaVillage.UI.Equipment
 
         protected override void OnShown()
         {
+            bool switched = _tab != _pendingTab;
             _tab = _pendingTab;
             _pendingTab = Tab.Gear;
             HidePopup();
             if (_scroll != null) _scroll.verticalNormalizedPosition = 1f;
+            if (switched) Refresh(); // the screen refreshed before this; redraw on the requested tab
         }
 
         private void SelectTab(Tab tab)
@@ -217,6 +241,7 @@ namespace NinjaVillage.UI.Equipment
             {
                 case Tab.Heroes: PopulateHeroes(); break;
                 case Tab.Pets: PopulatePets(); break;
+                case Tab.Mounts: PopulateMounts(); break;
                 default: PopulateGear(); break;
             }
             _popupRefresh?.Invoke();
@@ -234,31 +259,47 @@ namespace NinjaVillage.UI.Equipment
 
             var inv = InventoryService.Data;
             var weapon = InventoryService.GetWeapon(inv.EquippedWeaponId);
-            SetSlot(_slots[0], weapon != null ? WeaponIcon(weapon) : null, weapon != null ? RarityColors.For(weapon.Rarity) : (Color?)null,
-                weapon != null ? $"Lv {ForgeService.GetLevel(weapon.Id)}" : "Weapon");
+            var weaponGrade = weapon != null ? InventoryService.WeaponGrade(weapon.Id) : ItemGrade.Common;
+            SetSlot(_slots[0], weapon != null ? WeaponIcon(weapon) : null, weapon != null ? GradeColors.For(weaponGrade) : (Color?)null,
+                weapon != null ? $"{weaponGrade} · Lv {ForgeService.GetLevel(weapon.Id)}" : "Weapon", UIIcons.WeaponType);
 
             int open = InventoryService.EquipmentSlots;
             int[] gearSlots = { 1, 2, 3, 4 };
             for (int g = 0; g < GearSlots; g++)
             {
                 var slot = _slots[gearSlots[g]];
-                if (g >= open) { SetSlot(slot, null, null, "<color=#F2A0A0>Castle</color>", locked: true); continue; }
+                if (g >= open) { SetSlot(slot, null, null, "<color=#F2A0A0>Castle</color>", null, locked: true); continue; }
                 var item = g < inv.EquippedEquipmentIds.Count ? InventoryService.GetEquipment(inv.EquippedEquipmentIds[g]) : null;
-                SetSlot(slot, item != null ? GearIcon(item) : null, item != null ? RarityColors.For(item.Rarity) : (Color?)null,
-                    item != null ? item.Rarity.ToString() : "Empty");
+                var grade = item != null ? InventoryService.GearGrade(item) : ItemGrade.Common;
+                SetSlot(slot, item != null ? GearIcon(item) : null, item != null ? GradeColors.For(grade) : (Color?)null,
+                    item != null ? grade.ToString() : "Empty", item != null ? UIIcons.GearType(item.Kind) : null);
             }
 
             var pet = PetService.GetActive();
             SetSlot(_slots[5], pet != null ? UIIcons.Pet(pet.Id) : null, pet != null ? PetColor(pet) : (Color?)null,
-                pet != null ? $"Lv {PetService.GetLevel(pet)}" : "Pet");
+                pet != null ? $"Lv {PetService.GetLevel(pet)}" : "Pet", UIIcons.PetType);
         }
 
-        private static void SetSlot(Slot slot, Sprite icon, Color? color, string label, bool locked = false)
+        private static void SetSlot(Slot slot, Sprite icon, Color? color, string label, Sprite badge, bool locked = false)
         {
             slot.Icon.sprite = icon;
             slot.Icon.enabled = icon != null;
             slot.Frame.color = color.HasValue ? Color.Lerp(Color.white, color.Value, 0.75f) : locked ? new Color(0.3f, 0.26f, 0.24f) : new Color(0.55f, 0.47f, 0.4f);
             slot.Label.text = label;
+            slot.Label.color = color.HasValue ? Color.Lerp(Color.white, color.Value, 0.55f) : Color.white;
+            slot.Badge.sprite = badge;
+            slot.Badge.enabled = badge != null && icon != null;
+        }
+
+        /// <summary>The small type icon in a tile's or slot's top-left corner (weapon, ring, amulet, armour, pet...).</summary>
+        private static Image TypeBadge(Transform parent, float size)
+        {
+            var badge = UIBuilder.Image(parent, "Type", Color.white);
+            badge.raycastTarget = false;
+            badge.preserveAspect = true;
+            UIStyle.Place(badge.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(-6f, 6f), new Vector2(size, size));
+            badge.enabled = false;
+            return badge;
         }
 
         private void ShowHeroSprite(HeroDefinition hero)
@@ -270,16 +311,45 @@ namespace NinjaVillage.UI.Equipment
                 var skin = SkinService.Catalog != null ? SkinService.Catalog.Get(SkinService.EquippedSkinId(hero.Id)) : null;
                 if (skin != null && SkinService.Owns(skin) && CharacterSpriteLibrary.Find(skin.Id) != null) key = skin.Id;
             }
-            if (key == _shownHeroKey) return;
-            _shownHeroKey = key;
+            var mount = MountService.Active;
+            if (mount != null && (mount.Frames.Length == 0 || mount.Frames[0] == null)) mount = null;
+            string shown = mount != null ? key + "|" + mount.Id : key;
+            if (shown == _shownHeroKey) return;
             var set = CharacterSpriteLibrary.Find(key);
             if (set == null) return;
+            _shownHeroKey = shown;
             var frames = set.Frames(CharacterAnim.Idle);
             var sprite = set.DefaultSprite;
+            _heroAnimator.Play(frames.Length > 0 ? frames : new[] { sprite }, set.Fps(CharacterAnim.Idle), frames.Length > 1 || mount != null ? 0f : 12f);
+            LayoutRider(sprite, mount);
+        }
+
+        /// <summary>
+        /// The hero alone, or seated on <paramref name="mount"/> exactly as <see cref="Gameplay.Mounts.MountVisual"/> seats
+        /// them in battle (mount's feet on the hero's feet, rider at the mount's rider offset), a bit smaller so it fits.
+        /// </summary>
+        private void LayoutRider(Sprite heroSprite, MountDefinition mount)
+        {
             // Pack heroes are 16 px cells, the Beast Ninja 32 px: size by cell so bodies match.
-            float cells = sprite != null ? sprite.rect.width / 128f : 1f;
-            _heroImage.rectTransform.sizeDelta = Vector2.one * Mathf.Min(320f * cells, 640f);
-            _heroAnimator.Play(frames.Length > 0 ? frames : new[] { sprite }, set.Fps(CharacterAnim.Idle), frames.Length > 1 ? 0f : 12f);
+            float cells = heroSprite != null ? heroSprite.rect.width / 128f : 1f;
+            _mountImage.gameObject.SetActive(mount != null);
+            if (mount == null)
+            {
+                _heroImage.rectTransform.sizeDelta = Vector2.one * Mathf.Min(320f * cells, 640f);
+                _heroAnimator.SetPosition(Vector2.zero);
+                return;
+            }
+            float px = cells > 1.5f ? 10f : 15f;              // UI px per pack pixel (20 on foot)
+            const float feet = -175f;
+            float heroSize = 16f * px * cells;
+            _heroImage.rectTransform.sizeDelta = Vector2.one * heroSize;
+            var first = mount.Frames[0];
+            var mountSize = first.rect.size / 8f * px;        // textures are 8x the pack art
+            _mountImage.rectTransform.sizeDelta = mountSize;
+            _mountAnimator.Play(mount.Frames, mount.Fps * 0.5f);
+            _mountAnimator.SetPosition(new Vector2(0f, feet + mountSize.y * 0.5f));
+            var seat = mount.RiderOffset / 0.075f * px;       // world units → pack pixels → UI px
+            _heroAnimator.SetPosition(new Vector2(seat.x, feet + heroSize * 0.5f + seat.y));
         }
 
         private void OnSlot(int index)
@@ -289,7 +359,7 @@ namespace NinjaVillage.UI.Equipment
             if (index == 0)
             {
                 var weapon = InventoryService.GetWeapon(inv.EquippedWeaponId);
-                if (weapon != null) ShowWeapon(weapon);
+                if (weapon != null) ShowWeapon(weapon, InventoryService.WeaponGrade(weapon.Id));
                 else SelectTab(Tab.Gear);
                 return;
             }
@@ -307,7 +377,7 @@ namespace NinjaVillage.UI.Equipment
                 return;
             }
             var item = g < inv.EquippedEquipmentIds.Count ? InventoryService.GetEquipment(inv.EquippedEquipmentIds[g]) : null;
-            if (item != null) ShowGear(item);
+            if (item != null) ShowGear(item, InventoryService.GearGrade(item));
             else SelectTab(Tab.Gear);
         }
 
@@ -326,20 +396,31 @@ namespace NinjaVillage.UI.Equipment
             return (RectTransform)grid.transform;
         }
 
-        /// <summary>A rarity-framed tile: icon, level/count in the corner, a green E when equipped/selected, dimmed when locked.</summary>
+        /// <summary>
+        /// A grade/rarity-framed tile: icon, a small type badge (top-left), level/count (bottom-right), a green E when
+        /// equipped/selected (top-right), a green MERGE tag when three of it can merge, dimmed when locked.
+        /// </summary>
         private static void Tile(RectTransform grid, Sprite icon, Color frame, string corner, string caption, bool equipped, bool locked,
-            UnityEngine.Events.UnityAction onClick)
+            UnityEngine.Events.UnityAction onClick, Sprite badge = null, bool mergeable = false, bool special = false)
         {
             var button = UIStyle.Frame(grid, "Tile", "panel_wood_panel", onClick, frame);
             button.image.color = locked ? new Color(0.35f, 0.3f, 0.28f) : Color.Lerp(Color.white, frame, 0.8f);
             var image = UIBuilder.Image(button.transform, "Icon", locked ? new Color(0.25f, 0.2f, 0.2f, 0.9f) : Color.white, icon);
             image.raycastTarget = false;
             image.preserveAspect = true;
-            UIStyle.Place(image.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 12f), new Vector2(118f, 118f));
+            UIStyle.Place(image.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 12f), new Vector2(112f, 112f));
             image.enabled = icon != null;
 
-            var cornerText = UIStyle.Label(button.transform, corner, 24f, Color.white, TextAlignmentOptions.TopLeft, 0.28f);
-            UIStyle.Place(cornerText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -8f), new Vector2(150f, 30f));
+            if (badge != null)
+            {
+                var type = TypeBadge(button.transform, 48f);
+                type.sprite = badge;
+                type.enabled = true;
+            }
+
+            var cornerText = UIStyle.Label(button.transform, corner, 24f, Color.white, badge != null ? TextAlignmentOptions.BottomRight : TextAlignmentOptions.TopLeft, 0.28f);
+            if (badge != null) UIStyle.Place(cornerText.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-10f, 34f), new Vector2(150f, 30f));
+            else UIStyle.Place(cornerText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(12f, -8f), new Vector2(150f, 30f));
             var captionText = UIStyle.Label(button.transform, caption, 20f, UIStyle.Cream, TextAlignmentOptions.Center, 0.25f);
             captionText.enableAutoSizing = true;
             captionText.fontSizeMin = 14f;
@@ -348,38 +429,96 @@ namespace NinjaVillage.UI.Equipment
 
             if (equipped)
             {
-                var badge = UIBuilder.Image(button.transform, "Equipped", UITheme.Positive, Core.Utilities.GeneratedSprites.Circle);
-                badge.raycastTarget = false;
-                UIStyle.Place(badge.rectTransform, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-18f, -18f), new Vector2(40f, 40f));
-                var e = UIStyle.Label(badge.transform, "E", 24f);
-                UIBuilder.Stretch(e.rectTransform);
+                var e = UIBuilder.Image(button.transform, "Equipped", UITheme.Positive, Core.Utilities.GeneratedSprites.Circle);
+                e.raycastTarget = false;
+                UIStyle.Place(e.rectTransform, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-18f, -18f), new Vector2(40f, 40f));
+                var letter = UIStyle.Label(e.transform, "E", 24f);
+                UIBuilder.Stretch(letter.rectTransform);
+            }
+
+            if (special)
+            {
+                // S-class: a gold "S" on red at the top centre.
+                var s = UIBuilder.Image(button.transform, "SClass", new Color(0.8f, 0.12f, 0.12f), Core.Utilities.GeneratedSprites.Circle);
+                s.raycastTarget = false;
+                UIStyle.Place(s.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -8f), new Vector2(40f, 40f));
+                var letter = UIStyle.Label(s.transform, "S", 28f, new Color(1f, 0.82f, 0.3f), TextAlignmentOptions.Center, 0.3f);
+                UIBuilder.Stretch(letter.rectTransform);
+            }
+
+            if (mergeable)
+            {
+                var tag = UIBuilder.Image(button.transform, "Merge", new Color(0.2f, 0.62f, 0.25f, 0.95f));
+                tag.raycastTarget = false;
+                UIStyle.Place(tag.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(8f, 36f), new Vector2(92f, 28f));
+                var text = UIStyle.Label(tag.transform, "MERGE", 18f);
+                UIBuilder.Stretch(text.rectTransform);
             }
         }
 
         private void PopulateGear()
         {
             var inv = InventoryService.Data;
+            var top = UIBuilder.Horizontal(_list, "GearActions", 14f);
+            UIBuilder.SetPreferredSize(top, -1f, 100f);
+            var crates = UIBuilder.Button(top.transform, "Open crates", () =>
+            {
+                Sfx.Play(AudioCueIds.UiClick);
+                UIScreenNavigator.Instance.Show(ScreenIds.Crates);
+            }, UITheme.ButtonSecondary, 100f, UITheme.BodySize);
+            crates.name = "OpenCrates";
+            int sets = MergeService.MergeableCount();
+            if (sets > 0)
+            {
+                var all = UIBuilder.Button(top.transform, $"Merge all  ·  {sets} ready", MergeAll, UITheme.Gold, 100f, UITheme.BodySize);
+                all.name = "MergeAll";
+            }
+
+            // One tile per weapon per grade you own copies of, best grade first; the E marks the grade in use.
             var weapons = Grid("Weapons");
             foreach (var entry in inv.Weapons)
             {
                 var weapon = entry != null ? InventoryService.GetWeapon(entry.Id) : null;
                 if (weapon == null) continue;
-                Tile(weapons, WeaponIcon(weapon), RarityColors.For(weapon.Rarity), $"Lv {ForgeService.GetLevel(weapon.Id)}",
-                    DefinitionNames.Of(weapon), inv.EquippedWeaponId == weapon.Id, false, () => ShowWeapon(weapon));
+                int best = inv.BestWeaponGrade(weapon.Id);
+                for (int g = (int)GradeRules.Max; g >= 0; g--)
+                {
+                    int copies = inv.GetWeaponCopies(weapon.Id, g);
+                    if (copies <= 0) continue;
+                    var grade = (ItemGrade)g;
+                    string corner = $"Lv {ForgeService.GetLevel(weapon.Id)}" + (copies > 1 ? $" ×{copies}" : "");
+                    Tile(weapons, WeaponIcon(weapon), GradeColors.For(grade), corner, DefinitionNames.Of(weapon),
+                        inv.EquippedWeaponId == weapon.Id && g == best, false, () => ShowWeapon(weapon, grade),
+                        UIIcons.WeaponType, MergeService.CheckWeapon(weapon.Id, grade) == MergeResult.Merged && copies >= GradeRules.MergeCount,
+                        weapon.IsSpecial);
+                }
             }
 
             var gear = Grid($"Gear  ·  {inv.EquippedEquipmentIds.Count}/{InventoryService.EquipmentSlots} equipped");
             int shown = 0;
-            foreach (var stack in inv.Equipment)
+            var stacks = new List<OwnedEquipment>(inv.Equipment);
+            stacks.RemoveAll(st => st == null || st.Count <= 0 || InventoryService.GetEquipment(st.Id) == null);
+            stacks.Sort((a, b) => a.Id != b.Id ? string.CompareOrdinal(a.Id, b.Id) : b.Grade.CompareTo(a.Grade));
+            foreach (var stack in stacks)
             {
-                var item = stack != null && stack.Count > 0 ? InventoryService.GetEquipment(stack.Id) : null;
-                if (item == null) continue;
+                var item = InventoryService.GetEquipment(stack.Id);
+                var grade = GradeRules.Clamp(stack.Grade);
                 shown++;
-                Tile(gear, GearIcon(item), RarityColors.For(item.Rarity), stack.Count > 1 ? $"×{stack.Count}" : "",
-                    DefinitionNames.Of(item), inv.IsEquipmentEquipped(item.Id), false, () => ShowGear(item));
+                Tile(gear, GearIcon(item), GradeColors.For(grade), stack.Count > 1 ? $"×{stack.Count}" : "",
+                    DefinitionNames.Of(item), inv.IsEquipmentEquipped(item.Id) && stack.Grade == inv.BestEquipmentGrade(item.Id), false,
+                    () => ShowGear(item, grade), UIIcons.GearType(item.Kind), stack.Count >= GradeRules.MergeCount && !GradeRules.IsMax(grade),
+                    item.IsSpecial);
             }
             if (shown == 0)
                 UIBuilder.Text(_list, "No gear yet — enemies, chests and the Market drop it.", UITheme.SmallSize, TextAlignmentOptions.Center, UITheme.TextMuted);
+        }
+
+        private void MergeAll()
+        {
+            int merges = MergeService.MergeAll();
+            Sfx.Play(merges > 0 ? AudioCueIds.RewardClaim : AudioCueIds.UiError);
+            UIScreenNavigator.Instance.Toast(merges > 0 ? $"{merges} merge{(merges == 1 ? "" : "s")} done — your gear got stronger!" : "Nothing to merge yet.");
+            Refresh();
         }
 
         private void PopulateHeroes()
@@ -402,8 +541,33 @@ namespace NinjaVillage.UI.Equipment
                 var p = pet;
                 bool unlocked = PetService.IsUnlocked(pet);
                 Tile(grid, UIIcons.Pet(pet.Id), PetColor(pet),
-                    unlocked ? $"Lv {PetService.GetLevel(pet)}" : "", pet.NameOrId, PetService.IsActive(pet), !unlocked, () => ShowPet(p));
+                    unlocked ? $"Lv {PetService.GetLevel(pet)}" : "", pet.NameOrId, PetService.IsActive(pet), !unlocked, () => ShowPet(p), UIIcons.PetType);
             }
+        }
+
+        private void PopulateMounts()
+        {
+            var active = MountService.Active;
+            var grid = Grid(active != null ? $"Mounts  ·  riding the {active.NameOrId}" : "Mounts  ·  on foot");
+            foreach (var mount in MountService.GetSorted())
+            {
+                var m = mount;
+                bool owned = MountService.IsOwned(mount);
+                Tile(grid, MountIcon(mount), MountColor(mount), owned ? $"Lv {MountService.Level(mount)}" : "", mount.NameOrId,
+                    MountService.IsActive(mount), !owned, () => ShowMount(m), UIIcons.MountType, special: mount.IsSpecial);
+            }
+            UIBuilder.Text(_list, "Your hero rides the mount into every battle and around the village; its bonuses apply to every run.",
+                UITheme.SmallSize, TextAlignmentOptions.Center, UITheme.TextMuted);
+        }
+
+        /// <summary>S-class mounts are framed Legendary gold, gem mounts Epic, coin mounts Rare.</summary>
+        private static Color MountColor(MountDefinition mount) => GradeColors.For(
+            mount.IsSpecial ? ItemGrade.Legendary : mount.UnlockPrice.Currency == CurrencyType.Gems ? ItemGrade.Epic : ItemGrade.Rare);
+
+        private static Sprite MountIcon(MountDefinition mount)
+        {
+            var icon = UIIcons.Mount(mount.Id);
+            return icon != null ? icon : mount.Icon != null ? mount.Icon : mount.Frames.Length > 0 ? mount.Frames[0] : null;
         }
 
         /// <summary>Premium pets are framed gold; others in their own colour (a leafy green when they have none).</summary>
@@ -500,50 +664,96 @@ namespace NinjaVillage.UI.Equipment
             Refresh(); // showcase, grid and (via _popupRefresh) this card
         }
 
-        private void ShowWeapon(WeaponDefinition weapon)
+        /// <summary>The Merge button for a card: "Merge 3 → Rare", or "Merge 2 + 4 Iron Bars" when bars make up the third copy.</summary>
+        private void MergeButton(RectTransform row, ItemGrade grade, int copies, MergeResult check, System.Func<MergeResult> merge, string name)
         {
-            _popupRefresh = () => ShowWeapon(weapon);
+            if (GradeRules.IsMax(grade)) return;
+            var next = GradeRules.Next(grade);
+            var (bar, amount) = GradeRules.BarsFor(next);
+            var barGoods = bar != null ? NinjaVillage.Systems.Farm.GoodsService.Get(bar) : null;
+            string label = copies >= GradeRules.MergeCount || check != MergeResult.Merged || barGoods == null
+                ? $"Merge 3 → {next}"
+                : $"Merge 2 + {amount} {barGoods.NameOrId}s";
+            var button = Action(row, label, () =>
+            {
+                var result = merge();
+                if (result == MergeResult.Merged) UIScreenNavigator.Instance.Toast($"{name} is now {next}!");
+                AfterAction(result == MergeResult.Merged, MergeService.Describe(result, grade));
+            }, UITheme.Gold, 380f);
+            if (check != MergeResult.Merged) UIBuilder.SetEnabled(button, false);
+        }
+
+        private static string MergeHint(ItemGrade grade, int copies)
+        {
+            if (GradeRules.IsMax(grade)) return "<color=#FFD24D>Legendary — the best grade there is.</color>";
+            var next = GradeRules.Next(grade);
+            var (bar, amount) = GradeRules.BarsFor(next);
+            var barGoods = bar != null ? NinjaVillage.Systems.Farm.GoodsService.Get(bar) : null;
+            return $"<color=#AAAAB5>Merge {GradeRules.MergeCount} {grade} copies into 1 {GradeColors.Colorize(next.ToString(), next)}" +
+                   (barGoods != null ? $" (or 2 + {amount} {barGoods.NameOrId}s from the mine)" : "") + $". You have {copies}.</color>";
+        }
+
+        private void ShowWeapon(WeaponDefinition weapon, ItemGrade grade)
+        {
+            _popupRefresh = () => ShowWeapon(weapon, grade);
+            var inv = InventoryService.Data;
             int level = ForgeService.GetLevel(weapon.Id);
-            string tier = ForgeService.TierName(ForgeService.GetTier(weapon.Id));
-            bool equipped = InventoryService.Data.EquippedWeaponId == weapon.Id;
+            int copies = inv.GetWeaponCopies(weapon.Id, (int)grade);
+            bool equipped = inv.EquippedWeaponId == weapon.Id;
+            bool inUse = equipped && InventoryService.WeaponGrade(weapon.Id) == grade;
+            float bonus = GradeRules.WeaponAttackBonus(grade);
             string body = $"Damage <color=#FFD24D>{weapon.GetDamage(level):0.#}</color>   ·   {weapon.GetAttacksPerSecond(level):0.##} attacks/s   ·   Range {weapon.Range:0.#}";
-            if (!string.IsNullOrEmpty(weapon.Description)) body += $"\n\n{weapon.Description}";
-            body += "\n\n<color=#AAAAB5>Reforge to a higher tier at the Forge in your village.</color>";
-            ShowCard(WeaponIcon(weapon), RarityColors.For(weapon.Rarity), DefinitionNames.Of(weapon),
-                $"{(string.IsNullOrEmpty(tier) ? "" : tier + " · ")}{weapon.Rarity} weapon · Lv {level}", body, row =>
+            body += bonus > 0f ? $"\n<color=#9CFF8A>{grade}: +{bonus * 100f:0}% attack</color>" : $"\n<color=#AAAAB5>{grade}: no grade bonus yet</color>";
+            if (!GradeRules.IsMax(grade))
+                body += $"\nNext: {GradeColors.Colorize(GradeRules.Next(grade).ToString(), GradeRules.Next(grade))} +{GradeRules.WeaponAttackBonus(GradeRules.Next(grade)) * 100f:0}% attack";
+            body += "\n\n" + MergeHint(grade, copies) + (weapon.IsSpecial
+                ? "\n<color=#AAAAB5>More copies: Surprise Boxes.</color>"
+                : "\n<color=#AAAAB5>More copies: Forge, battle chests and supply crates.</color>");
+            ShowCard(WeaponIcon(weapon), GradeColors.For(grade), $"{(weapon.IsSpecial ? "S · " : "")}{grade} {DefinitionNames.Of(weapon)}",
+                $"{(weapon.IsSpecial ? "S-class weapon" : "Weapon")}  ·  Lv {level}  ·  ×{copies}{(inUse ? "  ·  In use" : "")}", body, row =>
                 {
-                    var equip = Action(row, equipped ? "Equipped" : "Equip", () => AfterAction(InventoryService.EquipWeapon(weapon.Id), null), UITheme.ButtonSecondary, 240f);
+                    var equip = Action(row, equipped ? "Equipped" : "Equip", () => AfterAction(InventoryService.EquipWeapon(weapon.Id), null), UITheme.ButtonSecondary, 200f);
                     if (equipped) UIBuilder.SetEnabled(equip, false);
                     var blocker = ForgeService.CheckUpgrade(weapon);
-                    if (blocker == ForgeBlocker.MaxLevel) return;
-                    var up = Action(row, $"Lv up {ForgeService.UpgradePrice(weapon)}", () =>
+                    if (blocker != ForgeBlocker.MaxLevel)
                     {
-                        bool ok = ForgeService.TryUpgrade(weapon, out var b);
-                        AfterAction(ok, ok ? null : ForgeService.DescribeBlocker(b, weapon));
-                    }, null, 360f);
-                    if (blocker != ForgeBlocker.None) UIBuilder.SetEnabled(up, false);
+                        var up = Action(row, $"Lv up {ForgeService.UpgradePrice(weapon)}", () =>
+                        {
+                            bool ok = ForgeService.TryUpgrade(weapon, out var b);
+                            AfterAction(ok, ok ? null : ForgeService.DescribeBlocker(b, weapon));
+                        }, null, 260f);
+                        if (blocker != ForgeBlocker.None) UIBuilder.SetEnabled(up, false);
+                    }
+                    MergeButton(row, grade, copies, MergeService.CheckWeapon(weapon.Id, grade), () => MergeService.MergeWeapon(weapon.Id, grade), DefinitionNames.Of(weapon));
                 });
         }
 
-        private void ShowGear(EquipmentDefinition item)
+        private void ShowGear(EquipmentDefinition item, ItemGrade grade)
         {
-            _popupRefresh = () => ShowGear(item);
+            _popupRefresh = () => ShowGear(item, grade);
             var inv = InventoryService.Data;
             bool equipped = inv.IsEquipmentEquipped(item.Id);
-            int count = 0;
-            foreach (var stack in inv.Equipment)
-                if (stack != null && stack.Id == item.Id) count = stack.Count;
-            string bonuses = item.DescribeBonuses("\n");
-            string body = (string.IsNullOrEmpty(bonuses) ? "" : $"<color=#9CFF8A>{bonuses}</color>") +
-                          (string.IsNullOrEmpty(item.Description) ? "" : $"\n\n{item.Description}") +
-                          "\n\n<color=#AAAAB5>Spare copies are material for reforging weapons at the Forge.</color>";
-            ShowCard(GearIcon(item), RarityColors.For(item.Rarity), DefinitionNames.Of(item), $"{item.Rarity} gear · owned ×{count}", body, row =>
+            int copies = inv.GetEquipmentCount(item.Id, (int)grade);
+            var native = InventoryService.NativeGrade(item);
+            string bonuses = item.DescribeBonuses("\n", GradeRules.StatScale(native, grade));
+            string body = (string.IsNullOrEmpty(bonuses) ? "" : $"<color=#9CFF8A>{bonuses}</color>");
+            if (!GradeRules.IsMax(grade))
+            {
+                var next = GradeRules.Next(grade);
+                body += $"\nNext: {GradeColors.Colorize(next.ToString(), next)} {item.DescribeBonuses(" · ", GradeRules.StatScale(native, next))}";
+            }
+            body += "\n\n" + MergeHint(grade, copies);
+            if (equipped && grade != InventoryService.GearGrade(item))
+                body += $"\n<color=#AAAAB5>Equipped pieces use your best grade ({InventoryService.GearGrade(item)}).</color>";
+            ShowCard(GearIcon(item), GradeColors.For(grade), $"{(item.IsSpecial ? "S · " : "")}{grade} {DefinitionNames.Of(item)}",
+                $"{(item.IsSpecial ? "S-class " : "")}{item.Kind}  ·  ×{copies}", body, row =>
             {
                 Action(row, equipped ? "Unequip" : "Equip", () =>
                 {
                     var result = equipped ? InventoryService.UnequipEquipment(item.Id) : InventoryService.EquipEquipment(item.Id);
                     AfterAction(result == EquipResult.Ok, InventoryService.DescribeEquipResult(result));
-                }, equipped ? UITheme.ButtonSecondary : (Color?)null, 300f);
+                }, equipped ? UITheme.ButtonSecondary : (Color?)null, 260f);
+                MergeButton(row, grade, copies, MergeService.CheckGear(item.Id, grade), () => MergeService.MergeGear(item.Id, grade), DefinitionNames.Of(item));
             });
         }
 
@@ -636,6 +846,62 @@ namespace NinjaVillage.UI.Equipment
                     AfterAction(r == PetActionResult.Success, PetService.Describe(r, pet));
                 }, null, 420f);
                 if (upgradeCheck != PetActionResult.Success) UIBuilder.SetEnabled(upgrade, false);
+            });
+        }
+
+        private void ShowMount(MountDefinition mount)
+        {
+            _popupRefresh = () => ShowMount(mount);
+            bool owned = MountService.IsOwned(mount);
+            bool riding = MountService.IsActive(mount);
+            int level = MountService.Level(mount);
+            string body = mount.Description + $"\n\n<color=#9CFF8A>{MountService.DescribeBonuses(mount, Mathf.Max(1, level), "\n")}</color>";
+            if (owned && level < MountRules.MaxLevel)
+                body += $"\n<color=#AAAAB5>Lv {level + 1}: {MountService.DescribeBonuses(mount, level + 1)}</color>";
+            if (mount.IsSpecial)
+                body += owned ? "\n\n<color=#AAAAB5>More from Surprise Boxes level it up.</color>" : "\n\n<color=#FFD24D>S-class: found only in Surprise Boxes.</color>";
+            string sub = owned ? $"Lv {level}/{MountRules.MaxLevel}{(riding ? "  ·  Riding" : "")}" : "Locked";
+            ShowCard(MountIcon(mount), MountColor(mount), $"{(mount.IsSpecial ? "S · " : "")}{mount.NameOrId}", sub, body, row =>
+            {
+                if (!owned)
+                {
+                    if (mount.IsSpecial)
+                    {
+                        Action(row, "Open crates", () =>
+                        {
+                            Sfx.Play(AudioCueIds.UiClick);
+                            HidePopup();
+                            UIScreenNavigator.Instance.Show(ScreenIds.Crates);
+                        }, UITheme.Gold, 360f);
+                        return;
+                    }
+                    var check = MountService.CheckUnlock(mount);
+                    var unlock = Action(row, $"Unlock {mount.UnlockPrice}", () =>
+                    {
+                        var r = MountService.TryUnlock(mount);
+                        if (r == MountResult.Success) UIScreenNavigator.Instance.Toast($"You ride the {mount.NameOrId}!");
+                        AfterAction(r == MountResult.Success, MountService.Describe(r, mount));
+                    }, null, 420f);
+                    if (check != MountResult.Success)
+                    {
+                        UIBuilder.SetEnabled(unlock, false);
+                        _popupBody.text += $"\n\n<color=#F25A5A>{MountService.Describe(check, mount)}</color>";
+                    }
+                    return;
+                }
+                Action(row, riding ? "Dismount" : "Ride", () =>
+                {
+                    if (riding) MountService.Dismount();
+                    else MountService.Ride(mount);
+                    AfterAction(true, null);
+                }, UITheme.ButtonSecondary, 260f);
+                var upgradeCheck = MountService.CheckUpgrade(mount);
+                var upgrade = Action(row, upgradeCheck == MountResult.MaxLevel ? "Max level" : $"Upgrade {MountService.UpgradePrice(mount)}", () =>
+                {
+                    var r = MountService.TryUpgrade(mount);
+                    AfterAction(r == MountResult.Success, MountService.Describe(r, mount));
+                }, null, 420f);
+                if (upgradeCheck != MountResult.Success) UIBuilder.SetEnabled(upgrade, false);
             });
         }
     }

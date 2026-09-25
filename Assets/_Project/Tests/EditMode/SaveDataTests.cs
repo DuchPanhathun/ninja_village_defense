@@ -74,10 +74,10 @@ namespace NinjaVillage.Tests
             inv.AddEquipment("cloak");
             inv.EquippedEquipmentIds.Add("cloak");
 
-            Assert.IsTrue(inv.RemoveEquipment("cloak"));
+            Assert.IsTrue(inv.RemoveEquipment("cloak", 1, 0));
             Assert.AreEqual(0, inv.GetEquipmentCount("cloak"));
             Assert.IsFalse(inv.EquippedEquipmentIds.Contains("cloak"));
-            Assert.IsFalse(inv.RemoveEquipment("cloak"));
+            Assert.IsFalse(inv.RemoveEquipment("cloak", 1, 0));
         }
 
         [Test]

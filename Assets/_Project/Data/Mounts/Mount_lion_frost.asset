@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f865ecc0a6984c238585f2850aff239, type: 3}
+  m_Name: Mount_lion_frost
+  m_EditorClassIdentifier: 
+  id: lion_frost
+  displayName: Frost Lion
+  description: A mountain king with a hide like ice.
+  icon: {fileID: 21300000, guid: ea95e0ed20c9b038a83ced4cf8f34c40, type: 3}
+  frames:
+  - {fileID: 21300000, guid: 24799d080cc449999805a02427012f08, type: 3}
+  - {fileID: 21300000, guid: 9a4eddcceb34417fd8bca87eec62be7f, type: 3}
+  fps: 8
+  riderOffset: {x: -0.6, y: 0.75}
+  bonuses:
+  - Stat: 9
+    Value: 0.1
+  - Stat: 4
+    Value: 0.12
+  unlockCurrency: 1
+  unlockCost: 150
+  sClass: 0
+  sortOrder: 5

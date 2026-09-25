@@ -76,7 +76,7 @@ namespace NinjaVillage.Systems.Village
     /// tests pin them down. Fishing: casts refill over real time; a fish bites (rarer ones with a bigger castle),
     /// and a timing bar decides the catch — rarer fish have a narrower zone and a faster marker. Mine: bars pile up
     /// over time (the Mine building's level sets the rate), gold from Mine Lv 3 and mithril from Lv 5 by a fixed
-    /// share, with gems now and then; bars stand in for spare gear when the Forge reforges.
+    /// share, with gems now and then; bars can stand in for a missing copy when merging (GradeRules.BarsFor).
     /// </summary>
     public static class PondMineRules
     {
@@ -182,18 +182,5 @@ namespace NinjaVillage.Systems.Village
             gemCarry = Math.Max(0.0, gemCarry - gems);
             return new MineHaul(bars - gold - mithril, gold, mithril, gems);
         }
-
-        // ------------------------------------------------------------------ bars at the Forge
-
-        public const int BarsPerMaterial = 5;
-
-        /// <summary>The bar that stands in for a missing piece of gear when reforging into <paramref name="tier"/> (Steel, Golden, Legendary).</summary>
-        public static string ReforgeBar(int tier) => tier switch
-        {
-            1 => "iron_bar",
-            2 => "gold_bar",
-            >= 3 => "mithril_bar",
-            _ => null,
-        };
     }
 }

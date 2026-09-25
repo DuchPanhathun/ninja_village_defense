@@ -53,6 +53,8 @@ namespace NinjaVillage.Systems.Save
         public MineSaveData Mine = new();
         public SocialSaveData Social = new();
         public PetCareSaveData PetCare = new();
+        public CrateSaveData Crates = new();
+        public MountSaveData Mounts = new();
 
         /// <summary>
         /// Fills sections that are null (JsonUtility leaves a class field null only when
@@ -97,6 +99,9 @@ namespace NinjaVillage.Systems.Save
             PetCare ??= new PetCareSaveData();
             PetCare.PettedDay ??= new System.Collections.Generic.List<IdLevelEntry>();
             PetCare.FedDay ??= new System.Collections.Generic.List<IdLevelEntry>();
+            Crates ??= new CrateSaveData();
+            Mounts ??= new MountSaveData();
+            Mounts.Owned ??= new System.Collections.Generic.List<IdLevelEntry>();
             Chapters ??= new ChapterSaveData();
             Chapters.BestWaves ??= new System.Collections.Generic.List<IdLevelEntry>();
 

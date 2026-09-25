@@ -123,26 +123,22 @@ namespace NinjaVillage.Tests
         }
 
         [Test]
-        public void ForgeMaterials_NeverConsumeTheEquippedPiece()
+        public void GearStacks_AreKeptPerGrade_AndTheLastCopyUnequips()
         {
             var inv = new InventorySaveData();
-            inv.AddEquipment("common_a", 2);
-            inv.AddEquipment("rare_b", 1);
-            inv.EquippedEquipmentIds.Add("common_a");
+            inv.AddEquipment("ring", 2, 0);
+            inv.AddEquipment("ring", 1, 2);
+            inv.EquippedEquipmentIds.Add("ring");
+            Assert.AreEqual(3, inv.GetEquipmentCount("ring"));
+            Assert.AreEqual(2, inv.GetEquipmentCount("ring", 0));
+            Assert.AreEqual(2, inv.BestEquipmentGrade("ring"));
 
-            int RarityOf(string id) => id.StartsWith("rare") ? 1 : 0;
-            var picked = new List<string>();
-
-            Assert.IsTrue(InventoryRules.PickMaterials(inv, RarityOf, 0, 2, picked));
-            CollectionAssert.AreEqual(new[] { "common_a", "rare_b" }, picked, "cheapest rarity first, only spares");
-
-            Assert.IsFalse(InventoryRules.PickMaterials(inv, RarityOf, 1, 2, picked), "only one spare rare piece");
-
-            InventoryRules.PickMaterials(inv, RarityOf, 0, 2, picked);
-            InventoryRules.ConsumeMaterials(inv, picked);
-            Assert.AreEqual(1, inv.GetEquipmentCount("common_a"));
-            Assert.IsTrue(inv.IsEquipmentEquipped("common_a"));
-            Assert.AreEqual(0, inv.GetEquipmentCount("rare_b"));
+            Assert.IsTrue(inv.RemoveEquipment("ring", 2, 0));
+            Assert.IsTrue(inv.IsEquipmentEquipped("ring"), "an Elite copy is still owned");
+            Assert.IsFalse(inv.RemoveEquipment("ring", 1, 0), "no Common copies left");
+            Assert.IsTrue(inv.RemoveEquipment("ring", 1, 2));
+            Assert.IsFalse(inv.IsEquipmentEquipped("ring"));
+            Assert.AreEqual(-1, inv.BestEquipmentGrade("ring"));
         }
     }
 }

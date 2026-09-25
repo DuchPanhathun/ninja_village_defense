@@ -558,3 +558,16 @@ into battles. Order = build order; each phase ends with a phone playtest and a c
 
 - [ ]  Shuriken target practice   <!-- 3 free tries a day for coins/tickets -->
 - [ ]  Dojo sparring   <!-- 60-second arena challenge with a daily reward; try heroes and skills -->
+
+# 🎮 EPIC 25 - Equipment grades, merging & supply crates
+
+Goal: Survivor.io-style gear growth — every weapon and gear piece comes in grades, duplicates merge up, and
+crates (with rare S-class items) are the place to get more.
+
+- [x]  Grades   <!-- Common → Rare → Elite → Epic → Legendary (grey/blue/purple/gold/red); items keep a native grade (drop grade) where their listed stats apply, other grades scale them; weapons: grade = +0/15/25/40/60% attack; old saves keep their strength (gear at native grade, reforge tiers → grades) -->
+- [x]  Merge 3 → 1   <!-- MergeService: 3 copies of an item at a grade → 1 of the next; bars from the mine stand in for one missing copy; "Merge all"; equipped items use the best grade owned; replaces Forge reforging (Forge now crafts copies) -->
+- [x]  Type badges   <!-- small icon on every tile/slot: weapon, ring, amulet, armour, helmet, talisman, pet; MERGE tag when 3 are ready -->
+- [x]  Supply crates   <!-- CratesScreen (home "Crates", Equipment "Open crates"): Wooden (400 coins, 1 free a day), Silver (40 gems), Surprise Box (120 gems) ×1/×10 with odds shown; reveal: chest shakes, flash, rays, cards pop out -->
+- [x]  S-class equipment   <!-- Storm Ninjaku, Phoenix Bow, Phoenix Ring, Oni Warband, Dragon Mail, Void Amulet (recoloured pack art + gold glow); Surprise Box only (5%, certain by the 30th; Silver 1%); drop at Elite; never from battle, market or Forge; gold "S" tag; GradeTests + CrateTests + MainMenu_CratesOpenWithARevealAndSurpriseBoxesHoldSClass -->
+- [x]  Mounts   <!-- 8 rideable mounts from the pack's side-view animals (Loyal Donkey, Brown Horse, Sand Lioness, Shadow Steed, Blaze Lion, Frost Lion) + S-class Golden Qilin and Nightmare Steed (recoloured + gold glow, Surprise Box only; a duplicate levels it up); Equipment "Mounts" tab (buy / ride / dismount / level up to 10, bonuses +10% per level) with the hero seated on the mount in the showcase; the hero rides it in battle (MountVisual: gallops while moving, jumps with you, legs hidden behind the mount; move speed + one more stat via MountRunModifier) and around the village (visitors see it too); MountTests + MainMenu_Equipment... + Battle_AndVillage_YouRideYourMount -->
+

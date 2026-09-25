@@ -33,6 +33,14 @@ namespace NinjaVillage.UI.Common
             if (_frames.Length > 0) _image.sprite = _frames[0];
         }
 
+        /// <summary>Moves the image (the bob keeps working around the new spot).</summary>
+        public void SetPosition(Vector2 position)
+        {
+            if (_rt == null) _rt = (RectTransform)transform;
+            _basePosition = position;
+            _rt.anchoredPosition = position;
+        }
+
         private void Update()
         {
             if (_image == null) return;

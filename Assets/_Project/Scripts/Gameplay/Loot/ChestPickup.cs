@@ -8,7 +8,8 @@ using UnityEngine;
 namespace NinjaVillage.Gameplay.Loot
 {
     /// <summary>
-    /// A chest (EPIC 10 "Chest rewards") that grants a bundle of coins + optional equipment when the
+    /// A chest (EPIC 10 "Chest rewards") that grants a bundle of coins + optional equipment (and sometimes a copy of
+    /// one of your weapons, for merging) when the
     /// player touches it. Dropped by bosses via <see cref="LootSpawner"/>; works without a prefab
     /// (<see cref="Create"/>) and falls back to the EquipmentCatalog when no equipment list is set.
     /// </summary>
@@ -98,10 +99,28 @@ namespace NinjaVillage.Gameplay.Loot
                 }
             }
 
+            // Sometimes a copy of one of your weapons (usually the one in your hands), for merging.
+            if (Random.value <= WeaponCopyChance) GrantWeaponCopy();
+
             Sfx.PlayAt(AudioCueIds.ChestOpen, transform.position);
             NinjaVillage.Gameplay.Vfx.Vfx.Burst(transform.position, NinjaVillage.Gameplay.Vfx.Vfx.GoldColor, 2.5f, 0.45f);
             Progress.Report(ProgressStatIds.ChestOpened);
             Destroy(gameObject);
+        }
+
+        /// <summary>Chance a chest also holds a copy of one of your weapons (merge 3 → a better grade).</summary>
+        public const float WeaponCopyChance = 0.2f;
+
+        private void GrantWeaponCopy()
+        {
+            var inv = NinjaVillage.Systems.Inventory.InventoryService.Data;
+            string weaponId = inv.EquippedWeaponId;
+            if (Random.value > 0.6f && inv.Weapons.Count > 0) weaponId = inv.Weapons[Random.Range(0, inv.Weapons.Count)].Id;
+            var weapon = NinjaVillage.Systems.Inventory.InventoryService.GetWeapon(weaponId);
+            if (weapon == null || weapon.IsSpecial) return;
+            NinjaVillage.Systems.Inventory.InventoryService.AddWeaponCopy(weapon.Id);
+            NinjaVillage.Gameplay.Village.FloatingText.Spawn(transform.position + Vector3.up * 1.2f,
+                $"+1 {(string.IsNullOrEmpty(weapon.DisplayName) ? weapon.Id : weapon.DisplayName)} copy", new Color(1f, 0.85f, 0.35f));
         }
 
         private EquipmentDefinition PickEquipment()
@@ -111,7 +130,10 @@ namespace NinjaVillage.Gameplay.Loot
 
             var catalog = CatalogCache<EquipmentCatalog>.Get();
             if (catalog == null || catalog.All.Count == 0) return null;
-            return catalog.All[Random.Range(0, catalog.All.Count)];
+            var regular = new System.Collections.Generic.List<EquipmentDefinition>();
+            foreach (var def in catalog.All)
+                if (def != null && !def.IsSpecial) regular.Add(def); // S-class only comes from Surprise Boxes
+            return regular.Count > 0 ? regular[Random.Range(0, regular.Count)] : null;
         }
     }
 }

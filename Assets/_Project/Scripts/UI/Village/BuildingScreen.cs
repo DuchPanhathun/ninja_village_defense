@@ -161,7 +161,7 @@ namespace NinjaVillage.UI.Village
             string metals = level >= 5 ? "iron, gold and mithril" : level >= 3 ? "iron and gold (mithril from Lv 5)" : "iron (gold from Lv 3, mithril from Lv 5)";
             UIBuilder.ActionCard(_extra, $"{MineService.Available} / {MineService.Capacity} bars ready",
                 $"Digs up {MineService.BarsPerHour:0} bars an hour: {metals}, and a gem now and then. Tap the mine on the map to collect.\n" +
-                $"The Forge takes <color=#FFD24D>{PondMineRules.BarsPerMaterial} bars</color> in place of each missing piece of spare gear when reforging.",
+                "Bars can stand in for one missing copy when merging weapons and gear into a better grade.",
                 out _, out _, UITheme.Gold, UIArt.Get("item_iron_bar"));
             foreach (var id in new[] { "iron_bar", "gold_bar", "mithril_bar" })
             {

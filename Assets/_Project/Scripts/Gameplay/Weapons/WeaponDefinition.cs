@@ -20,6 +20,8 @@ namespace NinjaVillage.Gameplay.Weapons
         [Header("Rarity")]
         [SerializeField] private Rarity rarity = Rarity.Common;
         [SerializeField] private Element element = Element.None;
+        [Tooltip("S-class: a special weapon only found in Surprise Boxes (can't be crafted; drops at Elite).")]
+        [SerializeField] private bool sClass;
 
         [Header("Base Stats (level 1)")]
         [SerializeField] private float baseDamage = 10f;
@@ -39,6 +41,7 @@ namespace NinjaVillage.Gameplay.Weapons
 
         public Rarity Rarity => rarity;
         public Element Element => element;
+        public bool IsSpecial => sClass;
         public float Range => range;
         public float BaseCritChance => baseCritChance;
         public float BaseCritMultiplier => baseCritMultiplier;

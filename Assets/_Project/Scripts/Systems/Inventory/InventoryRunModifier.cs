@@ -5,7 +5,8 @@ namespace NinjaVillage.Systems.Inventory
 {
     /// <summary>
     /// Where the persistent inventory meets the battle: equips the weapon chosen in the Inventory at
-    /// its Forge level, applies its tier's attack bonus, and applies every equipped equipment piece.
+    /// its Forge level, applies its grade's attack bonus, and applies every equipped equipment piece at the best
+    /// grade owned.
     /// Runs after the hero (<see cref="RunModifierOrder.Inventory"/>), so the player's own weapon choice
     /// wins over a hero's signature weapon.
     /// </summary>
@@ -23,16 +24,17 @@ namespace NinjaVillage.Systems.Inventory
                 context.Weapon = weapon;
                 context.WeaponLevel = Mathf.Max(1, inv.GetWeaponLevel(weapon.Id));
 
-                float tierBonus = ForgeService.TierAttackBonus(weapon.Id);
-                if (tierBonus != 0f && context.Stats != null)
-                    context.Stats.AddAttackDamageMultiplier(tierBonus);
+                float gradeBonus = GradeRules.WeaponAttackBonus(InventoryService.WeaponGrade(weapon.Id));
+                if (gradeBonus != 0f && context.Stats != null)
+                    context.Stats.AddAttackDamageMultiplier(gradeBonus);
             }
 
             if (context.Stats == null) return;
             foreach (var equipmentId in inv.EquippedEquipmentIds)
             {
                 var equipment = InventoryService.GetEquipment(equipmentId);
-                if (equipment != null) equipment.Apply(context.Stats);
+                if (equipment != null)
+                    equipment.Apply(context.Stats, GradeRules.StatScale(InventoryService.NativeGrade(equipment), InventoryService.GearGrade(equipment)));
             }
         }
 

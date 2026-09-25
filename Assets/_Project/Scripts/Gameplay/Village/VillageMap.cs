@@ -98,6 +98,7 @@ namespace NinjaVillage.Gameplay.Village
             EventBus<RequestsChangedEvent>.Subscribe(OnRequestsChanged);
             EventBus<HousesChangedEvent>.Subscribe(OnHousesChanged);
             EventBus<Systems.Pets.PetCaredEvent>.Subscribe(OnPetCared);
+            EventBus<Systems.Mounts.MountsChangedEvent>.Subscribe(OnMountsChanged);
         }
 
         private void OnDisable()
@@ -107,6 +108,7 @@ namespace NinjaVillage.Gameplay.Village
             EventBus<RequestsChangedEvent>.Unsubscribe(OnRequestsChanged);
             EventBus<HousesChangedEvent>.Unsubscribe(OnHousesChanged);
             EventBus<Systems.Pets.PetCaredEvent>.Unsubscribe(OnPetCared);
+            EventBus<Systems.Mounts.MountsChangedEvent>.Unsubscribe(OnMountsChanged);
         }
 
         private void Start()
@@ -159,6 +161,7 @@ namespace NinjaVillage.Gameplay.Village
         private void OnDecorationsChanged(DecorationsChangedEvent evt) => RefreshFromSave();
         private void OnRequestsChanged(RequestsChangedEvent evt) => SyncRequestGivers();
         private void OnHousesChanged(HousesChangedEvent evt) => RefreshFromSave(); // new families move in
+        private void OnMountsChanged(Systems.Mounts.MountsChangedEvent evt) => RefreshFromSave(); // your hero hops on (or off)
 
         private void Redraw()
         {
@@ -371,7 +374,7 @@ namespace NinjaVillage.Gameplay.Village
 
         private static string ResidentsKey(VillageSnapshot s)
         {
-            var sb = new StringBuilder(s.SelectedHeroId).Append('|').Append(s.ActivePetId).Append('|');
+            var sb = new StringBuilder(s.SelectedHeroId).Append('|').Append(s.ActivePetId).Append('|').Append(s.ActiveMountId).Append('|');
             foreach (var h in s.Heroes) sb.Append(h.Id).Append(':').Append(h.Level).Append(':').Append(h.SkinId).Append(',');
             sb.Append('|');
             foreach (var p in s.Pets) sb.Append(p.Id).Append(':').Append(p.Level).Append(',');
@@ -399,6 +402,7 @@ namespace NinjaVillage.Gameplay.Village
                     .OnTap(() => TappedDisplay(VillageDisplayKind.Heroes));
                 if (hero.Id == Snapshot.SelectedHeroId)
                 {
+                    resident.Riding(Systems.Mounts.MountService.Get(Snapshot.ActiveMountId)); // on your mount, if you ride one
                     resident.WithTag(name, new Color(1f, 0.85f, 0.3f)); // gold name = your selected hero
                     leader = resident.transform;
                 }

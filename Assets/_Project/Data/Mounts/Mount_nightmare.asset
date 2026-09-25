@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f865ecc0a6984c238585f2850aff239, type: 3}
+  m_Name: Mount_nightmare
+  m_EditorClassIdentifier: 
+  id: nightmare
+  displayName: Nightmare Steed
+  description: S-class. Rides out of the void, faster than fear.
+  icon: {fileID: 21300000, guid: fbdc54a4d10685233876122f97aee330, type: 3}
+  frames:
+  - {fileID: 21300000, guid: 34112c8d3e68129c4ac6ab9b92a89ba0, type: 3}
+  - {fileID: 21300000, guid: 43ac932ce0a5ae70b9bcd5d6b1ce37ba, type: 3}
+  fps: 8
+  riderOffset: {x: -0.15, y: 0.82500005}
+  bonuses:
+  - Stat: 9
+    Value: 0.18
+  - Stat: 2
+    Value: 0.06
+  - Stat: 7
+    Value: 0.04
+  unlockCurrency: 1
+  unlockCost: 0
+  sClass: 1
+  sortOrder: 7

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using NinjaVillage.Systems.Save;
 
@@ -16,8 +15,8 @@ namespace NinjaVillage.Systems.Inventory
 
     /// <summary>
     /// Persistent-inventory rules on the plain save section (EPIC 16 "Inventory save"): fresh-save
-    /// defaults (own + equip the starter Kunai), equipment slot limits, and choosing spare equipment
-    /// as Forge crafting materials. No Unity objects, so it's covered by EditMode tests.
+    /// defaults (own + equip the starter Kunai) and equipment slot limits. Grades and merging are in
+    /// <see cref="GradeRules"/> / <see cref="MergeService"/>. No Unity objects, so it's covered by EditMode tests.
     /// </summary>
     public static class InventoryRules
     {
@@ -32,6 +31,7 @@ namespace NinjaVillage.Systems.Inventory
 
             inv.Weapons ??= new List<IdLevelEntry>();
             inv.WeaponTiers ??= new List<IdLevelEntry>();
+            inv.WeaponCopies ??= new List<OwnedEquipment>();
             inv.Equipment ??= new List<OwnedEquipment>();
             inv.EquippedEquipmentIds ??= new List<string>();
 
@@ -92,59 +92,6 @@ namespace NinjaVillage.Systems.Inventory
             if (inv == null || !inv.OwnsWeapon(weaponId)) return false;
             inv.EquippedWeaponId = weaponId;
             return true;
-        }
-
-        /// <summary>Pieces of this equipment not currently worn (the equipped one is never consumed).</summary>
-        public static int SpareCount(InventorySaveData inv, string equipmentId)
-        {
-            if (inv == null) return 0;
-            int owned = inv.GetEquipmentCount(equipmentId);
-            return Math.Max(0, owned - (inv.IsEquipmentEquipped(equipmentId) ? 1 : 0));
-        }
-
-        /// <summary>
-        /// Picks <paramref name="count"/> spare equipment pieces of at least <paramref name="minRarity"/>,
-        /// cheapest rarity first, as crafting materials. <paramref name="rarityOf"/> maps an equipment id
-        /// to its rarity index (-1 = unknown, never picked). <paramref name="picked"/> gets one id per piece.
-        /// Returns true when enough pieces were found.
-        /// </summary>
-        public static bool PickMaterials(InventorySaveData inv, Func<string, int> rarityOf, int minRarity, int count, List<string> picked)
-        {
-            picked.Clear();
-            if (count <= 0) return true;
-            if (inv == null || rarityOf == null) return false;
-
-            var candidates = new List<(string id, int rarity, int spare)>();
-            foreach (var stack in inv.Equipment)
-            {
-                if (stack == null || string.IsNullOrEmpty(stack.Id)) continue;
-                int rarity = rarityOf(stack.Id);
-                if (rarity < 0 || rarity < minRarity) continue;
-                int spare = SpareCount(inv, stack.Id);
-                if (spare > 0) candidates.Add((stack.Id, rarity, spare));
-            }
-
-            candidates.Sort((a, b) =>
-            {
-                int byRarity = a.rarity.CompareTo(b.rarity);
-                return byRarity != 0 ? byRarity : string.CompareOrdinal(a.id, b.id);
-            });
-
-            foreach (var candidate in candidates)
-            {
-                for (int i = 0; i < candidate.spare && picked.Count < count; i++)
-                    picked.Add(candidate.id);
-                if (picked.Count >= count) break;
-            }
-            return picked.Count >= count;
-        }
-
-        /// <summary>Removes every id in <paramref name="picked"/> (one piece each) from the inventory.</summary>
-        public static void ConsumeMaterials(InventorySaveData inv, List<string> picked)
-        {
-            if (inv == null || picked == null) return;
-            foreach (var id in picked)
-                inv.RemoveEquipment(id, 1);
         }
     }
 }

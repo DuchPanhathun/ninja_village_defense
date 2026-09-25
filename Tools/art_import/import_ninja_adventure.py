@@ -44,7 +44,7 @@ MANIFEST = os.path.join(HERE, ".last_outputs.txt")
 SCALE = 8
 MAX_SIZE = 2048
 
-FOLDERS = ["Characters/Heroes", "Characters/Enemies", "Characters/Pets", "Projectiles", "Pickups", "UI/Icons",
+FOLDERS = ["Characters/Heroes", "Characters/Enemies", "Characters/Pets", "Characters/Mounts", "Projectiles", "Pickups", "UI/Icons",
            "UI/Buttons", "UI/Bars", "UI/Panels", "UI/MenuIcons", "Environment/Backgrounds",
            "Environment/Village", "Environment/Tiles", "VFX"]
 
@@ -1014,6 +1014,119 @@ def import_pond_and_mine():
     record("Village", "koi pond decoration, Best Village trophy (gilded monk statue), metal bars, fishing rod, golden koi icons", "pond + `Fish/SpriteSheetYellow`, `Items/Resource/Bar*`, `Items/Weapons/Fishing Rod`", out)
 
 
+# S-class equipment (special items from Surprise Boxes): a themed recolour, a gold glow outline and sparkles.
+S_THEMES = {
+    "storm": [(40, 30, 110), (70, 70, 200), (90, 160, 255), (160, 230, 255), (240, 255, 255)],
+    "fire": [(110, 20, 20), (200, 50, 30), (250, 120, 40), (255, 200, 70), (255, 245, 190)],
+    "crimson": [(80, 10, 30), (160, 20, 40), (230, 50, 50), (255, 130, 110), (255, 220, 200)],
+    "emerald": [(10, 60, 40), (20, 120, 70), (40, 190, 110), (140, 240, 170), (230, 255, 230)],
+    "void": [(30, 10, 50), (80, 30, 130), (150, 60, 210), (210, 140, 255), (250, 230, 255)],
+    "royal": [(50, 15, 70), (110, 30, 140), (180, 70, 200), (255, 190, 60), (255, 240, 170)],
+    "gold": [(120, 70, 20), (200, 130, 30), (245, 190, 60), (255, 230, 120), (255, 250, 220)],
+    "wood": [(60, 30, 15), (110, 60, 30), (160, 100, 50), (210, 150, 80), (240, 200, 130)],
+}
+
+
+def themed(img, theme):
+    """Recolours by brightness into one of S_THEMES (dark outline pixels are kept)."""
+    ramp = S_THEMES[theme]
+    out = img.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if not a:
+                continue
+            v = (0.3 * r + 0.59 * g + 0.11 * b) / 255
+            if v < 0.16:
+                continue
+            px[x, y] = ramp[min(len(ramp) - 1, int((v - 0.16) / 0.84 * len(ramp)))] + (a,)
+    return out
+
+
+def s_grade(img, theme, seed):
+    """An S item: themed colours, a 1 px gold glow around it and three sparkles, on a canvas 2 px bigger."""
+    base = themed(img, theme)
+    out = Image.new("RGBA", (base.width + 2, base.height + 2), (0, 0, 0, 0))
+    out.alpha_composite(base, (1, 1))
+    px = out.load()
+    solid = [[px[x, y][3] > 0 for y in range(out.height)] for x in range(out.width)]
+    for y in range(out.height):
+        for x in range(out.width):
+            if solid[x][y]:
+                continue
+            if any(0 <= x + dx < out.width and 0 <= y + dy < out.height and solid[x + dx][y + dy]
+                   for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                px[x, y] = (255, 214, 90, 255)
+    rng = random.Random(seed)
+    empty = [(x, y) for y in range(out.height) for x in range(out.width) if px[x, y][3] == 0]
+    for x, y in rng.sample(empty, min(3, len(empty))):
+        px[x, y] = (255, 255, 230, 255)
+    return out
+
+
+S_ITEMS = [  # (icon name, source, theme)
+    ("icon_weapon_stormninjaku", ("pack", "Items/Weapons/Ninjaku/Sprite.png"), "storm"),
+    ("icon_weapon_phoenixbow", ("pack", "Items/Weapons/Bow2/Sprite.png"), "fire"),
+    ("icon_equip_phoenix_ring", ("ai", "icons/icon_equip_iron_ring.png"), "fire"),
+    ("icon_equip_oni_warband", ("ai", "icons/icon_equip_ninja_headband.png"), "crimson"),
+    ("icon_equip_dragon_mail", ("ai", "icons/icon_equip_dragon_scale.png"), "emerald"),
+    ("icon_equip_void_amulet", ("ai", "icons/icon_equip_jade_charm.png"), "void"),
+]
+
+
+def import_s_equipment():
+    """S-class items and the crates they come from (closed + open chests for the opening animation)."""
+    U = "UI/Icons"
+    out = []
+    for i, (name, (kind, rel), theme) in enumerate(S_ITEMS):
+        src = trim(load(rel) if kind == "pack" else load_ai(rel))
+        out.append(save(square(s_grade(src, theme, i), 18), U, name))
+    record("Icons", "S-class equipment (Surprise Box)", "pack weapons / AI equipment icons, recoloured + gold glow outline + sparkles", out)
+
+    big = load("Items/Treasure/BigTreasureChest.png")          # red chest: closed | open
+    little = load("Items/Treasure/LittleTreasureChest.png")    # teal chest: closed | open
+    out = []
+    for crate, sheet, theme in (("wood", big, "wood"), ("silver", little, None), ("surprise", big, "royal")):
+        half = sheet.width // 2
+        for state, box in (("closed", (0, 0, half, sheet.height)), ("open", (half, 0, sheet.width, sheet.height))):
+            frame = trim(sheet.crop(box))
+            if theme == "royal":
+                frame = s_grade(frame, theme, 99)
+            elif theme:
+                frame = themed(frame, theme)
+            out.append(save(square(frame, 20), U, f"chest_{crate}_{state}"))
+    record("Icons", "supply crates (closed / open)", "`Items/Treasure` chests: wood recolour, silver as is, Surprise Box royal purple + gold glow", out)
+
+
+# Mounts: the pack's side-view animals (2-frame gallop). S-class mounts are recoloured with a gold glow.
+MOUNTS = [  # (id, sheet, S theme or None)
+    ("horse_brown", "Actor/Animal/Horse/SpriteSheetBrownSide.png", None),
+    ("horse_black", "Actor/Animal/Horse/SpriteSheetBlackSide.png", None),
+    ("donkey", "Actor/Animal/Donkey/SpriteSheeGreySide.png", None),
+    ("lion_red", "Actor/Animal/Lion/SpriteSheetRedSide.png", None),
+    ("lion_frost", "Actor/Animal/Lion/SpriteSheetWhiteSide.png", None),
+    ("lioness", "Actor/Animal/Lioness/SpriteSheetLionessSide.png", None),
+    ("golden_qilin", "Actor/Animal/Lion/SpriteSheetWhiteSide.png", "gold"),
+    ("nightmare", "Actor/Animal/Horse/SpriteSheetBlackSide.png", "void"),
+]
+
+
+def import_mounts():
+    M, U = "Characters/Mounts", "UI/Icons"
+    out = []
+    for mount_id, rel, theme in MOUNTS:
+        sheet = load(rel)
+        half = sheet.width // 2
+        frames = [sheet.crop((i * half, 0, (i + 1) * half, sheet.height)) for i in range(2)]
+        if theme:
+            frames = [s_grade(f, theme, 31 + i) for i, f in enumerate(frames)]   # sparkles twinkle between frames
+        out += save_frames(frames, M, f"mount_{mount_id}")
+        out.append(save(square(trim(frames[0]), max(frames[0].size) + 2), U, f"icon_mount_{mount_id}"))
+    record("Characters", "mounts (side-view gallop, 2 frames) + icons; S-class Golden Qilin and Nightmare Steed",
+           "`Actor/Animal/*Side.png` sheets; S mounts recoloured + gold glow outline", out)
+
+
 GROUNDS = [("grass", (0, 12)), ("grass_dark", (11, 12)), ("dirt", (11, 19)), ("sand", (0, 5)), ("snow", (0, 19))]
 
 
@@ -1211,6 +1324,8 @@ def main():
     import_decor()
     import_farm()
     import_pond_and_mine()
+    import_s_equipment()
+    import_mounts()
     import_backgrounds()
     export_store_graphics()
 

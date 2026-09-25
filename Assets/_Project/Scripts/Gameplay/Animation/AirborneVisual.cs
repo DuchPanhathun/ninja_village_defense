@@ -15,8 +15,9 @@ namespace NinjaVillage.Gameplay.Animation
         private SpriteRenderer _source, _copy, _shadow;
         private DepthSort _depth;
         private float _feet;
+        private NinjaVillage.Gameplay.Mounts.MountVisual _mount;
 
-        public bool IsAirborne => _copy != null;
+        public bool IsAirborne => _copy != null || _mount != null;
         /// <summary>World units above the ground.</summary>
         public float Height { get; set; }
 
@@ -31,6 +32,17 @@ namespace NinjaVillage.Gameplay.Animation
 
             _feet = _source.bounds.min.y - _source.transform.position.y;
             _shadow = GeneratedSprites.CreateRenderer(transform, "JumpShadow", GeneratedSprites.Circle, new Color(0f, 0f, 0f, 0.35f), _source.sortingOrder - 1);
+
+            // Riding: the mount (and its rider) jump together; the mount does the drawing.
+            var mount = GetComponent<NinjaVillage.Gameplay.Mounts.MountVisual>();
+            if (mount != null && mount.IsMounted)
+            {
+                _mount = mount;
+                if (_source.sprite != null) _feet = _source.sprite.bounds.min.y * Mathf.Abs(_source.transform.lossyScale.y);
+                Height = 0f;
+                LateUpdate();
+                return;
+            }
             _copy = new GameObject("AirborneSprite").AddComponent<SpriteRenderer>();
             _copy.transform.SetParent(_source.transform, false);
             _source.enabled = false;
@@ -40,11 +52,14 @@ namespace NinjaVillage.Gameplay.Animation
 
         public void End()
         {
+            if (_mount != null) _mount.Lift = 0f;
+            bool wasMounted = _mount != null;
+            _mount = null;
             if (_copy != null) Destroy(_copy.gameObject);
             if (_shadow != null) Destroy(_shadow.gameObject);
             _copy = null;
             _shadow = null;
-            if (_source != null) _source.enabled = true;
+            if (_source != null && !wasMounted) _source.enabled = true; // a rider's own sprite stays hidden
             if (_depth != null) _depth.Airborne = false;
             Height = 0f;
         }
@@ -53,6 +68,18 @@ namespace NinjaVillage.Gameplay.Animation
 
         private void LateUpdate()
         {
+            if (_mount != null && _source != null)
+            {
+                float scale = Mathf.Max(0.01f, Mathf.Abs(_source.transform.lossyScale.y));
+                _mount.Lift = Height / scale;
+                float w = _mount.MountRenderer != null && _mount.MountRenderer.sprite != null ? _mount.MountRenderer.sprite.bounds.size.x * Mathf.Abs(_source.transform.lossyScale.x) : 1f;
+                float s = Mathf.Clamp01(1f - Height * 0.25f);
+                float px = Mathf.Max(0.01f, Mathf.Abs(transform.lossyScale.x)), py = Mathf.Max(0.01f, Mathf.Abs(transform.lossyScale.y));
+                _shadow.transform.localPosition = new Vector3(0f, _feet / py + 0.05f, 0f);
+                _shadow.transform.localScale = new Vector3(w * 0.7f * s / px, w * 0.2f * s / py, 1f);
+                _shadow.sortingOrder = _source.sortingOrder - 1;
+                return;
+            }
             if (_copy == null || _source == null) return;
             _copy.sprite = _source.sprite;
             _copy.flipX = _source.flipX;

@@ -41,6 +41,8 @@ namespace NinjaVillage.Systems.Village
         public string SelectedHeroId;
         public List<IdLevelEntry> Pets = new();
         public string ActivePetId;
+        /// <summary>The mount the selected hero rides (null on foot).</summary>
+        public string ActiveMountId;
 
         public string WeaponId;
         public List<string> EquipmentIds = new();
@@ -118,6 +120,9 @@ namespace NinjaVillage.Systems.Village
                 foreach (var pet in save.Pets.Owned)
                     if (pet != null && !string.IsNullOrEmpty(pet.Id)) snapshot.Pets.Add(new IdLevelEntry(pet.Id, Math.Max(1, pet.Level)));
             }
+
+            if (save.Mounts != null && !string.IsNullOrEmpty(save.Mounts.ActiveMountId) && save.Mounts.Owned.ContainsId(save.Mounts.ActiveMountId))
+                snapshot.ActiveMountId = save.Mounts.ActiveMountId;
 
             if (save.Inventory != null)
             {
