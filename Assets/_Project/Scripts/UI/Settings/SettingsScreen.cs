@@ -25,7 +25,7 @@ namespace NinjaVillage.UI.Settings
         protected override string Title => "Settings";
 
         private Slider _master, _music, _sfx;
-        private Button _vibration, _battery, _damageNumbers, _screenShake, _quality, _analytics, _reset;
+        private Button _vibration, _battery, _damageNumbers, _screenShake, _battleView, _quality, _analytics, _reset;
         private TextMeshProUGUI _accountStatus, _linkHint;
         private TMP_InputField _email, _password;
         private GameObject _linkForm;
@@ -63,6 +63,12 @@ namespace NinjaVillage.UI.Settings
                 SettingsService.SetScreenShake(!SettingsService.Current.ScreenShake);
                 Click();
             }, UITheme.ButtonSecondary, 100f);
+            _battleView = UIBuilder.Button(list, "", () =>
+            {
+                SettingsService.SetBattleZoom(SettingsSaveData.NextBattleZoom(SettingsService.Current.BattleZoom));
+                Click();
+            }, UITheme.ButtonSecondary, 100f);
+            _battleView.name = "BattleView";
 
             UIBuilder.SectionHeader(list, "Performance");
             _battery = UIBuilder.Button(list, "", () =>
@@ -130,6 +136,7 @@ namespace NinjaVillage.UI.Settings
             UIBuilder.SetLabel(_vibration, $"Vibration: {(s.Vibration ? "On" : "Off")}");
             UIBuilder.SetLabel(_damageNumbers, $"Damage numbers: {(s.ShowDamageNumbers ? "On" : "Off")}");
             UIBuilder.SetLabel(_screenShake, $"Screen shake: {(s.ScreenShake ? "On" : "Off")}");
+            UIBuilder.SetLabel(_battleView, $"Battle view: {SettingsSaveData.DescribeBattleZoom(s.BattleZoom)}");
             UIBuilder.SetLabel(_battery, s.BatterySaver ? "Battery saver: On (30 FPS)" : "Battery saver: Off (60 FPS)");
 
             var names = QualitySettings.names;

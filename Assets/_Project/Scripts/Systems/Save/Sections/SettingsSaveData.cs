@@ -26,6 +26,12 @@ namespace NinjaVillage.Systems.Save
         /// <summary>Camera shake on big moments (boss slams, ultimates).</summary>
         public bool ScreenShake = true;
         public string Language = "en";
+        /// <summary>How much of the battlefield the camera shows: 0 = Normal, 1 = Wide, 2 = Widest (<see cref="BattleZoomScales"/>).</summary>
+        public int BattleZoom;
+
+        /// <summary>Camera size multipliers for <see cref="BattleZoom"/>: Normal is the scene's own view.</summary>
+        public static readonly float[] BattleZoomScales = { 1f, 1.25f, 1.5f };
+        public static readonly string[] BattleZoomNames = { "Normal", "Wide", "Widest" };
 
         public bool BatterySaver => TargetFrameRate == BatterySaverFrameRate;
 
@@ -38,7 +44,14 @@ namespace NinjaVillage.Systems.Save
             QualityLevel = ClampQualityLevel(QualityLevel, qualityLevelCount);
             TargetFrameRate = NormalizeFrameRate(TargetFrameRate);
             if (string.IsNullOrEmpty(Language)) Language = "en";
+            BattleZoom = ClampBattleZoom(BattleZoom);
         }
+
+        public static int ClampBattleZoom(int level) => level < 0 ? 0 : level >= BattleZoomScales.Length ? BattleZoomScales.Length - 1 : level;
+        public static float BattleZoomScale(int level) => BattleZoomScales[ClampBattleZoom(level)];
+        /// <summary>The next level up, wrapping from Widest back to Normal (the battle button cycles).</summary>
+        public static int NextBattleZoom(int level) => (ClampBattleZoom(level) + 1) % BattleZoomScales.Length;
+        public static string DescribeBattleZoom(int level) => $"{BattleZoomNames[ClampBattleZoom(level)]} (×{BattleZoomScale(level):0.##})";
 
         /// <summary>0..1; NaN (corrupt save) falls back to full volume.</summary>
         public static float ClampVolume(float volume)

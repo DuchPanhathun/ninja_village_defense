@@ -806,6 +806,41 @@ namespace NinjaVillage.Tests
             }
         }
 
+        /// <summary>
+        /// Battle zoom: the VIEW button widens the camera a step at a time (and wraps back), the choice is saved, and
+        /// enemies still spawn off-screen in the wider view.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_ViewButtonWidensTheCamera_AndSpawnsStayOffScreen()
+        {
+            yield return LoadScene(SceneNames.Battle);
+            var cam = Camera.main;
+            var zoom = cam.GetComponent<NinjaVillage.Gameplay.Camera.BattleCameraZoom>();
+            Assert.IsNotNull(zoom, "the battle camera can zoom");
+            Assert.AreEqual(zoom.BaseSize, cam.orthographicSize, 1e-3f, "a new player starts on the Normal view");
+            var button = Object.FindAnyObjectByType<NinjaVillage.UI.Battle.BattleZoomButtonUI>();
+            Assert.IsNotNull(button, "a VIEW button in the HUD");
+
+            button.Cycle();
+            Assert.AreEqual(1, SaveService.Data.Settings.BattleZoom, "the choice is saved");
+            for (float end = Time.realtimeSinceStartup + 2f; Time.realtimeSinceStartup < end && !Mathf.Approximately(cam.orthographicSize, zoom.TargetSize);)
+                yield return null;
+            Assert.AreEqual(zoom.BaseSize * NinjaVillage.Systems.Save.SettingsSaveData.BattleZoomScales[1], cam.orthographicSize, 1e-3f, "the camera eases wider");
+
+            button.Cycle(); // Widest
+            var spawner = Object.FindAnyObjectByType<NinjaVillage.Gameplay.Waves.SpawnManager>();
+            Vector2 centre = cam.transform.position;
+            float halfH = zoom.TargetSize, halfW = halfH * cam.aspect;
+            for (int i = 0; i < 200; i++)
+            {
+                Vector2 offset = spawner.GetSpawnPositionAroundPlayer() - centre;
+                Assert.IsTrue(Mathf.Abs(offset.x) > halfW - 0.5f || Mathf.Abs(offset.y) > halfH - 0.5f, $"spawned on screen at {offset}");
+            }
+            button.Cycle();
+            Assert.AreEqual(0, SaveService.Data.Settings.BattleZoom, "Widest wraps back to Normal");
+            yield return new WaitForSecondsRealtime(0.2f);
+        }
+
         [UnityTest]
         public IEnumerator Battle_PlaysForAWhileWithoutErrors()
         {

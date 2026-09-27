@@ -51,6 +51,13 @@ namespace NinjaVillage.Systems.Settings
             Commit(immediate: true);
         }
 
+        /// <summary>How wide the battle camera looks (<see cref="SettingsSaveData.BattleZoomScales"/>); applies live in battle.</summary>
+        public static void SetBattleZoom(int level)
+        {
+            Current.BattleZoom = SettingsSaveData.ClampBattleZoom(level);
+            Commit(immediate: true);
+        }
+
         /// <summary>true = 30 FPS battery saver, false = 60 FPS.</summary>
         public static void SetBatterySaver(bool enabled)
         {
