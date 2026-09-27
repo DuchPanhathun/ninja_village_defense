@@ -1,5 +1,9 @@
 # Ninja Village Defense
 
+> This folder is the **Unity project** — open `game/` in Unity Hub, and run the commands below from here.
+> The repo also holds the website ([`../web`](../web)) and the Firebase backend ([`../firebase`](../firebase));
+> see the [repository overview](../README.md).
+
 A 2D roguelike action game (in the vein of *Survivor.io* / *Archero*) built in **Unity 6 (6000.0.84f1 LTS)** with **C#**, backed by **Firebase**. Target platforms: **Android first, then iOS** from the same codebase.
 
 > Become the last ninja protecting your hidden village against endless demon invasions. Every battle makes your village stronger, unlocks new ninjas, and reveals ancient forbidden techniques.

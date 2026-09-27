@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import OrdersPage from '../../components/admin/OrdersPage';
+---
+
+<Admin title="Orders" section="orders">
+  <OrdersPage client:only="preact" />
+</Admin>

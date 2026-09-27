@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import ShopGrid from '../../components/islands/ShopGrid';
+import { t } from '../../i18n';
+---
+
+<Base title={t.shop.title} description={t.shop.lead} active="shop">
+  <div class="page container">
+    <header class="page-head">
+      <h1>{t.shop.title}</h1>
+      <p>{t.shop.lead}</p>
+    </header>
+    <ShopGrid client:load />
+  </div>
+</Base>
+
+<style is:global>
+  .shop-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .product { display: flex; flex-direction: column; gap: 0.6rem; }
+  .product h2 { font-size: 1.3rem; margin: 0; }
+  .product p { margin: 0; }
+  .product-art {
+    display: grid;
+    place-items: center;
+    height: 140px;
+    margin: -0.25rem -0.25rem 0.25rem;
+    background: radial-gradient(circle at 50% 55%, rgba(245, 197, 101, 0.28), rgba(245, 197, 101, 0) 62%), var(--night-2);
+    border-radius: var(--radius);
+  }
+  .product-art img { width: 112px; height: 112px; filter: drop-shadow(0 5px 0 rgba(10, 15, 20, 0.5)); }
+  .product .includes { flex: 1; }
+  .ribbon {
+    position: absolute;
+    top: 10px;
+    right: -6px;
+    z-index: 1;
+    padding: 0.15rem 0.6rem;
+    background: var(--torii);
+    color: #fff6ee;
+    font: 700 0.85rem var(--font-ui);
+    box-shadow: 0 var(--px) 0 var(--torii-deep);
+  }
+  .buy-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+  .price { display: flex; flex-direction: column; line-height: 1.2; }
+  .price b { font: 700 1.4rem var(--font-ui); color: var(--lantern); }
+  .price s { font-size: 0.85rem; }
+</style>

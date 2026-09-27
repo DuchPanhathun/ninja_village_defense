@@ -1,0 +1,67 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import '../styles/admin.css';
+import { firebaseSettings, site } from '../config';
+
+interface Props {
+  title: string;
+  section: string;
+}
+const { title, section } = Astro.props;
+
+const nav = [
+  { key: 'dashboard', href: '/admin/', label: 'Dashboard', icon: 'icon_achievement_champion.png' },
+  { key: 'players', href: '/admin/players/', label: 'Players', icon: 'hero_samurai.png' },
+  { key: 'codes', href: '/admin/codes/', label: 'Redeem codes', icon: 'icon_item_scroll.png' },
+  { key: 'shop', href: '/admin/shop/', label: 'Shop', icon: 'store_gems_550.png' },
+  { key: 'orders', href: '/admin/orders/', label: 'Orders', icon: 'icon_item_money.png' },
+  { key: 'mail', href: '/admin/mail/', label: 'Gift to everyone', icon: 'chest_silver_closed.png' },
+  { key: 'moderation', href: '/admin/moderation/', label: 'Moderation', icon: 'icon_weapon_katana.png' },
+  { key: 'deletions', href: '/admin/deletions/', label: 'Deletions', icon: 'chest_wood_closed.png' },
+  { key: 'audit', href: '/admin/audit/', label: 'Audit log', icon: 'item_gold_bar.png' },
+  { key: 'staff', href: '/admin/staff/', label: 'Staff', icon: 'pet_wolf.png' },
+  { key: 'security', href: '/admin/security/', label: '2-step sign-in', icon: 'icon_weapon_shuriken.png' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · Admin · {site.gameName}</title>
+    <link rel="icon" type="image/png" href="/art/logo_emblem.png" />
+    <meta name="theme-color" content="#121a22" />
+    <Font cssVariable="--font-pixel" preload />
+    <Font cssVariable="--font-body" />
+  </head>
+  <body class="admin">
+    <div class="admin-shell">
+      <aside class="admin-side">
+        <a class="admin-brand" href="/admin/">
+          <img class="pixel" src="/art/logo_emblem.png" alt="" width="36" height="36" />
+          <span>Village HQ</span>
+        </a>
+        <div class="env-badges">
+          {firebaseSettings.useEmulators && <span class="badge info">Emulator</span>}
+          {site.paymentsTestMode && <span class="badge warn">Test payments</span>}
+        </div>
+        <nav aria-label="Admin">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={section === item.key ? 'page' : undefined}>
+              <img class="pixel" src={`/art/${item.icon}`} alt="" width="22" height="22" />
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <a class="back-to-site small" href="/">← Player website</a>
+      </aside>
+      <main class="admin-main" id="main">
+        <h1>{title}</h1>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

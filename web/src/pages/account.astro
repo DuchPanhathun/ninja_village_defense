@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import AccountView from '../components/islands/AccountView';
+import { t } from '../i18n';
+---
+
+<Base title={t.account.title} noindex active="account">
+  <div class="page container">
+    <header class="page-head">
+      <h1>{t.account.title}</h1>
+    </header>
+    <AccountView client:load />
+  </div>
+</Base>
+
+<style is:global>
+  .account-grid { display: grid; gap: 1.25rem; }
+  @media (min-width: 900px) {
+    .account-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+    .account-grid .profile { grid-row: span 2; }
+    .account-grid .account-foot { grid-column: 1 / -1; }
+  }
+</style>

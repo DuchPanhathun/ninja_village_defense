@@ -1,0 +1,88 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../config';
+const email = site.supportEmail;
+---
+
+<Legal title="Privacy Policy" description={`What data ${site.gameName} and this website collect, why, and your choices.`}>
+  <p>
+    This policy explains what information {site.studioName} (“we”) collects when you play {site.gameName} or use this
+    website, why we collect it, who we share it with and what you can do about it.
+  </p>
+
+  <h2>What we collect</h2>
+  <h3>Your account</h3>
+  <ul>
+    <li>An account ID the game creates for you.</li>
+    <li>If you link one: your email address and a password (stored by our sign-in provider, never readable by us).</li>
+  </ul>
+  <h3>Game data</h3>
+  <ul>
+    <li>Your cloud save: village, ninjas, pets, gear, currencies, settings and progress.</li>
+    <li>Your display name, leaderboard scores and public village, which other players can see.</li>
+    <li>Visits, likes and gifts between players’ villages.</li>
+    <li>Rewards sent to your inbox, codes you redeemed, and reports or actions by our support team.</li>
+  </ul>
+  <h3>Purchases</h3>
+  <ul>
+    <li>For web shop orders: what you bought, the price, the time, the order status and the payment reference.</li>
+    <li>Payments are processed by our payment provider (and by Google Play for in-app purchases). They handle your card or payment details; we don’t receive your full card number.</li>
+  </ul>
+  <h3>Device and usage data</h3>
+  <ul>
+    <li>Gameplay events (such as runs started and finished) and crash reports, to improve the game.</li>
+    <li>Security signals from this website and the app (Firebase App Check / reCAPTCHA) to block abuse.</li>
+  </ul>
+
+  <h2>Why we use it</h2>
+  <ul>
+    <li>To run the game: save and sync your progress, run leaderboards and village visits (contract).</li>
+    <li>To deliver purchases, redeem codes and gifts, and to handle refunds (contract, legal obligation).</li>
+    <li>To answer support requests (contract, legitimate interest).</li>
+    <li>To prevent cheating, fraud and abuse and keep the service secure (legitimate interest).</li>
+    <li>To understand how the game is played and fix crashes (legitimate interest, or consent where required).</li>
+  </ul>
+
+  <h2>Who we share it with</h2>
+  <ul>
+    <li><strong>Google Firebase</strong> (sign-in, database, cloud functions, analytics, crash reports, App Check) — as our service provider.</li>
+    <li><strong>Our payment provider</strong> — to take web payments.</li>
+    <li><strong>Google Play / Apple</strong> — for in-app purchases.</li>
+    <li><strong>Other players</strong> — only your public name, scores and public village.</li>
+    <li>Authorities, when the law requires it.</li>
+  </ul>
+  <p>We don’t sell your personal information.</p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li>Game and account data: while your account exists. Deleted accounts are removed within 30 days (backups roll over after that).</li>
+    <li>Payment records: as long as tax and accounting laws require (usually several years), without your email once the account is deleted.</li>
+    <li>Support and moderation records: as long as needed to keep the service fair and safe.</li>
+  </ul>
+
+  <h2>Your choices and rights</h2>
+  <ul>
+    <li>See your account details, redeem history and orders on your <a href="/account/">account page</a>.</li>
+    <li>Delete your account and data on the <a href="/delete-account/">account deletion page</a>.</li>
+    <li>Ask for a copy of your data, a correction, or object to how we use it: email <a href={`mailto:${email}`}>{email}</a>.</li>
+    <li>If you are in the EU/UK or a similar jurisdiction, you can also complain to your data protection authority.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>
+    The game is not meant for children under {site.minimumAge}. If we learn that a child under that age created an account
+    without a parent’s consent, we will delete it. Parents can contact us to review or delete their child’s data.
+  </p>
+
+  <h2>Security and transfers</h2>
+  <p>
+    Data is encrypted in transit and access is restricted to the people who need it. Our providers may process data in
+    other countries, with safeguards required by law.
+  </p>
+
+  <h2>Changes</h2>
+  <p>We’ll update this page when our practices change and tell you in the game about important changes.</p>
+
+  <h2>Contact</h2>
+  <p>Email <a href={`mailto:${email}`}>{email}</a>.</p>
+</Legal>

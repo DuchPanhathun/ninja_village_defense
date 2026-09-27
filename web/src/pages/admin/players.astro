@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import PlayersPage from '../../components/admin/PlayersPage';
+---
+
+<Admin title="Players" section="players">
+  <PlayersPage client:only="preact" />
+</Admin>

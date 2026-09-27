@@ -1,0 +1,123 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config';
+import { t } from '../i18n';
+---
+
+<Base title={site.gameName} active="home">
+  <section class="hero">
+    <div class="hero-art" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <img class="pixel hero-logo" src="/art/logo_emblem.png" alt="" width="160" height="160" />
+      <p class="kicker">{t.home.kicker}</p>
+      <h1>{t.home.title}</h1>
+      <p class="lead">{t.home.lead}</p>
+      <div class="row hero-actions">
+        <a class="btn btn-primary" href="/redeem/"><img src="/art/icon_item_scroll.png" alt="" />{t.home.redeemCta}</a>
+        <a class="btn" href="/shop/"><img src="/art/store_gems_100.png" alt="" />{t.home.shopCta}</a>
+        {site.playStoreUrl && <a class="btn btn-ghost" href={site.playStoreUrl} rel="noopener">{t.home.play}</a>}
+      </div>
+    </div>
+  </section>
+
+  <section class="container features" aria-label="What you can do here">
+    {t.home.features.map((feature) => (
+      <a class="panel feature" href={feature.href}>
+        <img class="pixel" src={`/art/${feature.icon}`} alt="" width="64" height="64" loading="lazy" />
+        <div>
+          <h2>{feature.title}</h2>
+          <p class="muted">{feature.body}</p>
+        </div>
+      </a>
+    ))}
+  </section>
+
+  <section class="container how">
+    <h2>{t.home.howTitle}</h2>
+    <ol class="steps">
+      {t.home.steps.map((step, i) => (
+        <li class="panel panel-accent">
+          <span class="step-number" aria-hidden="true">{i + 1}</span>
+          <h3>{step.title}</h3>
+          <p class="muted">{step.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: 3.5rem 5rem;
+    border-bottom: var(--px) solid var(--ink);
+    isolation: isolate;
+  }
+  .hero-art {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('/art/bg_mainmenu.png') center 35% / cover no-repeat;
+    image-rendering: pixelated;
+  }
+  .hero-art::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(18, 26, 34, 0.35) 0%, rgba(18, 26, 34, 0.55) 55%, var(--night) 100%),
+      radial-gradient(ellipse at 50% 40%, rgba(18, 26, 34, 0) 0%, rgba(18, 26, 34, 0.55) 80%);
+  }
+  .hero-inner { text-align: center; display: grid; justify-items: center; }
+  .hero-logo { width: clamp(112px, 22vw, 160px); height: auto; filter: drop-shadow(0 6px 0 rgba(10, 15, 20, 0.6)); }
+  .hero h1 { color: var(--paper); text-shadow: 0 4px 0 var(--ink), 0 0 24px rgba(10, 15, 20, 0.6); margin-top: 0.25rem; }
+  .hero .kicker { text-shadow: 0 2px 0 var(--ink); margin-top: 0.75rem; }
+  .lead {
+    max-width: 38rem;
+    font-size: 1.1rem;
+    color: var(--paper);
+    text-shadow: 0 2px 6px rgba(10, 15, 20, 0.9);
+  }
+  .hero-actions { justify-content: center; margin-top: 0.75rem; }
+
+  .features {
+    display: grid;
+    gap: 1rem;
+    margin-top: -2.25rem;
+    position: relative;
+  }
+  @media (min-width: 760px) { .features { grid-template-columns: repeat(3, 1fr); } }
+  .feature {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    color: var(--paper);
+    text-decoration: none;
+    transition: transform 120ms;
+  }
+  .feature:hover { transform: translateY(-3px); color: var(--paper); }
+  .feature img { flex: none; width: 64px; height: 64px; }
+  .feature h2 { font-size: 1.25rem; margin-bottom: 0.2rem; color: var(--lantern); }
+  .feature p { margin: 0; font-size: 0.95rem; }
+
+  .how { padding-block: 3.5rem 4rem; }
+  .how > h2 { text-align: center; margin-bottom: 1.5rem; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; counter-reset: step; }
+  @media (min-width: 760px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .steps li { padding-top: 1.75rem; }
+  .step-number {
+    position: absolute;
+    top: -14px;
+    left: 16px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    background: var(--torii);
+    color: #fff6ee;
+    font: 700 1.1rem var(--font-ui);
+    box-shadow: 0 0 0 var(--px) var(--ink);
+  }
+  .steps h3 { color: var(--paper); }
+</style>

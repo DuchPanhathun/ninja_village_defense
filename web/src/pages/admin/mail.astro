@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import MailPage from '../../components/admin/MailPage';
+---
+
+<Admin title="Gift to everyone" section="mail">
+  <MailPage client:only="preact" />
+</Admin>

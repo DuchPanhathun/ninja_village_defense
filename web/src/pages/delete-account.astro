@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import DeleteAccount from '../components/islands/DeleteAccount';
+import { site } from '../config';
+import { t } from '../i18n';
+---
+
+<!-- Public URL for Google Play Console → App content → Data deletion. -->
+<Base title={t.deletion.title} description={t.deletion.lead}>
+  <div class="page narrow stack-lg">
+    <header class="page-head">
+      <p class="kicker">{site.gameName}</p>
+      <h1>{t.deletion.title}</h1>
+      <p>{t.deletion.lead}</p>
+    </header>
+
+    <section class="panel stack">
+      <h2>{t.deletion.whatTitle}</h2>
+      <ul>
+        {t.deletion.what.map((item) => <li>{item}</li>)}
+      </ul>
+      <h2>{t.deletion.keptTitle}</h2>
+      <p class="muted">{t.deletion.kept}</p>
+      <p class="muted">{t.deletion.timing}</p>
+    </section>
+
+    <DeleteAccount client:load />
+  </div>
+</Base>

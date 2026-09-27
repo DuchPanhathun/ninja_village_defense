@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import ShopPage from '../../components/admin/ShopPage';
+---
+
+<Admin title="Shop" section="shop">
+  <ShopPage client:only="preact" />
+</Admin>

@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import AuditPage from '../../components/admin/AuditPage';
+---
+
+<Admin title="Audit log" section="audit">
+  <AuditPage client:only="preact" />
+</Admin>

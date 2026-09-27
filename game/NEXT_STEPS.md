@@ -34,7 +34,7 @@ runs on device builds), real in-app purchases, real ads, and an actual Android b
    removed their `.meta` files. Copy `google-services.json` and `GoogleService-Info.plist` into
    `Assets/` (from the Firebase console, project `bookknhom`).
 2. **Firebase console:** enable Anonymous (+ Email/Password) auth, create Firestore, and deploy
-   `firebase/firestore.rules` and the indexes. The steps are in [`firebase/README.md`](firebase/README.md).
+   `firebase/firestore.rules` and the indexes. The steps are in [`../firebase/README.md`](../firebase/README.md).
    Without this the game still works fully; it just stays offline.
 3. **Store products:** create these in Play Console and App Store Connect:
    `com.thun.ninjavillagedefense.` + `gems_100`, `gems_550`, `gems_1200` (consumable), `starter_pack`,

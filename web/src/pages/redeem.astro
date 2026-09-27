@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import RedeemForm from '../components/islands/RedeemForm';
+import { t } from '../i18n';
+---
+
+<Base title={t.redeem.title} description={t.redeem.lead} active="redeem">
+  <div class="page narrow">
+    <header class="page-head center">
+      <img class="pixel" src="/art/icon_item_scroll.png" alt="" width="96" height="96" />
+      <h1>{t.redeem.title}</h1>
+      <p style="margin-inline: auto">{t.redeem.lead}</p>
+    </header>
+    <RedeemForm client:load />
+  </div>
+</Base>

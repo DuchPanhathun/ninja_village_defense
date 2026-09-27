@@ -1,0 +1,41 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../config';
+const email = site.supportEmail;
+---
+
+<Legal title="Refund Policy" description={`Refunds for ${site.gameName} web shop purchases.`}>
+  <p>
+    This policy covers purchases made on this website’s shop. Purchases made inside the app are refunded by Google Play
+    (or the App Store) under their policies — request those through the store.
+  </p>
+
+  <h2>Before you collect your rewards</h2>
+  <p>
+    Web purchases wait in your in-game inbox until you claim them. If you change your mind within 14 days and haven’t
+    claimed the rewards yet, email us with your order ID and we’ll refund you in full.
+  </p>
+
+  <h2>After you collect your rewards</h2>
+  <p>
+    Once rewards are claimed in the game, the digital content has been delivered and used, so we generally can’t refund
+    it — except where the law gives you that right, or if something went wrong (for example the rewards never arrived or
+    you were charged twice). By buying, you ask us to deliver the content straight away and acknowledge that, where the
+    law allows, this ends your right to withdraw once the content has been delivered.
+  </p>
+
+  <h2>If something went wrong</h2>
+  <ul>
+    <li>Check your <a href="/account/">account page</a>: a <strong>Paid</strong> order means the rewards are in your in-game inbox.</li>
+    <li>If an order is missing or stuck, email <a href={`mailto:${email}`}>{email}</a> with the order ID. We’ll fix it or refund you.</li>
+  </ul>
+
+  <h2>Chargebacks</h2>
+  <p>
+    Please contact us before disputing a payment with your bank — it’s faster. When a payment is refunded or disputed,
+    unclaimed rewards are cancelled; if they were already claimed, we may remove them or review the account.
+  </p>
+
+  <h2>How refunds are paid</h2>
+  <p>Refunds go back to the original payment method. It can take a few days for your bank to show it.</p>
+</Legal>

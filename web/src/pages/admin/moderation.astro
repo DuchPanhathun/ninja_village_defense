@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import ModerationPage from '../../components/admin/ModerationPage';
+---
+
+<Admin title="Moderation" section="moderation">
+  <ModerationPage client:only="preact" />
+</Admin>

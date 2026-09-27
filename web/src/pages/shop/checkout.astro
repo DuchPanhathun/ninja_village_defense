@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SandboxCheckout } from '../../components/islands/OrderPages';
+import { t } from '../../i18n';
+---
+
+<Base title={t.checkout.title} noindex active="shop">
+  <div class="page narrow">
+    <header class="page-head">
+      <p class="kicker">{t.shop.title}</p>
+      <h1>{t.checkout.title}</h1>
+      <p>{t.checkout.lead}</p>
+    </header>
+    <SandboxCheckout client:load />
+  </div>
+</Base>

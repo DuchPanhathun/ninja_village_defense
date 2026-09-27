@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import SecurityPage from '../../components/admin/SecurityPage';
+---
+
+<Admin title="2-step sign-in" section="security">
+  <SecurityPage client:only="preact" />
+</Admin>

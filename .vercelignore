@@ -1,0 +1,19 @@
+# Vercel deploys only the website: web/ plus the data contract it shares with the Cloud Functions
+# (firebase/functions/src/shared). Everything else — the Unity project above all — stays local.
+/*
+!/web
+!/firebase
+!/vercel.json
+!/.vercelignore
+/firebase/*
+!/firebase/functions
+/firebase/functions/*
+!/firebase/functions/src
+/firebase/functions/src/*
+!/firebase/functions/src/shared
+
+/web/node_modules
+/web/dist
+/web/.astro
+/web/.env
+/web/.env.emulator

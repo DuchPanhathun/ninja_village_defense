@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config';
+import { t } from '../i18n';
+---
+
+<Base title={t.support.title} description={t.support.lead}>
+  <div class="page narrow stack-lg">
+    <header class="page-head">
+      <h1>{t.support.title}</h1>
+      <p>{t.support.lead}</p>
+    </header>
+
+    <section class="panel stack">
+      <h2>{t.support.emailTitle}</h2>
+      <p><a class="btn btn-primary" href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a></p>
+      <p class="muted">{t.support.emailBody}</p>
+    </section>
+
+    <section class="stack">
+      <h2>{t.support.faqTitle}</h2>
+      {t.support.faq.map((item) => (
+        <details class="panel panel-tight faq">
+          <summary>{item.q}</summary>
+          <p class="muted">{item.a}</p>
+        </details>
+      ))}
+    </section>
+  </div>
+</Base>
+
+<style>
+  .faq summary { cursor: pointer; font-weight: 800; list-style-position: outside; margin-left: 1rem; }
+  .faq[open] summary { color: var(--lantern); margin-bottom: 0.5rem; }
+</style>

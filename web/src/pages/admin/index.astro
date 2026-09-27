@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import DashboardPage from '../../components/admin/DashboardPage';
+---
+
+<Admin title="Dashboard" section="dashboard">
+  <DashboardPage client:only="preact" />
+</Admin>

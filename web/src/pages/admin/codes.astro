@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import CodesPage from '../../components/admin/CodesPage';
+---
+
+<Admin title="Redeem codes" section="codes">
+  <CodesPage client:only="preact" />
+</Admin>

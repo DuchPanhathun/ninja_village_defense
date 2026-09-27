@@ -1,19 +1,77 @@
 rules_version = '2';
 
 // Ninja Village Defense — Firestore security rules.
-// Deploy: firebase deploy --only firestore:rules   (see README.md)
+// Deploy: firebase deploy --only firestore:rules   (see README.md). Tested by functions/test/emulator/rules.test.ts.
+//
+// Web platform (task_web.text): grants, orders, codes, products, mail, audit, staff, stats and deletion requests
+// are written only by the Cloud Functions (Admin SDK, which bypasses these rules). Clients may only read what
+// is theirs — and set `claimedAt` on their own grants. Staff (custom claim `role`) may read the admin data;
+// admins must have signed in with 2-step verification.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null; }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
 
-    // Private save + public-ish profile fields. Only the owner can read or write their own document.
-    // (Reads have no request.resource, so the size check must only apply to writes.)
+    // ---------------------------------------------------------------- staff
+    function staffRole() { return signedIn() ? request.auth.token.get('role', '') : ''; }
+    function hasSecondFactor() { return request.auth.token.get('firebase', {}).get('sign_in_second_factor', null) != null; }
+    function isStaff() {
+      return staffRole() in ['viewer', 'support'] || (staffRole() == 'admin' && hasSecondFactor());
+    }
+    function isAdmin() { return staffRole() == 'admin' && hasSecondFactor(); }
+
+    // ---------------------------------------------------------------- moderation (server-only fields of users/{uid})
+    function userPath(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function isBannedData(u) {
+      return u.get('banned', false) == true && (u.get('bannedUntil', null) == null || u.bannedUntil > request.time);
+    }
+    // May this player publish to the leaderboard / their public village? Not while banned or hidden by staff,
+    // and only under the name staff set (nameOverride) if they renamed them.
+    function canPublishData(u, hiddenKey) {
+      return !isBannedData(u) && u.get(hiddenKey, false) != true
+        && (u.get('nameOverride', null) == null || request.resource.data.displayName == u.nameOverride);
+    }
+    function canPublish(uid, hiddenKey) {
+      return !exists(userPath(uid)) || canPublishData(get(userPath(uid)).data, hiddenKey);
+    }
+    function notBanned(uid) {
+      return !exists(userPath(uid)) || !isBannedData(get(userPath(uid)).data);
+    }
+    function serverUserFields() {
+      return ['banned', 'bannedUntil', 'banReason', 'nameOverride', 'leaderboardHidden', 'villageHidden', 'reviewFlag'];
+    }
+    function saveSizeOk() {
+      return !('save' in request.resource.data) || request.resource.data.save.size() < 900000;
+    }
+
+    // Private save + public-ish profile fields. Only the owner can read or write their own document, and never the
+    // moderation fields the server keeps there. (Reads have no request.resource, so the size check is write-only.)
     match /users/{uid} {
       allow read: if isOwner(uid);
-      allow write: if isOwner(uid)
-        && (!('save' in request.resource.data) || request.resource.data.save.size() < 900000);
+      allow create: if isOwner(uid) && saveSizeOk()
+        && !request.resource.data.keys().hasAny(serverUserFields());
+      allow update: if isOwner(uid) && saveSizeOk()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverUserFields());
+
+      // Rewards waiting in the in-game inbox. The owner reads them and may only mark one claimed, once.
+      match /grants/{grantId} {
+        allow read: if isOwner(uid);
+        allow update: if isOwner(uid)
+          && resource.data.claimedAt == null
+          && resource.data.get('revokedAt', null) == null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claimedAt'])
+          && request.resource.data.claimedAt == request.time;
+      }
+
+      // Redeem history (written by the redeemCode function).
+      match /redemptions/{code} {
+        allow read: if isOwner(uid);
+      }
+      // Ban / rename history: staff only (the admin website reads it through adminGetPlayer).
+      match /moderationLog/{entryId} {
+        allow read: if false;
+      }
     }
 
     // Trusted server time: the client writes request.time and reads it back.
@@ -27,19 +85,22 @@ service cloud.firestore {
     // with sane field types/ranges (client-authoritative scores — see README for hardening options).
     match /leaderboard/{uid} {
       allow read: if signedIn();
-      allow write: if isOwner(uid)
+      allow delete: if false;
+      allow create, update: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['displayName', 'bestWave', 'bestKills', 'updatedAt'])
         && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 16
         && request.resource.data.bestWave is int && request.resource.data.bestWave >= 0 && request.resource.data.bestWave <= 10000
         && request.resource.data.bestKills is int && request.resource.data.bestKills >= 0
-        && request.resource.data.updatedAt == request.time;
+        && request.resource.data.updatedAt == request.time
+        && canPublish(uid, 'leaderboardHidden');
     }
 
     // Public villages (for visiting and the weekly Best Village ranking): everyone signed in can read; each
     // player publishes only their own, with the expected fields, a bounded snapshot and the server's timestamp.
     match /villages/{uid} {
       allow read: if signedIn();
-      allow write: if isOwner(uid)
+      allow delete: if false;
+      allow create, update: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['displayName', 'castleLevel', 'highestWave', 'chaptersCleared',
                                                  'achievementTiers', 'snapshot', 'likes', 'likesWeek', 'rankKey', 'updatedAt'])
         && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 16
@@ -51,7 +112,8 @@ service cloud.firestore {
         && (!('likes' in request.resource.data) || (request.resource.data.likes is int && request.resource.data.likes >= 0 && request.resource.data.likes < 1000000))
         && (!('likesWeek' in request.resource.data) || request.resource.data.likesWeek is int)
         && (!('rankKey' in request.resource.data) || request.resource.data.rankKey is int)
-        && request.resource.data.updatedAt == request.time;
+        && request.resource.data.updatedAt == request.time
+        && canPublish(uid, 'villageHidden');
 
       // Visitors' book: one record per visitor (likes, gifts, help with the crops). Only that visitor writes it,
       // never on their own village; the village's owner reads them all (and may clear them).
@@ -64,8 +126,50 @@ service cloud.firestore {
           && request.resource.data.visitDay is int && request.resource.data.likedWeek is int
           && request.resource.data.giftDay is int && request.resource.data.waterDay is int
           && request.resource.data.waterTicks is int
-          && request.resource.data.at == request.time;
+          && request.resource.data.at == request.time
+          && notBanned(visitorId);
       }
     }
+
+    // ---------------------------------------------------------------- web platform (server-written)
+
+    // Web shop catalog: anyone may read the products on sale (queries must filter active == true); staff see all.
+    match /products/{productId} {
+      allow read: if resource.data.active == true || isStaff();
+    }
+
+    // Web orders: the buyer reads their own (queries must filter uid == their uid); staff read all.
+    match /orders/{orderId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isStaff();
+    }
+
+    // Redeem codes and who used them: staff only. Players redeem through the redeemCode function.
+    match /codes/{code} {
+      allow read: if isStaff();
+      match /redemptions/{uid} {
+        allow read: if isStaff();
+      }
+    }
+
+    // Gift-to-everyone mail (collected through the collectMail function), deletion requests, dashboard stats.
+    match /mail/{mailId} {
+      allow read: if isStaff();
+    }
+    match /deletionRequests/{uid} {
+      allow read: if isOwner(uid) || isStaff();
+    }
+    match /stats/{day} {
+      allow read: if isStaff();
+    }
+
+    // Audit log and the staff list: readable by staff / admins, never writable by any client.
+    match /audit/{entryId} {
+      allow read: if isStaff();
+    }
+    match /staff/{uid} {
+      allow read: if isAdmin() || isOwner(uid);
+    }
+
+    // rateLimits/{key} and anything else: no client access (default deny).
   }
 }

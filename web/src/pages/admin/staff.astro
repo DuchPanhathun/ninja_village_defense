@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import StaffPage from '../../components/admin/StaffPage';
+---
+
+<Admin title="Staff" section="staff">
+  <StaffPage client:only="preact" />
+</Admin>

@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import { OrderDone } from '../../components/islands/OrderPages';
+import { t } from '../../i18n';
+---
+
+<Base title={t.done.title} noindex active="shop">
+  <div class="page narrow">
+    <OrderDone client:load />
+  </div>
+</Base>

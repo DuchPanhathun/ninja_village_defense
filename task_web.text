@@ -1,0 +1,110 @@
+# 🌐 WEB PLATFORM — admin website + player website (redeem codes, buy gems and items)
+
+## How it fits together (read first)
+
+- One Firebase project for everything: the game, the player website and the admin website share the same accounts
+  (Firebase Auth) and database (Firestore). A player signs in on the website with the email/password they linked in the game.
+- The website never edits a player's save. Gems live in the save on the phone, and the phone's newer save would overwrite any
+  web change. Instead, the server leaves a "grant" (a reward waiting to be collected) in the player's inbox, and the game
+  collects it. Web purchases, redeem codes and admin gifts all arrive this way.
+- Only server code (Cloud Functions, using the Firebase Admin SDK) may create grants, orders and codes. The browser and the
+  game are never trusted to do it.
+- Build order: WEB 0 → WEB 1 (game side) → WEB 2 → WEB 3 → WEB 5 → WEB 4 (shop, with money) → WEB 6 → WEB 7.
+
+---
+
+# 🌐 WEB 0 - Decisions & setup (before coding)
+
+- [x]  Choose the stack   <!-- recommended: one Next.js website (player pages + /admin) on Firebase Hosting, with Cloud Functions for server work. Vercel + the Admin SDK in its API routes also works -->   <!-- DONE: Astro 7 + TypeScript static site (web/) on Firebase Hosting, Cloud Functions in firebase/functions. See web/README.md -->
+- [ ]  Upgrade Firebase to the Blaze plan   <!-- Cloud Functions need it; the free quota still applies, you pay only above it. Set a budget alert in Google Cloud -->
+- [x]  Keep the Admin SDK service-account key out of git   <!-- only in the hosting's secret settings; never in the Unity project or the website repo -->   <!-- DONE: no key needed: functions use their built-in service account; set-role.mjs uses gcloud application-default credentials -->
+- [ ]  Buy a domain and set up HTTPS   <!-- e.g. play.<yourgame>.com for players, admin on a hidden path or subdomain -->
+- [ ]  Choose a payment provider   <!-- it must support your country and digital goods. A games "merchant of record" (e.g. Xsolla) also handles tax, fraud and refunds; otherwise Stripe / PayPal / local QR payments -->   <!-- the shop runs on a sandbox provider; add the chosen provider as an adapter in firebase/functions/src/payments/providers.ts -->
+- [ ]  Check Google Play's payments policy   <!-- in-game items bought inside the app must use Google Play Billing. Rules about linking to or mentioning a web shop inside the game differ by country and have been changing: do not add in-game links until you confirm they're allowed; promote the web shop outside the game -->
+- [ ]  Decide what the web shop sells   <!-- gem packs, bundles, items; prices compared with the in-app prices; which offers are once-per-player (starter pack) -->   <!-- admin Shop page has templates mirroring the app catalog (gem packs, starter pack, remove ads) -->
+- [ ]  Write the legal pages   <!-- Terms of Service, Privacy Policy (update it: website accounts, payments, emails), Refund Policy, minimum age / parental consent -->   <!-- drafts at /terms/, /privacy/, /refunds/ — need a lawyer review, then set PUBLIC_LEGAL_DRAFT=false -->
+- [ ]  Set up a support email address   <!-- shown on the website and the store listings -->   <!-- then set PUBLIC_SUPPORT_EMAIL in web/.env -->
+
+---
+
+# 🌐 WEB 1 - Game side: collect rewards from the server (needed before anything else works)
+
+- [x]  Grants in Firestore   <!-- users/{uid}/grants/{grantId}: { kind: purchase|redeem|gift|compensation, rewards: [{type, id, amount}], message, createdAt, claimedAt }. Rules: only the owner can read; the owner may only set claimedAt; everything else server-only -->   <!-- DONE: schema in functions/src/shared/types.ts, rules + tests done. Game side = the items below -->
+- [ ]  Game collects grants   <!-- on sign-in and on app resume: read unclaimed grants → add gems/coins/items → record the grant id in the save (so it can never be added twice, even offline) → mark claimed -->   <!-- NEXT: also call the collectMail function first (gift-to-everyone), skip grants with revokedAt, and adopt users/{uid}.nameOverride -->
+- [ ]  Inbox screen   <!-- mail list with rewards: "Thanks for your purchase", "Code redeemed", gifts from the team; Claim / Claim all; red badge on the home screen -->
+- [ ]  Show the account ID for support   <!-- the Profile's "Player ID" today is a local random ID, NOT the Firebase account ID. Show the Firebase user ID (with a Copy button) so support and the admin site can find the player -->
+- [ ]  Ask anonymous players to link an email   <!-- the website needs email sign-in; the link form already exists in Settings — add a prompt in the Inbox/Profile: "Link an email to use the website" -->
+- [ ]  Banned players   <!-- users/{uid}.banned (server-only): the game shows a message and stops publishing to the leaderboard / public villages; Firestore rules also block those writes -->   <!-- server side done: fields + rules block leaderboard/village/visit writes; game message still to do -->
+- [ ]  Delete account button in Settings   <!-- required by Google Play for games with accounts; opens the website's deletion page (WEB 2) -->
+- [ ]  Tests   <!-- EditMode: a grant applies once, duplicates ignored, unknown item ids skipped. PlayMode: Inbox claim flow with the offline backend -->
+
+---
+
+# 🌐 WEB 2 - Player website: account
+
+- [x]  Sign in   <!-- Firebase Auth web SDK, same email/password as in the game; "Forgot password" email; clear message for anonymous-only players: "Link an email in the game first (Settings)" -->   <!-- DONE: with 2-step (authenticator app or SMS) for staff -->
+- [x]  Account page   <!-- player name, account ID, level / highest wave / chapters (from the public profile), linked email -->
+- [x]  Account & data deletion page   <!-- required by Google Play: a public URL (put it in Play Console). Signed-in players confirm deletion; others can send a request by email -->   <!-- DONE: public URL /delete-account/ for Play Console -->
+- [x]  Mobile-friendly layout   <!-- most players will open it on their phone -->
+- [x]  Language   <!-- same languages as the game -->   <!-- DONE: English (same as the game); all strings in web/src/i18n/en.ts -->
+
+---
+
+# 🌐 WEB 3 - Player website: redeem codes
+
+- [x]  Codes in Firestore (server-only)   <!-- codes/{code}: rewards, type (single-use / campaign with a use limit / once per player), startsAt, expiresAt, usesLeft, active -->
+- [x]  Redeem function   <!-- Cloud Function: checks the code exists, is active, not expired, has uses left, not already used by this player → creates a grant → records the redemption, all in one transaction -->
+- [x]  Redeem page   <!-- enter code → "Sent to your in-game inbox!" with the rewards shown -->
+- [x]  Stop code guessing   <!-- App Check + a limit on attempts per player per hour; same error message for "wrong" and "expired" -->   <!-- DONE: 10 attempts/player/hour + one answer for wrong/expired/used-up; App Check wired, switch on with ENFORCE_APP_CHECK -->
+- [x]  Redeem history on the account page
+- [ ]  (Optional) Redeem box inside the game   <!-- Settings → "Redeem code", calling the same function -->
+
+---
+
+# 🌐 WEB 4 - Player website: shop (gems and items)
+
+- [x]  Product catalog (server-only)   <!-- products/{id}: name, picture, rewards, price, currency, active, sale price, once-per-player -->
+- [x]  Shop page   <!-- product cards with pictures from the game's art; shows what the player already bought for once-only offers -->
+- [x]  Checkout   <!-- the provider's hosted checkout page (never handle card numbers yourself); the order is created by the server with the price from the catalog, never from the browser -->   <!-- DONE: server-priced orders + provider interface; sandbox checkout until a provider is chosen -->
+- [x]  Payment webhook   <!-- Cloud Function: verify the provider's signature → mark the order paid → create the grant, exactly once per payment (use the payment id as the grant id) -->   <!-- DONE: signature check + exactly-once grant keyed by payment id; tested: replay, forged signature, wrong amount -->
+- [x]  Order history + receipts   <!-- order list on the account page; email receipt from the provider -->   <!-- DONE: order list on the account page; receipt emails come from the provider once chosen -->
+- [x]  Refunds and chargebacks   <!-- the webhook marks the order refunded; decide the rule for gems already spent (e.g. take back what's left, flag the account for review) -->   <!-- DONE: unclaimed grant → revoked; claimed → player flagged for review (reviewFlag), staff decide -->
+- [x]  Once-only offers across web and app   <!-- the starter pack bought in the app must not be sold again on the web (and the other way round) -->   <!-- DONE: web checks earlier web orders + the app save (StarterPackPurchased / PurchasedProductIds); the game must honour the entitlement grant -->
+- [ ]  Test mode end to end   <!-- sandbox payments → webhook → grant → claimed in the game on the phone — before switching to live payments -->   <!-- website → sandbox payment → webhook → grant is done and tested; "claimed in the game" needs WEB 1 -->
+
+---
+
+# 🌐 WEB 5 - Admin website: manage players
+
+- [x]  Admin sign-in with roles   <!-- Firebase custom claims: admin (everything), support (search, gifts, bans), viewer (read-only). Two-step verification required for admin accounts -->   <!-- DONE: custom claim role; admins need 2-step (rules + functions). First admin: functions/scripts/set-role.mjs -->
+- [x]  Search players   <!-- by account ID, email, display name -->
+- [x]  Player page   <!-- profile, progress, gems/coins from the last cloud save, purchases (Play + web), redeemed codes, grants and whether they were claimed, ban history -->
+- [x]  Send a gift   <!-- choose rewards + message → creates a grant; shows in the player's Inbox -->
+- [x]  Ban / unban   <!-- reason and duration; also hide their public village and remove their leaderboard entry -->
+- [x]  Rename bad display names   <!-- updates profile, leaderboard entry and public village -->   <!-- DONE: locks the name (nameOverride); the game must adopt it (WEB 1) -->
+- [x]  Deletion requests   <!-- list of requests; delete the Auth account and all their Firestore documents; keep the payment records the law requires -->
+- [x]  Audit log   <!-- every admin action: who, what, which player, when (admins can't edit or delete it) -->
+
+---
+
+# 🌐 WEB 6 - Admin website: codes, shop and live ops
+
+- [x]  Redeem codes manager   <!-- create one code or bulk-generate many (CSV download), set rewards / limits / dates, see how many were used and by whom, turn a code off -->
+- [x]  Shop manager   <!-- add/edit products, prices, sales, turn products on/off -->
+- [x]  Orders   <!-- list, search, refund status, totals -->
+- [x]  Gift to everyone   <!-- e.g. compensation after downtime: a global mail the game turns into a grant once per player (no need to write to every player) -->   <!-- DONE: mail/{id} + collectMail function; the game must call collectMail (WEB 1) -->
+- [x]  Moderate public content   <!-- remove cheaters from the leaderboard, hide offensive villages -->
+- [x]  Dashboard   <!-- revenue by day, orders, redemptions, new and active players -->
+
+---
+
+# 🌐 WEB 7 - Security, testing & launch
+
+- [x]  Firestore rules for the new collections   <!-- grants, orders, codes, products, audit log: no client writes (except claimedAt on your own grants); admin data readable only by admins -->
+- [x]  Rules tests on the Firebase emulator   <!-- plus tests for the redeem and webhook functions (valid, expired, used twice, fake signature, same payment twice) -->   <!-- DONE: functions/test: 18 unit, 19 rules, 18 end-to-end function tests -->
+- [ ]  App Check on website and game   <!-- blocks scripts calling the functions directly -->   <!-- website ready (PUBLIC_RECAPTCHA_ENTERPRISE_KEY); game side and enforcement still to do -->
+- [ ]  Monitoring   <!-- alerts for function errors and failed webhooks; daily check that paid orders all have grants -->   <!-- daily checkOrders function logs an ERROR for paid orders without a grant — add Cloud Monitoring alerts on function errors -->
+- [ ]  Backups   <!-- scheduled Firestore export -->   <!-- command in firebase/README.md (gcloud firestore backups schedules create ...) -->
+- [ ]  Play Console updates   <!-- Data safety form (the website collects email and purchase data), account deletion URL, privacy policy URL -->
+- [ ]  Launch checklist   <!-- legal pages live, support email answered, payments in live mode, a test purchase and refund done on the live site -->
+- [ ]  (Later) Server-owned currency   <!-- today gems are stored in the player's own save, so a cheater can edit their own. Web delivery through grants is safe, but full protection means keeping the wallet on the server — a bigger step for later -->

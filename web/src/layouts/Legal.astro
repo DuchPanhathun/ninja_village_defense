@@ -1,0 +1,35 @@
+---
+import Base from './Base.astro';
+import { site } from '../config';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <article class="page narrow legal">
+    <header class="page-head">
+      <p class="kicker">{site.gameName}</p>
+      <h1>{title}</h1>
+      <p class="small">Last updated {new Date(site.legalUpdated).toLocaleDateString('en-US', { dateStyle: 'long' })}</p>
+    </header>
+    {site.legalDraft && (
+      <p class="notice warn small">Draft — this page is being reviewed and may change before launch.</p>
+    )}
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</Base>
+
+<style is:global>
+  .legal .prose { max-width: 68ch; }
+  .legal .prose h2 { font-size: 1.35rem; margin-top: 2.25rem; color: var(--lantern); }
+  .legal .prose h3 { font-size: 1.1rem; margin-top: 1.5rem; }
+  .legal .prose p, .legal .prose li { color: #e3dac8; }
+  .legal .prose ul { padding-left: 1.25rem; margin: 0 0 1em; }
+  .legal .prose li + li { margin-top: 0.35rem; }
+</style>

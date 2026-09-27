@@ -1,0 +1,28 @@
+{
+  "name": "ninja-village-functions",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "test": "vitest run test/unit",
+    "test:rules": "vitest run test/emulator/rules.test.ts",
+    "test:functions": "vitest run test/emulator/functions.test.ts",
+    "seed": "node scripts/seed-emulator.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "@types/node": "^22.20.4",
+    "firebase": "^12.19.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  }
+}

@@ -1,0 +1,89 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../config';
+const email = site.supportEmail;
+---
+
+<Legal title="Terms of Service" description={`The rules for playing ${site.gameName} and using this website.`}>
+  <p>
+    These terms are an agreement between you and {site.studioName} (“we”, “us”) about {site.gameName} (the “game”)
+    and this website (together, the “service”). By playing the game or using the website you accept them. If you
+    don’t agree, please don’t use the service.
+  </p>
+
+  <h2>1. Who can play</h2>
+  <p>
+    You must be at least {site.minimumAge} years old, or older where your country requires it. If you are under 18 (or
+    the age of majority where you live), a parent or guardian must agree to these terms and should supervise any purchase.
+  </p>
+
+  <h2>2. Your account</h2>
+  <ul>
+    <li>The game creates an account for you automatically. Linking an email and password in the game’s settings keeps your progress safe and lets you sign in on this website.</li>
+    <li>Keep your password private. You are responsible for what happens on your account.</li>
+    <li>One person, one account. Don’t sell, share or transfer accounts.</li>
+    <li>You can ask us to delete your account at any time on the <a href="/delete-account/">account deletion page</a>.</li>
+  </ul>
+
+  <h2>3. Gems, coins and other virtual items</h2>
+  <ul>
+    <li>Gems, coins, heroes, pets, skins, crates and other in-game items are a limited, personal licence to use content in the game. You don’t own them, and they have no real-world money value.</li>
+    <li>They can’t be exchanged for money, sold or traded outside the game.</li>
+    <li>We may change or rebalance items and prices as the game evolves. We won’t remove paid items you already collected without a good reason (for example a refund, a chargeback or cheating).</li>
+    <li>Items are lost if your account is deleted or suspended for breaking these terms.</li>
+  </ul>
+
+  <h2>4. Purchases</h2>
+  <ul>
+    <li>In the app, purchases go through Google Play (or the App Store) under their terms.</li>
+    <li>On this website, payments are handled by our payment provider; we never see your full card details. The price is the one shown at checkout, including tax where required.</li>
+    <li>Web purchases are delivered to your in-game inbox. Open the game while online and claim them there.</li>
+    <li>Refunds are covered by our <a href="/refunds/">Refund Policy</a> and your legal rights as a consumer.</li>
+  </ul>
+
+  <h2>5. Redeem codes</h2>
+  <p>
+    Codes can be redeemed once per account, may expire or have limited uses, and have no cash value. Codes may not
+    be sold. We may cancel codes that were obtained or used improperly, and we limit how often codes can be tried.
+  </p>
+
+  <h2>6. Fair play</h2>
+  <p>Please don’t:</p>
+  <ul>
+    <li>cheat, edit your save data, use modified versions of the game, bots or exploits;</li>
+    <li>interfere with the service, our servers or other players’ experience;</li>
+    <li>use offensive, hateful or impersonating names, or build offensive public villages;</li>
+    <li>abuse refunds or chargebacks.</li>
+  </ul>
+  <p>
+    We may remove content, reset scores, rename you, hide your public village or leaderboard entry, or suspend or close
+    accounts that break these rules. If you think we made a mistake, contact us.
+  </p>
+
+  <h2>7. What other players can see</h2>
+  <p>
+    Your display name, leaderboard scores and public village (buildings, decorations, heroes and similar) are visible
+    to other players. Don’t put personal information in your name.
+  </p>
+
+  <h2>8. Changes and availability</h2>
+  <p>
+    We keep improving the game, which means features, events and content change. We try to keep the service running,
+    but it may sometimes be unavailable. If we ever close the game, we will give notice in the game.
+  </p>
+
+  <h2>9. Liability</h2>
+  <p>
+    The service is provided “as is”. To the extent the law allows, we are not liable for indirect losses or for losses
+    of virtual items. Nothing in these terms limits rights you have under consumer law that can’t be waived.
+  </p>
+
+  <h2>10. Changes to these terms</h2>
+  <p>
+    We may update these terms. For important changes we’ll tell you in the game or on this website before they apply.
+    Continuing to use the service after that means you accept the new terms.
+  </p>
+
+  <h2>11. Contact</h2>
+  <p>Questions? Email <a href={`mailto:${email}`}>{email}</a>.</p>
+</Legal>

@@ -1,0 +1,8 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import DeletionsPage from '../../components/admin/DeletionsPage';
+---
+
+<Admin title="Account deletions" section="deletions">
+  <DeletionsPage client:only="preact" />
+</Admin>
